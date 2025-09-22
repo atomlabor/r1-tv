@@ -1,4 +1,4 @@
-/* Classic Rabbit R1 TV UI - 240x254px compact viewport */
+/* Rabbit R1 UI - Exact viewport specs: 240x282px total, content 240x254px, top offset 28px */
 * {
   margin: 0;
   padding: 0;
@@ -15,10 +15,32 @@ body {
   text-transform: lowercase;
 }
 
-/* Main App Container - Rabbit R1 viewport */
-.r1-app {
+/* Viewport Container - Total Rabbit R1 viewport: 240x282px */
+.viewport {
   position: fixed;
   top: 0;
+  left: 0;
+  width: 240px;
+  height: 282px;
+  background: #000;
+  overflow: hidden;
+}
+
+/* Status Bar Simulation - 28px top offset */
+.status-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 240px;
+  height: 28px;
+  background: #222;
+  z-index: 1000;
+}
+
+/* Main App Container - Content area: 240x254px with 28px top offset */
+.r1-app {
+  position: absolute;
+  top: 28px;
   left: 0;
   width: 240px;
   height: 254px;
@@ -28,8 +50,8 @@ body {
   line-height: 1.2;
   color: white;
   overflow: hidden;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  border-radius: 0;
+  box-shadow: none;
 }
 
 /* Header with logo and navigation */
@@ -400,7 +422,7 @@ body {
 
 /* Responsive - center on larger screens */
 @media (min-width: 241px) {
-  .r1-app {
+  .viewport {
     position: relative;
     margin: 20px auto;
     border: 2px solid #333;
