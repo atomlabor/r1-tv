@@ -1,41 +1,88 @@
 import React, { useState, useEffect } from 'react';
 import '../styles/CountrySelector.css';
 
+// Flag emoji mapping for countries
+const countryFlags = {
+  'AD': '🇦🇩', 'AE': '🇦🇪', 'AF': '🇦🇫', 'AL': '🇦🇱', 'AM': '🇦🇲', 'AO': '🇦🇴', 'AR': '🇦🇷',
+  'AT': '🇦🇹', 'AU': '🇦🇺', 'AW': '🇦🇼', 'AZ': '🇦🇿', 'BA': '🇧🇦', 'BD': '🇧🇩', 'BE': '🇧🇪',
+  'BF': '🇧🇫', 'BG': '🇧🇬', 'BH': '🇧🇭', 'BJ': '🇧🇯', 'BM': '🇧🇲', 'BN': '🇧🇳', 'BO': '🇧🇴',
+  'BQ': '🇧🇶', 'BR': '🇧🇷', 'BS': '🇧🇸', 'BY': '🇧🇾', 'CA': '🇨🇦', 'CD': '🇨🇩', 'CH': '🇨🇭',
+  'CI': '🇨🇮', 'CL': '🇨🇱', 'CM': '🇨🇲', 'CN': '🇨🇳', 'CO': '🇨🇴', 'CR': '🇨🇷', 'CU': '🇨🇺',
+  'CV': '🇨🇻', 'CW': '🇨🇼', 'CY': '🇨🇾', 'CZ': '🇨🇿', 'DE': '🇩🇪', 'DJ': '🇩🇯', 'DK': '🇩🇰',
+  'DO': '🇩🇴', 'DZ': '🇩🇿', 'EC': '🇪🇨', 'EE': '🇪🇪', 'EG': '🇪🇬', 'EH': '🇪🇭', 'ER': '🇪🇷',
+  'ES': '🇪🇸', 'ET': '🇪🇹', 'FI': '🇫🇮', 'FO': '🇫🇴', 'FR': '🇫🇷', 'GE': '🇬🇪', 'GH': '🇬🇭',
+  'GL': '🇬🇱', 'GM': '🇬🇲', 'GN': '🇬🇳', 'GP': '🇬🇵', 'GQ': '🇬🇶', 'GR': '🇬🇷', 'GT': '🇬🇹',
+  'GU': '🇬🇺', 'GY': '🇬🇾', 'HK': '🇭🇰', 'HN': '🇭🇳', 'HR': '🇭🇷', 'HT': '🇭🇹', 'HU': '🇭🇺',
+  'ID': '🇮🇩', 'IE': '🇮🇪', 'IL': '🇮🇱', 'IN': '🇮🇳', 'IQ': '🇮🇶', 'IR': '🇮🇷', 'IS': '🇮🇸',
+  'IT': '🇮🇹', 'JM': '🇯🇲', 'JO': '🇯🇴', 'JP': '🇯🇵', 'KE': '🇰🇪', 'KH': '🇰🇭', 'KN': '🇰🇳',
+  'KR': '🇰🇷', 'KW': '🇰🇼', 'KZ': '🇰🇿', 'LA': '🇱🇦', 'LB': '🇱🇧', 'LC': '🇱🇨', 'LK': '🇱🇰',
+  'LT': '🇱🇹', 'LU': '🇱🇺', 'LV': '🇱🇻', 'LY': '🇱🇾', 'MA': '🇲🇦', 'MC': '🇲🇨', 'MD': '🇲🇩',
+  'ME': '🇲🇪', 'MK': '🇲🇰', 'ML': '🇲🇱', 'MM': '🇲🇲', 'MN': '🇲🇳', 'MQ': '🇲🇶', 'MT': '🇲🇹',
+  'MU': '🇲🇺', 'MV': '🇲🇻', 'MX': '🇲🇽', 'MY': '🇲🇾', 'MZ': '🇲🇿', 'NA': '🇳🇦', 'NG': '🇳🇬',
+  'NI': '🇳🇮', 'NL': '🇳🇱', 'NO': '🇳🇴', 'NP': '🇳🇵', 'NZ': '🇳🇿', 'OM': '🇴🇲', 'PA': '🇵🇦',
+  'PE': '🇵🇪', 'PF': '🇵🇫', 'PH': '🇵🇭', 'PK': '🇵🇰', 'PL': '🇵🇱', 'PR': '🇵🇷', 'PS': '🇵🇸',
+  'PT': '🇵🇹', 'PY': '🇵🇾', 'QA': '🇶🇦', 'RO': '🇷🇴', 'RS': '🇷🇸', 'RU': '🇷🇺', 'RW': '🇷🇼',
+  'SA': '🇸🇦', 'SD': '🇸🇩', 'SE': '🇸🇪', 'SG': '🇸🇬', 'SI': '🇸🇮', 'SK': '🇸🇰', 'SM': '🇸🇲',
+  'SN': '🇸🇳', 'SO': '🇸🇴', 'SR': '🇸🇷', 'SV': '🇸🇻', 'SX': '🇸🇽', 'SY': '🇸🇾', 'TD': '🇹🇩',
+  'TG': '🇹🇬', 'TH': '🇹🇭', 'TJ': '🇹🇯', 'TN': '🇹🇳', 'TR': '🇹🇷', 'TT': '🇹🇹', 'TW': '🇹🇼',
+  'UA': '🇺🇦', 'UG': '🇺🇬', 'UK': '🇬🇧', 'US': '🇺🇸', 'UY': '🇺🇾', 'UZ': '🇺🇿', 'VE': '🇻🇪',
+  'VG': '🇻🇬', 'VN': '🇻🇳', 'WS': '🇼🇸', 'XK': '🇽🇰', 'YE': '🇾🇪', 'ZA': '🇿🇦', 'ZW': '🇿🇼'
+};
+
 /**
  * CountrySelector - Komponente für die Auswahl verschiedener Länder
- * Zeigt verfügbare Länder für TV-Kanäle an
+ * Lädt verfügbare Länder mit TV-Kanälen aus der tv-garden-channel-list API
  */
 const CountrySelector = ({ onCountrySelect, selectedCountry }) => {
   const [countries, setCountries] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  // Beispiel-Länder - wird später durch tv.garden API ersetzt
-  const mockCountries = [
-    { code: 'DE', name: 'Deutschland', flag: '🇩🇪' },
-    { code: 'US', name: 'USA', flag: '🇺🇸' },
-    { code: 'GB', name: 'Großbritannien', flag: '🇬🇧' },
-    { code: 'FR', name: 'Frankreich', flag: '🇫🇷' },
-    { code: 'IT', name: 'Italien', flag: '🇮🇹' },
-    { code: 'ES', name: 'Spanien', flag: '🇪🇸' }
-  ];
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Simuliere API-Aufruf für Länderliste
     const fetchCountries = async () => {
       try {
         setLoading(true);
-        // TODO: tv.garden API Integration
-        // const response = await fetch('tv.garden/api/countries');
-        // const data = await response.json();
+        setError(null);
         
-        // Temporär: Mock-Daten verwenden
-        setTimeout(() => {
-          setCountries(mockCountries);
-          setLoading(false);
-        }, 1000);
+        // Lade Länder-Metadaten von tv-garden-channel-list
+        const response = await fetch(
+          'https://raw.githubusercontent.com/TVGarden/tv-garden-channel-list/main/channels/raw/countries_metadata.json'
+        );
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch countries metadata');
+        }
+        
+        const countriesData = await response.json();
+        
+        // Filtere nur Länder mit verfügbaren Kanälen
+        const availableCountries = Object.entries(countriesData)
+          .filter(([code, data]) => data.hasChannels)
+          .map(([code, data]) => ({
+            code: code.toUpperCase(),
+            name: data.country,
+            flag: countryFlags[code.toUpperCase()] || '🏳️',
+            capital: data.capital,
+            timeZone: data.timeZone
+          }))
+          .sort((a, b) => a.name.localeCompare(b.name)); // Alphabetisch sortieren
+        
+        setCountries(availableCountries);
       } catch (error) {
         console.error('Fehler beim Laden der Länder:', error);
-        setCountries(mockCountries); // Fallback
+        setError(error.message);
+        
+        // Fallback: Einige wichtige Länder
+        const fallbackCountries = [
+          { code: 'DE', name: 'Deutschland', flag: '🇩🇪' },
+          { code: 'US', name: 'United States', flag: '🇺🇸' },
+          { code: 'UK', name: 'United Kingdom', flag: '🇬🇧' },
+          { code: 'FR', name: 'France', flag: '🇫🇷' },
+          { code: 'IT', name: 'Italy', flag: '🇮🇹' },
+          { code: 'ES', name: 'Spain', flag: '🇪🇸' }
+        ];
+        setCountries(fallbackCountries);
+      } finally {
         setLoading(false);
       }
     };
@@ -52,15 +99,38 @@ const CountrySelector = ({ onCountrySelect, selectedCountry }) => {
   if (loading) {
     return (
       <div className="country-selector loading">
-        <h2>Länder werden geladen...</h2>
-        <div className="spinner"></div>
+        <h3>Länder werden geladen...</h3>
+        <div className="loading-spinner"></div>
+      </div>
+    );
+  }
+
+  if (error && countries.length === 0) {
+    return (
+      <div className="country-selector error">
+        <h3>Fehler beim Laden der Länder</h3>
+        <p>{error}</p>
+        <button onClick={() => window.location.reload()}>
+          Erneut versuchen
+        </button>
       </div>
     );
   }
 
   return (
     <div className="country-selector">
-      <h2>Land auswählen</h2>
+      <div className="selector-header">
+        <h3>Land auswählen</h3>
+        <div className="country-count">
+          {countries.length} Länder mit TV-Kanälen verfügbar
+        </div>
+        {error && (
+          <div className="warning">
+            ⚠️ Fallback-Daten werden verwendet
+          </div>
+        )}
+      </div>
+      
       <div className="countries-grid">
         {countries.map((country) => (
           <button
@@ -69,9 +139,11 @@ const CountrySelector = ({ onCountrySelect, selectedCountry }) => {
               selectedCountry?.code === country.code ? 'selected' : ''
             }`}
             onClick={() => handleCountryClick(country)}
+            title={`${country.name}${country.capital ? ` - ${country.capital}` : ''}`}
           >
             <span className="flag">{country.flag}</span>
             <span className="name">{country.name}</span>
+            <span className="code">{country.code}</span>
           </button>
         ))}
       </div>
