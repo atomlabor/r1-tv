@@ -1,0 +1,387 @@
+/* CountrySelector.css - Modern Dark Mode UI for Rabbit R1 TV App */
+/* Inspired by clean weather app design with dark theme, cards, and modern typography */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.country-selector {
+  font-family: -apple-system, BlinkMacSystemFont, 'Inter', system-ui, sans-serif;
+  background: #000000;
+  color: #ffffff;
+  min-height: 100vh;
+  padding: 20px;
+  line-height: 1.5;
+  overflow-x: hidden;
+}
+
+/* Header Section */
+.header {
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+.title {
+  font-size: 36px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #ffffff 0%, #cccccc 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.subtitle {
+  font-size: 16px;
+  color: #888888;
+  font-weight: 400;
+  margin: 0;
+}
+
+/* Search Container */
+.search-container {
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: center;
+}
+
+.search-card {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 400px;
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  transition: all 0.3s ease;
+}
+
+.search-card:focus-within {
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 20px rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+.search-icon {
+  font-size: 18px;
+  opacity: 0.6;
+}
+
+.search-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 400;
+  outline: none;
+  font-family: inherit;
+}
+
+.search-input::placeholder {
+  color: #666666;
+}
+
+/* Countries Grid */
+.countries-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Country Card */
+.country-card {
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 20px;
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.country-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.country-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.country-card:hover::before {
+  opacity: 1;
+}
+
+.country-card.selected {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 24px rgba(255, 255, 255, 0.1);
+}
+
+.country-card.selected::before {
+  opacity: 1;
+}
+
+/* Country Card Content */
+.country-flag {
+  font-size: 48px;
+  text-align: center;
+  margin-bottom: 16px;
+  line-height: 1;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.country-info {
+  text-align: center;
+}
+
+.country-name {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+}
+
+.country-code {
+  font-size: 14px;
+  color: #888888;
+  margin-bottom: 8px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.country-channels {
+  font-size: 14px;
+  color: #aaaaaa;
+  margin: 0;
+  font-weight: 400;
+}
+
+/* Loading State */
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  border-top: 3px solid #ffffff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Error State */
+.error-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+.error-card {
+  background: rgba(255, 59, 48, 0.1);
+  border: 1px solid rgba(255, 59, 48, 0.2);
+  border-radius: 20px;
+  padding: 32px;
+  text-align: center;
+  max-width: 400px;
+  backdrop-filter: blur(20px);
+}
+
+.error-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  display: block;
+}
+
+.error-message {
+  font-size: 16px;
+  color: #ffffff;
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+.retry-button {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  color: #ffffff;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.retry-button:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+/* No Results State */
+.no-results {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 60px 20px;
+  color: #666666;
+}
+
+.no-results-icon {
+  font-size: 64px;
+  margin-bottom: 16px;
+  display: block;
+  opacity: 0.5;
+}
+
+.no-results p {
+  font-size: 18px;
+  margin: 0;
+  font-weight: 400;
+}
+
+/* Responsive Design for Rabbit R1 */
+@media (max-width: 768px) {
+  .country-selector {
+    padding: 16px;
+  }
+  
+  .title {
+    font-size: 28px;
+  }
+  
+  .countries-grid {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 12px;
+  }
+  
+  .country-card {
+    padding: 16px;
+  }
+  
+  .country-flag {
+    font-size: 40px;
+    margin-bottom: 12px;
+  }
+  
+  .country-name {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .country-selector {
+    padding: 12px;
+  }
+  
+  .title {
+    font-size: 24px;
+  }
+  
+  .countries-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  
+  .country-card {
+    padding: 14px;
+  }
+  
+  .search-card {
+    padding: 12px 16px;
+  }
+}
+
+/* Smooth animations */
+@media (prefers-reduced-motion: no-preference) {
+  .country-card {
+    animation: fadeInUp 0.4s ease-out;
+  }
+  
+  .country-card:nth-child(odd) {
+    animation-delay: 0.1s;
+  }
+  
+  .country-card:nth-child(even) {
+    animation-delay: 0.2s;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .country-card {
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+  
+  .search-card {
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+  
+  .subtitle {
+    color: #cccccc;
+  }
+}
+
+/* Focus styles for accessibility */
+.country-card:focus-visible,
+.retry-button:focus-visible,
+.search-input:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.5);
+  outline-offset: 2px;
+}
+
+/* Touch targets for mobile */
+@media (pointer: coarse) {
+  .country-card {
+    min-height: 120px;
+  }
+  
+  .retry-button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
