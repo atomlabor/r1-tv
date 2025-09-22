@@ -2,12 +2,16 @@ import React, { useEffect, useRef, useState } from 'react';
 import './styles/App.css';
 
 function App() {
+  const [countries, setCountries] = useState([]);
+  const [selectedCountry, setSelectedCountry] = useState(null);
   const [channels, setChannels] = useState([]);
   const [selectedChannel, setSelectedChannel] = useState(null);
-  const [currentView, setCurrentView] = useState('channels'); // 'channels' | 'player'
+  const [currentView, setCurrentView] = useState('countries'); // 'countries' | 'channels' | 'player'
   const [videoRotation, setVideoRotation] = useState(0);
   const [isFs, setIsFs] = useState(false);
   const [error, setError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [itemsPerPage] = useState(12);
   
   const videoRef = useRef(null);
   const playerRef = useRef(null);
@@ -16,14 +20,14 @@ function App() {
   const shouldRenderFullscreen = !!(document.fullscreenEnabled || document.webkitFullscreenEnabled || document.mozFullScreenEnabled || document.msFullscreenEnabled);
   
   useEffect(() => {
-    // Load channels from JSON
-    fetch('/channels.json')
+    // Load countries from API
+    fetch('https://iptv-org.github.io/api/countries.json')
       .then(res => res.json())
       .then(data => {
-        setChannels(data.channels || []);
+        setCountries(data || []);
       })
       .catch(err => {
-        console.error('Failed to load channels:', err);
+        console.error('Failed to load countries:', err);
       });
   }, []);
   
@@ -54,6 +58,27 @@ function App() {
     };
   }, []);
   
+  const selectCountry = (country) => {
+    setSelectedCountry(country);
+    setCurrentView('channels');
+    setCurrentPage(0);
+    // Load channels for selected country
+    fetch(`https://iptv-org.github.io/api/channels.json`)
+      .then(res => res.json())
+      .then(data => {
+        const countryChannels = data.filter(channel => 
+          channel.country === country.code && 
+          channel.url && 
+          channel.url.trim() !== ''
+        );
+        setChannels(countryChannels || []);
+      })
+      .catch(err => {
+        console.error('Failed to load channels:', err);
+        setChannels([]);
+      });
+  };
+  
   const selectChannel = (channel) => {
     setSelectedChannel(channel);
     setCurrentView('player');
@@ -61,10 +86,17 @@ function App() {
   };
   
   const goBack = () => {
-    setCurrentView('channels');
-    setSelectedChannel(null);
-    setVideoRotation(0);
-    setError(null);
+    if (currentView === 'player') {
+      setCurrentView('channels');
+      setSelectedChannel(null);
+      setVideoRotation(0);
+      setError(null);
+    } else if (currentView === 'channels') {
+      setCurrentView('countries');
+      setSelectedCountry(null);
+      setChannels([]);
+      setCurrentPage(0);
+    }
   };
   
   const toggleVideoRotation = () => {
@@ -109,6 +141,25 @@ function App() {
     setCurrentView('channels');
   };
   
+  // Pagination logic
+  const totalPages = Math.ceil((currentView === 'countries' ? countries : channels).length / itemsPerPage);
+  const currentItems = (currentView === 'countries' ? countries : channels).slice(
+    currentPage * itemsPerPage,
+    (currentPage + 1) * itemsPerPage
+  );
+  
+  const nextPage = () => {
+    if (currentPage < totalPages - 1) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+  
+  const prevPage = () => {
+    if (currentPage > 0) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+  
   const exitBtnStyle = {
     position: 'absolute',
     top: '10px',
@@ -139,33 +190,92 @@ function App() {
   
   return (
     <div className="App">
+      {/* Country selection view */}
+      {currentView === 'countries' && (
+        <div className="r1-pane">
+          <header className="r1-header">
+            <div className="r1-title">
+              r1 tv <img src='r1-tv.png' alt='r1 tv logo' style={{height:'18px',verticalAlign:'middle'}}/>
+            </div>
+          </header>
+          <div className="r1-grid">
+            {currentItems.map((country, index) => (
+              <button
+                key={index}
+                className="r1-channel"
+                onClick={() => selectCountry(country)}
+                title={country.name}
+              >
+                <div className="r1-channel-name">{country.name}</div>
+              </button>
+            ))}
+          </div>
+          {totalPages > 1 && (
+            <div className="r1-pagination">
+              <button 
+                className="r1-btn"
+                onClick={prevPage}
+                disabled={currentPage === 0}
+              >
+                ← Previous
+              </button>
+              <span className="r1-page-info">
+                Page {currentPage + 1} of {totalPages}
+              </span>
+              <button 
+                className="r1-btn"
+                onClick={nextPage}
+                disabled={currentPage === totalPages - 1}
+              >
+                Next →
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+      
       {/* Channel grid view */}
       {currentView === 'channels' && (
         <div className="r1-pane">
           <header className="r1-header">
-            <img 
-              src="/r1-tv.png" 
-              alt="r1 tv logo" 
-              style={{
-                height: '24px', 
-                verticalAlign: 'middle', 
-                marginRight: '8px'
-              }} 
-            />
-            <div className="r1-title">r1.tv</div>
+            <button className="r1-back" onClick={goBack}>←</button>
+            <div className="r1-title">
+              r1 tv <img src='r1-tv.png' alt='r1 tv logo' style={{height:'18px',verticalAlign:'middle'}}/> - {selectedCountry?.name}
+            </div>
           </header>
           <div className="r1-grid">
-            {channels.map((channel, index) => (
+            {currentItems.map((channel, index) => (
               <button
                 key={index}
                 className="r1-channel"
                 onClick={() => selectChannel(channel)}
-                title={channel.originalName}
+                title={channel.name}
               >
                 <div className="r1-channel-name">{channel.name}</div>
               </button>
             ))}
           </div>
+          {totalPages > 1 && (
+            <div className="r1-pagination">
+              <button 
+                className="r1-btn"
+                onClick={prevPage}
+                disabled={currentPage === 0}
+              >
+                ← Previous
+              </button>
+              <span className="r1-page-info">
+                Page {currentPage + 1} of {totalPages}
+              </span>
+              <button 
+                className="r1-btn"
+                onClick={nextPage}
+                disabled={currentPage === totalPages - 1}
+              >
+                Next →
+              </button>
+            </div>
+          )}
         </div>
       )}
       
@@ -174,18 +284,16 @@ function App() {
         <div className="r1-pane">
           <header className="r1-header">
             <button className="r1-back" onClick={goBack}>←</button>
-            <div className="r1-title" title={selectedChannel.originalName}>
+            <div className="r1-title" title={selectedChannel.name}>
               {selectedChannel.name}
             </div>
             <button className="r1-rotate-btn" onClick={toggleVideoRotation} title="Rotate video (90°)">
               ↻
             </button>
             {shouldRenderFullscreen && (
-              <>
-                <button className="r1-more-tv-btn" onClick={toggleFullscreen} style={{marginLeft: '8px'}} title="Toggle fullscreen">
-                  fullscreen
-                </button>
-              </>
+              <button className="r1-more-tv-btn" onClick={toggleFullscreen} style={{marginLeft: '8px'}} title="Toggle fullscreen">
+                Fullscreen
+              </button>
             )}
           </header>
           <div className="r1-player" ref={playerRef}>
@@ -209,7 +317,7 @@ function App() {
                 title="Exit fullscreen"
                 style={exitBtnStyle}
               >
-                ↩
+                Exit
               </button>
             )}
             <video
@@ -219,7 +327,7 @@ function App() {
               key={selectedChannel.url}
               onError={(e) => {
                 console.error('Stream error:', e);
-                setError('stream unavailable');
+                setError('Stream unavailable');
               }}
               onLoadStart={() => setError(null)}
               ref={videoRef}
@@ -231,7 +339,7 @@ function App() {
               <div className="player-error">
                 {error}
                 <button className="r1-btn" onClick={goBack}>
-                  ← back to channels
+                  ← Back to channels
                 </button>
               </div>
             )}
