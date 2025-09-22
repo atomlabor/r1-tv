@@ -4,6 +4,7 @@ import './styles/App.css';
 /**
  * r1 tv - rabbit r1 optimized tv player
  * 240x254px grid, no scroll, lowercase ui, tvgarden api, direct player
+ * Enhanced to show real channel names from TVGarden/iptv-org API
  */
 function App() {
   const [currentView, setCurrentView] = useState('countries');
@@ -29,64 +30,102 @@ function App() {
     { code: 'mx', name: 'mx', flag: '🇲🇽' }
   ];
 
-  // load channels from tvgarden raw api
+  // clean and format channel name for display
+  const formatChannelName = (rawName) => {
+    if (!rawName || rawName === 'channel') return 'unnamed';
+    
+    // Remove common prefixes/suffixes and clean up
+    let cleaned = rawName
+      .replace(/^(\d+\s*-\s*|\d+\s*\|\s*|\d+\s+)/i, '') // Remove number prefixes
+      .replace(/\s*(HD|FHD|UHD|4K)\s*$/i, '') // Remove HD suffixes
+      .replace(/\s*(TV|Television)\s*$/i, '') // Remove TV suffixes
+      .replace(/[\[\(].*?[\]\)]/g, '') // Remove content in brackets/parentheses
+      .replace(/\s+/g, ' ') // Normalize whitespace
+      .trim();
+    
+    // Limit length for button display but keep readable
+    if (cleaned.length > 12) {
+      cleaned = cleaned.substring(0, 12) + '…';
+    }
+    
+    return cleaned || 'unnamed';
+  };
+
+  // load channels from tvgarden/iptv-org API with better name extraction
   const loadChannels = async (countryCode) => {
     setLoading(true);
     setError(null);
+    
     try {
-      const response = await fetch(`https://raw.githubusercontent.com/iptv-org/iptv/master/streams/${countryCode}.m3u`);
-      if (!response.ok) {
-        // fallback to alternative api
-        const fallbackResponse = await fetch(`https://iptv-org.github.io/api/countries/${countryCode}.json`);
-        if (!fallbackResponse.ok) throw new Error('no channels');
-        const fallbackData = await fallbackResponse.json();
-        const validChannels = fallbackData
-          .filter(ch => ch.url && ch.url.includes('.m3u8'))
-          .map((ch, idx) => ({
-            id: `${countryCode}_${idx}`,
-            name: (ch.name || 'channel').toLowerCase().substring(0, 15),
-            url: ch.url,
-            logo: ch.logo || '',
-            category: (ch.category || 'tv').toLowerCase()
-          }))
-          .slice(0, 12); // perfect grid fit
-        setChannels(validChannels);
-        return;
+      // Try iptv-org JSON API first for better channel data
+      let channelData = [];
+      
+      try {
+        const apiResponse = await fetch(`https://iptv-org.github.io/api/countries/${countryCode}.json`);
+        if (apiResponse.ok) {
+          const apiData = await apiResponse.json();
+          channelData = apiData
+            .filter(ch => ch.url && (ch.url.includes('.m3u8') || ch.url.includes('http')))
+            .map((ch, idx) => ({
+              id: `${countryCode}_${idx}`,
+              name: formatChannelName(ch.name),
+              originalName: ch.name || 'Unknown Channel',
+              url: ch.url,
+              logo: ch.logo || '',
+              category: (ch.category || 'tv').toLowerCase()
+            }))
+            .slice(0, 12); // Perfect grid fit for R1 display
+        }
+      } catch (apiError) {
+        console.log('API fallback needed:', apiError.message);
       }
       
-      // parse m3u content
-      const m3uContent = await response.text();
-      const lines = m3uContent.split('\n');
-      const channels = [];
-      
-      for (let i = 0; i < lines.length && channels.length < 12; i++) {
-        if (lines[i].startsWith('#EXTINF:')) {
-          const nameMatch = lines[i].match(/,(.*)$/);
-          const name = nameMatch ? nameMatch[1].toLowerCase().substring(0, 15) : 'channel';
-          const url = lines[i + 1];
-          
-          if (url && url.includes('http')) {
-            channels.push({
-              id: `${countryCode}_${channels.length}`,
-              name,
-              url,
-              logo: '',
-              category: 'tv'
-            });
+      // Fallback to M3U parsing if API fails
+      if (channelData.length === 0) {
+        const m3uResponse = await fetch(`https://raw.githubusercontent.com/iptv-org/iptv/master/streams/${countryCode}.m3u`);
+        if (!m3uResponse.ok) {
+          throw new Error('No channel sources available');
+        }
+        
+        const m3uContent = await m3uResponse.text();
+        const lines = m3uContent.split('\n');
+        
+        for (let i = 0; i < lines.length && channelData.length < 12; i++) {
+          if (lines[i].startsWith('#EXTINF:')) {
+            const nameMatch = lines[i].match(/,(.*)$/);
+            const rawName = nameMatch ? nameMatch[1].trim() : 'Unknown Channel';
+            const url = lines[i + 1]?.trim();
+            
+            if (url && url.startsWith('http')) {
+              channelData.push({
+                id: `${countryCode}_${channelData.length}`,
+                name: formatChannelName(rawName),
+                originalName: rawName,
+                url: url,
+                logo: '',
+                category: 'tv'
+              });
+            }
           }
         }
       }
       
-      setChannels(channels);
+      if (channelData.length === 0) {
+        throw new Error('No valid streams found');
+      }
+      
+      setChannels(channelData);
+      
     } catch (err) {
-      setError('loading failed');
+      console.error('Channel loading failed:', err);
+      setError('loading failed - try another country');
       setChannels([]);
     } finally {
       setLoading(false);
     }
   };
 
-  // auto-load channels
+  // auto-load channels when country is selected
   useEffect(() => {
     if (selectedCountry && currentView === 'channels') {
       loadChannels(selectedCountry.code);
@@ -144,13 +183,21 @@ function App() {
             <button className="r1-back" onClick={goBack}>←</button>
             <div className="r1-title">{selectedCountry?.name}</div>
           </header>
-          {loading && <div className="r1-loading">loading...</div>}
+          
+          {loading && <div className="r1-loading">loading channels...</div>}
+          
           {error && (
             <div className="r1-error">
-              <div>{error}</div>
-              <button className="r1-btn" onClick={() => loadChannels(selectedCountry.code)}>retry</button>
+              <div className="error-text">{error}</div>
+              <button 
+                className="r1-btn retry-btn" 
+                onClick={() => loadChannels(selectedCountry.code)}
+              >
+                retry
+              </button>
             </div>
           )}
+          
           {!loading && !error && (
             <div className="r1-grid">
               {channels.map(channel => (
@@ -158,6 +205,7 @@ function App() {
                   key={channel.id}
                   className="r1-btn channel-btn"
                   onClick={() => selectChannel(channel)}
+                  title={channel.originalName} // Show full name on hover
                 >
                   <span className="name">{channel.name}</span>
                   <span className="play">▶</span>
@@ -173,19 +221,34 @@ function App() {
         <div className="r1-pane">
           <header className="r1-header">
             <button className="r1-back" onClick={goBack}>←</button>
-            <div className="r1-title">{selectedChannel.name}</div>
+            <div className="r1-title" title={selectedChannel.originalName}>
+              {selectedChannel.name}
+            </div>
           </header>
           <div className="r1-player">
             <video
+              key={selectedChannel.url} // Force reload on channel change
               controls
               autoPlay
               muted
               className="r1-video"
               src={selectedChannel.url}
-              onError={() => setError('stream unavailable')}
+              onError={(e) => {
+                console.error('Stream error:', e);
+                setError('stream unavailable');
+              }}
+              onLoadStart={() => setError(null)}
             >
-              browser not supported
+              Your browser does not support video playback
             </video>
+            {error && (
+              <div className="player-error">
+                <p>{error}</p>
+                <button className="r1-btn" onClick={goBack}>
+                  ← back to channels
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
