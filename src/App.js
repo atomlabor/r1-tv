@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import './styles/App.css';
 
 function App() {
   const [selectedChannel, setSelectedChannel] = useState(null);
@@ -18,13 +19,14 @@ function App() {
     { code: 'de', name: 'Deutschland' },
     { code: 'at', name: 'Österreich' },
     { code: 'ch', name: 'Schweiz' },
-    { code: 'uk', name: 'United Kingdom' },
+    { code: 'gb', name: 'United Kingdom' },
     { code: 'us', name: 'United States' },
     { code: 'fr', name: 'France' }
   ];
 
-  const loadChannels = async (countryCode, page = 0) => {
+  const loadChannels = async (countryCode) => {
     setLoading(true);
+    setError(null);
     try {
       const response = await fetch(`https://iptv-org.github.io/iptv/countries/${countryCode}.json`);
       if (!response.ok) {
@@ -32,14 +34,20 @@ function App() {
       }
       const data = await response.json();
       
-      if (page === 0) {
-        setChannels(data);
-      } else {
-        setChannels(prev => [...prev, ...data]);
-      }
+      // Filter and clean channel data
+      const cleanChannels = data.filter(channel => 
+        channel && channel.name && channel.url
+      ).map(channel => ({
+        ...channel,
+        name: channel.name.toLowerCase()
+      }));
+      
+      setChannels(cleanChannels);
+      setCurrentPage(0);
     } catch (err) {
       console.error('Error loading channels:', err);
       setError('Fehler beim Laden der Sender');
+      setChannels([]);
     } finally {
       setLoading(false);
     }
@@ -73,8 +81,6 @@ function App() {
   const loadMoreChannels = () => {
     const nextPage = currentPage + 1;
     setCurrentPage(nextPage);
-    // For demo purposes, we'll show more from the same dataset
-    // In a real implementation, this would load the next page from the API
   };
 
   const toggleFullscreen = () => {
@@ -126,7 +132,11 @@ function App() {
       <header className="r1-header">
         <div className="r1-header-content">
           <h1 className="r1-title">r1 tv</h1>
-          <img src="https://github.com/atomlabor/r1-tv/blob/main/r1-tv.png?raw=true" alt="r1 tv logo" style={{height:'16px',marginLeft:'6px',verticalAlign:'middle'}} />
+          <img 
+            src="https://github.com/atomlabor/r1-tv/blob/main/r1-tv.png?raw=true" 
+            alt="r1 tv logo" 
+            className="r1-logo"
+          />
         </div>
         {(selectedChannel || selectedCountry) && (
           <button className="r1-btn" onClick={goBack}>
@@ -142,7 +152,7 @@ function App() {
       
       {!selectedCountry ? (
         <div className="r1-countries">
-          <h2>Land wählen</h2>
+          <div className="r1-section-title">Land wählen</div>
           <div className="r1-country-grid">
             {countries.map((country) => (
               <button
@@ -158,7 +168,7 @@ function App() {
       ) : !selectedChannel ? (
         <div className="r1-channels">
           <div className="r1-channels-header">
-            <h2>{selectedCountry.name} - Verfügbare Sender</h2>
+            {selectedCountry.name} - Verfügbare Sender
           </div>
           {loading && channels.length === 0 && (
             <div className="r1-loading">Lade Sender...</div>
@@ -200,7 +210,7 @@ function App() {
       ) : (
         <div className="r1-player-container">
           <header className="r1-player-header">
-            <h2>{selectedChannel.name}</h2>
+            {selectedChannel.name}
             <button className="r1-btn" onClick={goBack} title="zurück">
               ↻
             </button>
@@ -263,4 +273,5 @@ function App() {
     </div>
   );
 }
+
 export default App;
