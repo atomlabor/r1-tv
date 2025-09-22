@@ -4,6 +4,7 @@ import './styles/App.css';
 /**
  * R1-TV - Minimal Country/Channel Selector with TVGarden Integration
  * Content area: 240x254px, Top offset: 28px, Viewport: 240x282px
+ * Clean implementation without any weather-related functionality
  */
 function App() {
   const [currentView, setCurrentView] = useState('countries');
