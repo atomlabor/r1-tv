@@ -1,475 +1,307 @@
-/* R1-TV App Styles - Matching r1-tv.netlify.app Design */
-.app {
-  /* App styles are now in index.css for global application */
+/* R1-TV Minimal Country/Channel Selector Styles */
+
+/* Base Layout */
+.viewport {
+  width: 240px;
+  height: 282px;
+  background: #000;
+  color: #fff;
+  font-family: 'Arial', sans-serif;
+  overflow: hidden;
+  position: relative;
+}
+
+.status-offset {
+  height: 28px;
+  background: #000;
+}
+
+.pane {
+  height: 254px;
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
 }
 
 /* Header Styles */
-.app-header {
-  background: rgba(0, 0, 0, 0.9);
-  padding: 15px 20px;
+.topbar {
+  height: 40px;
+  background: rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.header-content {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  max-width: 1000px;
-  margin: 0 auto;
-}
-
-.logo {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 1.5rem;
+.brand {
+  font-size: 14px;
   font-weight: bold;
-  color: white;
-}
-
-.logo-text {
-  font-family: 'Arial', sans-serif;
-}
-
-.header-info {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-}
-
-.back-button {
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
-  border: none;
-  padding: 8px 12px;
-  border-radius: 8px;
-  font-size: 1.2rem;
-  cursor: pointer;
-  transition: background 0.3s ease;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.back-button:hover {
-  background: rgba(255, 255, 255, 0.2);
-}
-
-.favorites-count {
-  background: rgba(255, 107, 107, 0.8);
-  color: white;
-  padding: 5px 12px;
-  border-radius: 15px;
-  font-size: 0.9rem;
-  font-weight: 600;
-}
-
-/* Main Content */
-.app-main {
+  color: #fff;
   flex: 1;
-  padding: 20px;
-  max-width: 1000px;
-  margin: 0 auto;
-  width: 100%;
-}
-
-.view-title {
-  color: white;
-  font-size: 2rem;
-  margin-bottom: 10px;
   text-align: center;
 }
 
-.categories-subtitle,
-.view-subtitle {
+.subtitle {
+  font-size: 12px;
   color: rgba(255, 255, 255, 0.7);
   text-align: center;
-  margin-bottom: 30px;
-  font-size: 1.1rem;
+  margin-left: 10px;
 }
 
-/* Categories View */
-.categories-view {
-  text-align: center;
+.btn-back {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background 0.2s ease;
 }
 
-.categories-grid {
+.btn-back:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Content Area */
+.content {
+  flex: 1;
+  padding: 12px;
+  overflow-y: auto;
+}
+
+/* Country Grid */
+.country-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 15px;
-  margin: 30px 0;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  height: 100%;
+  align-content: start;
 }
 
-.category-button {
+.country-card {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  padding: 20px 15px;
-  color: white;
+  border-radius: 8px;
+  padding: 12px 8px;
+  color: #fff;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
-  min-height: 100px;
-}
-
-.category-button:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.3);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-}
-
-.category-emoji {
-  font-size: 2rem;
-  margin-bottom: 5px;
-}
-
-.category-name {
-  font-size: 1rem;
-  font-weight: 600;
-}
-
-.navigation-hint {
-  color: rgba(255, 255, 255, 0.5);
-  margin-top: 30px;
-  font-size: 0.9rem;
-}
-
-/* Countries View */
-.countries-view {
+  justify-content: center;
   text-align: center;
+  min-height: 60px;
 }
 
-.countries-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 15px;
-  margin-top: 20px;
-}
-
-.country-button {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  padding: 20px 15px;
-  color: white;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-}
-
-.country-button:hover {
+.country-card:hover {
   background: rgba(255, 255, 255, 0.1);
   border-color: rgba(255, 255, 255, 0.3);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  transform: translateY(-1px);
 }
 
 .country-flag {
-  font-size: 2rem;
-  margin-bottom: 5px;
+  font-size: 12px;
+  font-weight: bold;
+  color: #ffcc00;
+  margin-bottom: 4px;
 }
 
 .country-name {
-  font-size: 1rem;
+  font-size: 11px;
   font-weight: 600;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 100%;
 }
 
-/* Channels View */
-.channels-view {
-  text-align: center;
-}
-
-.channels-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 15px;
-  margin-top: 20px;
+/* Channel List */
+.channel-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .channel-item {
-  position: relative;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  overflow: hidden;
-  transition: all 0.3s ease;
+  border-radius: 6px;
+  padding: 10px 12px;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  width: 100%;
 }
 
 .channel-item:hover {
   background: rgba(255, 255, 255, 0.1);
   border-color: rgba(255, 255, 255, 0.3);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-}
-
-.channel-button {
-  width: 100%;
-  background: transparent;
-  border: none;
-  color: white;
-  padding: 20px 15px;
-  cursor: pointer;
-  font-size: 1rem;
-  transition: all 0.3s ease;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-}
-
-.channel-logo {
-  font-size: 2rem;
-  margin-bottom: 5px;
 }
 
 .channel-name {
-  font-size: 1rem;
+  font-size: 12px;
   font-weight: 600;
+  margin-bottom: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 100%;
 }
 
-.favorite-button {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background: rgba(0, 0, 0, 0.7);
-  border: none;
-  border-radius: 50%;
-  width: 35px;
-  height: 35px;
+.channel-category {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.6);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 100%;
+}
+
+/* Loading and Error States */
+.loading {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 12px;
+  padding: 20px;
+}
+
+.error {
+  text-align: center;
+  color: #ff6b6b;
+  font-size: 11px;
+  padding: 12px;
+}
+
+.error button {
+  background: rgba(255, 107, 107, 0.2);
+  border: 1px solid rgba(255, 107, 107, 0.5);
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 4px;
   cursor: pointer;
-  font-size: 1.2rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s ease;
+  font-size: 10px;
+  margin-top: 8px;
+  transition: all 0.2s ease;
 }
 
-.favorite-button:hover {
-  background: rgba(0, 0, 0, 0.9);
-  transform: scale(1.1);
-}
-
-.favorite-button.active {
-  background: rgba(255, 107, 107, 0.8);
+.error button:hover {
+  background: rgba(255, 107, 107, 0.3);
 }
 
 .no-channels {
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 1.1rem;
-  margin-top: 40px;
   text-align: center;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 11px;
+  padding: 20px;
 }
 
-/* Player View */
-.player-view {
-  text-align: center;
-}
-
-.video-container {
-  background: #000000;
-  border-radius: 12px;
-  overflow: hidden;
-  margin: 20px 0;
-  min-height: 400px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.video-placeholder {
-  text-align: center;
-  padding: 40px;
-  color: rgba(255, 255, 255, 0.8);
-}
-
-.channel-display {
+/* Player Styles */
+.player-content {
+  padding: 0;
+  height: 100%;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 15px;
 }
 
-.playing-logo {
-  font-size: 4rem;
-  margin-bottom: 10px;
-}
-
-.channel-display h3 {
-  color: white;
-  font-size: 1.5rem;
-  margin: 0;
-}
-
-.stream-info {
-  color: rgba(255, 255, 255, 0.6);
-  margin: 0;
-  font-size: 1rem;
-}
-
-.player-controls {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 20px;
-  padding: 20px 0;
-}
-
-.control-button {
-  background: rgba(255, 255, 255, 0.1);
-  border: none;
-  border-radius: 50%;
-  width: 50px;
-  height: 50px;
-  color: white;
-  font-size: 1.2rem;
-  cursor: pointer;
+.player-wrapper {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  background: #000;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s ease;
 }
 
-.control-button:hover {
-  background: rgba(255, 255, 255, 0.2);
-  transform: scale(1.1);
+.video-player {
+  width: 100%;
+  height: 100%;
+  background: #000;
+  object-fit: contain;
 }
 
-.play-button {
-  width: 60px;
-  height: 60px;
-  background: rgba(255, 107, 107, 0.8);
-  font-size: 1.5rem;
-}
-
-.play-button:hover {
-  background: rgba(255, 107, 107, 1);
-}
-
-.favorite-button-large {
-  background: rgba(255, 255, 255, 0.1);
-  border: none;
-  border-radius: 50%;
-  width: 50px;
-  height: 50px;
-  font-size: 1.5rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s ease;
-  margin-left: 10px;
-}
-
-.favorite-button-large:hover {
-  background: rgba(255, 255, 255, 0.2);
-  transform: scale(1.1);
-}
-
-.favorite-button-large.active {
-  background: rgba(255, 107, 107, 0.8);
-}
-
-/* Footer Styles */
-.app-footer {
-  background: rgba(0, 0, 0, 0.9);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 20px;
-  margin-top: auto;
-}
-
-.footer-content {
-  text-align: center;
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 0.9rem;
-  max-width: 1000px;
-  margin: 0 auto;
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-  .header-content {
-    padding: 0 10px;
+/* Responsive adjustments for web */
+@media (min-width: 480px) {
+  .viewport {
+    width: 100%;
+    max-width: 800px;
+    height: auto;
+    min-height: 600px;
+    margin: 0 auto;
+    border-radius: 12px;
+    overflow: hidden;
   }
   
-  .app-main {
-    padding: 15px;
+  .status-offset {
+    display: none;
   }
   
-  .categories-grid,
-  .countries-grid,
-  .channels-grid {
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 10px;
+  .pane {
+    height: auto;
+    min-height: 600px;
   }
   
-  .category-button,
-  .country-button,
-  .channel-button {
-    padding: 15px 10px;
-    min-height: 80px;
+  .topbar {
+    height: 60px;
+    padding: 0 20px;
   }
   
-  .category-emoji,
-  .country-flag,
-  .channel-logo {
-    font-size: 1.5rem;
+  .brand {
+    font-size: 18px;
   }
   
-  .view-title {
-    font-size: 1.5rem;
+  .subtitle {
+    font-size: 14px;
   }
   
-  .video-container {
-    min-height: 250px;
+  .content {
+    padding: 20px;
   }
   
-  .player-controls {
+  .country-grid {
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
     gap: 15px;
   }
   
-  .control-button {
-    width: 45px;
-    height: 45px;
-    font-size: 1rem;
+  .country-card {
+    padding: 20px 15px;
+    min-height: 100px;
   }
   
-  .play-button {
-    width: 55px;
-    height: 55px;
-  }
-}
-
-@media (max-width: 480px) {
-  .categories-grid,
-  .countries-grid,
-  .channels-grid {
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  .country-name {
+    font-size: 14px;
+    white-space: normal;
   }
   
-  .category-button,
-  .country-button,
-  .channel-button {
-    padding: 12px 8px;
-    min-height: 70px;
+  .country-flag {
+    font-size: 16px;
   }
   
-  .video-container {
-    min-height: 200px;
-    border-radius: 8px;
+  .channel-item {
+    padding: 15px 20px;
   }
   
-  .view-title {
-    font-size: 1.3rem;
+  .channel-name {
+    font-size: 16px;
+  }
+  
+  .channel-category {
+    font-size: 14px;
+  }
+  
+  .player-wrapper {
+    min-height: 400px;
   }
 }
