@@ -10,10 +10,11 @@ function App() {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
   const [loading, setLoading] = useState(false);
+  
   const channelsPerPage = 12;
   const videoRef = useRef(null);
   const playerRef = useRef(null);
-
+  
   const countries = [
     { code: 'de', name: 'germany', emoji: '🇩🇪' },
     { code: 'uk', name: 'uk', emoji: '🇬🇧' },
@@ -72,12 +73,10 @@ function App() {
   };
 
   const toggleRotate = () => setVideoRotation(prev => (prev === 0 ? 90 : 0));
-
   const toggleFullscreen = () => {
     if (document.fullscreenElement) document.exitFullscreen();
     else playerRef.current?.requestFullscreen();
   };
-
   const exitFullscreen = () => { if (document.fullscreenElement) document.exitFullscreen(); };
 
   useEffect(() => {
@@ -100,6 +99,12 @@ function App() {
               className="r1-logo"
             />
             <h1 className="r1-title">r1 tv</h1>
+            
+            {selectedCountry && !selectedChannel && hasMoreChannels && (
+              <button className="r1-more-tv-header-btn" onClick={loadMoreChannels} disabled={loading}>
+                {loading ? '...' : '>'}
+              </button>
+            )}
           </div>
         </header>
 
@@ -125,9 +130,11 @@ function App() {
               <button className="r1-back-btn" onClick={goBack}>←</button>
               {selectedCountry.name} channels
             </div>
+            
             {loading && channels.length === 0 && (
               <div className="r1-loading">loading channels...</div>
             )}
+            
             {error && (
               <div className="r1-error">
                 {error}
@@ -136,6 +143,7 @@ function App() {
                 </button>
               </div>
             )}
+            
             {visibleChannels.length > 0 && (
               <>
                 <div className="r1-channel-grid">
@@ -150,17 +158,6 @@ function App() {
                     </button>
                   ))}
                 </div>
-                {hasMoreChannels && (
-                  <div className="r1-load-more">
-                    <button
-                      className="r1-more-tv-btn"
-                      onClick={loadMoreChannels}
-                      disabled={loading}
-                    >
-                      {loading ? 'loading...' : 'more tv'}
-                    </button>
-                  </div>
-                )}
               </>
             )}
           </div>
@@ -175,9 +172,11 @@ function App() {
                 <button className="r1-control-btn rotate" onClick={toggleRotate} title="rotate">↻</button>
                 <button className="r1-control-btn fullscreen" onClick={toggleFullscreen} title="fullscreen">⛶</button>
               </div>
+              
               {isFullscreen && (
                 <button className="r1-exit-fullscreen" onClick={exitFullscreen} title="exit fullscreen">exit</button>
               )}
+              
               <video
                 ref={videoRef}
                 className="r1-video"
@@ -190,6 +189,7 @@ function App() {
               >
                 your browser does not support video playback
               </video>
+              
               {error && (
                 <div className="r1-player-error">
                   {error}
