@@ -4,7 +4,7 @@ import './styles/App.css';
  * r1 tv - rabbit r1 optimized tv player  
  * Country direct channel list, no categories, TVGarden JSON, Rabbit UI
  * Direct load from https://raw.githubusercontent.com/TVGarden/tv-garden-channel-list/main/channels/raw/countries/{country}.json
- * Extended with paging functionality - 'mehr tv' button loads next 12 channels from country JSON
+ * Extended with paging functionality - 'more tv' button loads next 12 channels from country JSON
  */
 function App() {
   const [currentView, setCurrentView] = useState('countries');
@@ -17,11 +17,10 @@ function App() {
   const [currentPage, setCurrentPage] = useState(0); // paging
   const [allCountryChannels, setAllCountryChannels] = useState([]); // cache
   const [hasMoreChannels, setHasMoreChannels] = useState(false);
-
+  const [fullscreenSupported, setFullscreenSupported] = useState(false);
   // refs for video and player wrapper to control fullscreen and styles
   const videoRef = useRef(null);
   const playerRef = useRef(null);
-
   // Countries with their country codes for TVGarden API
   const countries = [
     { code: 'us', name: 'usa', flag: '🇺🇸' },
@@ -37,7 +36,6 @@ function App() {
     { code: 'br', name: 'br', flag: '🇧🇷' },
     { code: 'mx', name: 'mx', flag: '🇲🇽' }
   ];
-
   // Format channel name for optimal display - lowercase and short
   const formatChannelName = (channel) => {
     if (!channel || !channel.name) return 'unknown';
@@ -51,12 +49,10 @@ function App() {
     if (name.length > 10) name = name.substring(0, 10) + '…';
     return name || 'unknown';
   };
-
   // Toggle video rotation between 0° and 90° — keep applied in all modes
   const toggleVideoRotation = () => {
     setVideoRotation(prev => (prev === 0 ? 90 : 0));
   };
-
   // Apply rotation style consistently (including after fullscreen changes)
   const applyRotationStyle = () => {
     const v = videoRef.current;
@@ -82,6 +78,17 @@ function App() {
     }
   };
 
+  // Detect if fullscreen APIs and exit paths are available
+  useEffect(() => {
+    const fsAvailable = !!(
+      document.fullscreenEnabled ||
+      document.webkitFullscreenEnabled ||
+      document.msFullscreenEnabled ||
+      document.mozFullScreenEnabled
+    );
+    setFullscreenSupported(fsAvailable);
+  }, []);
+
   useEffect(() => {
     applyRotationStyle();
   }, [videoRotation, selectedChannel, currentView]);
@@ -96,7 +103,6 @@ function App() {
       null
     );
   };
-
   const requestFs = (el) => {
     if (!el) return;
     if (el.requestFullscreen) return el.requestFullscreen();
@@ -104,14 +110,12 @@ function App() {
     if (el.msRequestFullscreen) return el.msRequestFullscreen(); // IE/Edge legacy
     if (el.mozRequestFullScreen) return el.mozRequestFullScreen(); // old Firefox
   };
-
   const exitFs = () => {
     if (document.exitFullscreen) return document.exitFullscreen();
     if (document.webkitExitFullscreen) return document.webkitExitFullscreen();
     if (document.msExitFullscreen) return document.msExitFullscreen();
     if (document.mozCancelFullScreen) return document.mozCancelFullScreen();
   };
-
   const toggleFullscreen = () => {
     const container = playerRef.current || videoRef.current;
     if (!container) return;
@@ -121,11 +125,9 @@ function App() {
       requestFs(container);
     }
   };
-
   // Listen to fullscreenchange and re-apply styles to ensure rotation persists
   useEffect(() => {
     const handler = () => {
-      // On any fullscreen state change, re-apply rotation to the video
       applyRotationStyle();
     };
     document.addEventListener('fullscreenchange', handler);
@@ -157,7 +159,6 @@ function App() {
         allUrls: ch.iptv_urls
       }));
   };
-
   // Load channels directly from TVGarden country JSON
   const loadCountryChannels = async (country) => {
     setLoading(true);
@@ -166,7 +167,6 @@ function App() {
     setCurrentPage(0);
     setChannels([]);
     setAllCountryChannels([]);
-
     try {
       const url = `https://raw.githubusercontent.com/TVGarden/tv-garden-channel-list/main/channels/raw/countries/${country.code}.json`;
       const response = await fetch(url);
@@ -193,7 +193,6 @@ function App() {
       setLoading(false);
     }
   };
-
   // Load next 12 channels (page view)
   const loadMoreChannels = async () => {
     if (!selectedCountry || !hasMoreChannels || loading) return;
@@ -218,20 +217,16 @@ function App() {
       setLoading(false);
     }
   };
-
   const selectChannel = (channel) => {
     setSelectedChannel(channel);
     setCurrentView('player');
-    // keep rotation as last user choice across sessions? reset to 0 for clarity
-    setVideoRotation(videoRotation); // preserve current rotation state
-    setTimeout(applyRotationStyle, 0); // ensure style applied after render
+    setVideoRotation(videoRotation);
+    setTimeout(applyRotationStyle, 0);
   };
-
   const goBack = () => {
     if (currentView === 'player') {
       setCurrentView('channels');
       setSelectedChannel(null);
-      // keep rotation state; user may want it preserved next time
     } else if (currentView === 'channels') {
       setCurrentView('countries');
       setSelectedCountry(null);
@@ -241,6 +236,10 @@ function App() {
       setHasMoreChannels(false);
     }
   };
+
+  // Determine if we should render fullscreen button:
+  // Only if fullscreen API is supported AND we can render an on-screen Exit Fullscreen button
+  const shouldRenderFullscreen = fullscreenSupported;
 
   return (
     <div className="r1-viewport">
@@ -264,7 +263,6 @@ function App() {
           </div>
         </div>
       )}
-
       {/* Channels view */}
       {currentView === 'channels' && (
         <div className="r1-pane">
@@ -276,15 +274,13 @@ function App() {
                 className="r1-more-tv-btn" 
                 onClick={loadMoreChannels}
                 disabled={loading}
-                title="Weitere 12 TV Sender für dieses Land laden"
+                title="Load 12 more TV channels for this country"
               >
-                mehr tv
+                more tv
               </button>
             )}
           </header>
-
           {loading && <div className="r1-loading">loading channels...</div>}
-
           {error && (
             <div className="r1-error">
               <div className="error-text">{error}</div>
@@ -296,7 +292,6 @@ function App() {
               </button>
             </div>
           )}
-
           {!loading && !error && (
             <div className="r1-grid">
               {channels.map(channel => (
@@ -313,15 +308,13 @@ function App() {
               ))}
             </div>
           )}
-
           {channels.length > 0 && (
             <div className="r1-page-info">
-              Seite {currentPage + 1} • {channels.length} Kanäle{hasMoreChannels ? ' (mehr verfügbar)' : ''}
+              Page {currentPage + 1} • {channels.length} channels{hasMoreChannels ? ' (more available)' : ''}
             </div>
           )}
         </div>
       )}
-
       {/* Player view */}
       {currentView === 'player' && selectedChannel && (
         <div className="r1-pane">
@@ -333,18 +326,32 @@ function App() {
             <button
               className="r1-rotate-btn"
               onClick={toggleVideoRotation}
-              title="Video rotieren (90°)"
+              title="Rotate video (90°)"
             >
               ↻
             </button>
-            <button
-              className="r1-more-tv-btn"
-              onClick={toggleFullscreen}
-              title="Fullscreen wechseln"
-              style={{ marginLeft: 6 }}
-            >
-              fullscreen
-            </button>
+            {shouldRenderFullscreen && (
+              <>
+                <button
+                  className="r1-more-tv-btn"
+                  onClick={toggleFullscreen}
+                  title="Toggle fullscreen"
+                  style={{ marginLeft: 6 }}
+                >
+                  fullscreen
+                </button>
+                {isFullscreen() && (
+                  <button
+                    className="r1-more-tv-btn"
+                    onClick={exitFs}
+                    title="Exit fullscreen"
+                    style={{ marginLeft: 6 }}
+                  >
+                    exit fullscreen
+                  </button>
+                )}
+              </>
+            )}
           </header>
           <div className="r1-player" ref={playerRef}>
             <video
@@ -359,7 +366,6 @@ function App() {
                 setError('stream unavailable');
               }}
               onLoadStart={() => setError(null)}
-              // Do not set style prop here; we manage via applyRotationStyle to keep across modes
             >
               Your browser does not support video playback
             </video>
