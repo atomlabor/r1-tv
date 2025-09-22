@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import './styles/App.css';
 
 /**
- * r1 tv - rabbit r1 optimized tv player
- * 240x254px grid, no scroll, lowercase ui, tvgarden api, direct player
- * Enhanced to show real channel names from TVGarden/iptv-org API
+ * r1 tv - rabbit r1 optimized tv player  
+ * Learned TVGarden/r1-tv.netlify style: per-country category JSON, real names, direct streams, optimal grid
+ * Based on analysis of r1-tv.netlify.app/assets/main-iXLiwYm6.js pattern
  */
 function App() {
   const [currentView, setCurrentView] = useState('countries');
@@ -13,128 +13,132 @@ function App() {
   const [selectedChannel, setSelectedChannel] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState(null);
 
-  // optimized countries grid for 240x254px
+  // Countries with their TVGarden category mappings - optimized for 240x254px grid
   const countries = [
-    { code: 'us', name: 'usa', flag: '🇺🇸' },
-    { code: 'gb', name: 'uk', flag: '🇬🇧' },
-    { code: 'de', name: 'de', flag: '🇩🇪' },
-    { code: 'fr', name: 'fr', flag: '🇫🇷' },
-    { code: 'es', name: 'es', flag: '🇪🇸' },
-    { code: 'it', name: 'it', flag: '🇮🇹' },
-    { code: 'ca', name: 'ca', flag: '🇨🇦' },
-    { code: 'au', name: 'au', flag: '🇦🇺' },
-    { code: 'jp', name: 'jp', flag: '🇯🇵' },
-    { code: 'kr', name: 'kr', flag: '🇰🇷' },
-    { code: 'br', name: 'br', flag: '🇧🇷' },
-    { code: 'mx', name: 'mx', flag: '🇲🇽' }
+    { code: 'us', name: 'usa', flag: '🇺🇸', categories: ['news', 'sports', 'movies', 'entertainment'] },
+    { code: 'gb', name: 'uk', flag: '🇬🇧', categories: ['news', 'sports', 'movies', 'entertainment'] },
+    { code: 'de', name: 'de', flag: '🇩🇪', categories: ['news', 'sports', 'movies', 'entertainment'] },
+    { code: 'fr', name: 'fr', flag: '🇫🇷', categories: ['news', 'sports', 'movies', 'entertainment'] },
+    { code: 'es', name: 'es', flag: '🇪🇸', categories: ['news', 'sports', 'movies', 'entertainment'] },
+    { code: 'it', name: 'it', flag: '🇮🇹', categories: ['news', 'sports', 'movies', 'entertainment'] },
+    { code: 'ca', name: 'ca', flag: '🇨🇦', categories: ['news', 'sports', 'movies', 'entertainment'] },
+    { code: 'au', name: 'au', flag: '🇦🇺', categories: ['news', 'sports', 'movies', 'entertainment'] },
+    { code: 'jp', name: 'jp', flag: '🇯🇵', categories: ['news', 'sports', 'movies', 'entertainment'] },
+    { code: 'kr', name: 'kr', flag: '🇰🇷', categories: ['news', 'sports', 'movies', 'entertainment'] },
+    { code: 'br', name: 'br', flag: '🇧🇷', categories: ['news', 'sports', 'movies', 'entertainment'] },
+    { code: 'mx', name: 'mx', flag: '🇲🇽', categories: ['news', 'sports', 'movies', 'entertainment'] }
   ];
 
-  // clean and format channel name for display
-  const formatChannelName = (rawName) => {
-    if (!rawName || rawName === 'channel') return 'unnamed';
+  // TVGarden categories - following netlify app pattern
+  const tvGardenCategories = [
+    { name: 'news', url: 'https://raw.githubusercontent.com/TVGarden/tv-garden-channel-list/refs/heads/main/channels/raw/categories/news.json' },
+    { name: 'sports', url: 'https://raw.githubusercontent.com/TVGarden/tv-garden-channel-list/refs/heads/main/channels/raw/categories/sports.json' },
+    { name: 'movies', url: 'https://raw.githubusercontent.com/TVGarden/tv-garden-channel-list/refs/heads/main/channels/raw/categories/movies.json' },
+    { name: 'entertainment', url: 'https://raw.githubusercontent.com/TVGarden/tv-garden-channel-list/refs/heads/main/channels/raw/categories/entertainment.json' },
+    { name: 'music', url: 'https://raw.githubusercontent.com/TVGarden/tv-garden-channel-list/refs/heads/main/channels/raw/categories/music.json' },
+    { name: 'kids', url: 'https://raw.githubusercontent.com/TVGarden/tv-garden-channel-list/refs/heads/main/channels/raw/categories/kids.json' },
+    { name: 'cooking', url: 'https://raw.githubusercontent.com/TVGarden/tv-garden-channel-list/refs/heads/main/channels/raw/categories/cooking.json' },
+    { name: 'documentary', url: 'https://raw.githubusercontent.com/TVGarden/tv-garden-channel-list/refs/heads/main/channels/raw/categories/documentary.json' }
+  ];
+
+  // Format channel name for optimal display - following netlify pattern
+  const formatChannelName = (channel) => {
+    if (!channel || !channel.name) return 'unknown';
     
-    // Remove common prefixes/suffixes and clean up
-    let cleaned = rawName
-      .replace(/^(\d+\s*-\s*|\d+\s*\|\s*|\d+\s+)/i, '') // Remove number prefixes
-      .replace(/\s*(HD|FHD|UHD|4K)\s*$/i, '') // Remove HD suffixes
-      .replace(/\s*(TV|Television)\s*$/i, '') // Remove TV suffixes
-      .replace(/[\[\(].*?[\]\)]/g, '') // Remove content in brackets/parentheses
-      .replace(/\s+/g, ' ') // Normalize whitespace
-      .trim();
+    let name = channel.name;
+    // Remove common prefixes and clean up
+    name = name.replace(/^(\d+\s*-\s*|\d+\s*\|\s*|\d+\s+)/i, '');
+    name = name.replace(/\s*(HD|FHD|UHD|4K)\s*$/i, '');
+    name = name.replace(/\s*(TV|Television)\s*$/i, '');
+    name = name.replace(/[\[\(].*?[\]\)]/g, '');
+    name = name.replace(/\s+/g, ' ').trim();
     
-    // Limit length for button display but keep readable
-    if (cleaned.length > 12) {
-      cleaned = cleaned.substring(0, 12) + '…';
+    // Keep it short for R1 display
+    if (name.length > 10) {
+      name = name.substring(0, 10) + '…';
     }
     
-    return cleaned || 'unnamed';
+    return name || 'unknown';
   };
 
-  // load channels from tvgarden/iptv-org API with better name extraction
-  const loadChannels = async (countryCode) => {
+  // Load categories for selected country
+  const loadCountryCategories = (country) => {
+    setSelectedCountry(country);
+    setCategories(tvGardenCategories.slice(0, 8)); // Max 8 for optimal grid
+    setCurrentView('categories');
+  };
+
+  // Load channels from TVGarden category JSON - following netlify pattern
+  const loadCategoryChannels = async (category) => {
     setLoading(true);
     setError(null);
+    setSelectedCategory(category);
     
     try {
-      // Try iptv-org JSON API first for better channel data
-      let channelData = [];
-      
-      try {
-        const apiResponse = await fetch(`https://iptv-org.github.io/api/countries/${countryCode}.json`);
-        if (apiResponse.ok) {
-          const apiData = await apiResponse.json();
-          channelData = apiData
-            .filter(ch => ch.url && (ch.url.includes('.m3u8') || ch.url.includes('http')))
-            .map((ch, idx) => ({
-              id: `${countryCode}_${idx}`,
-              name: formatChannelName(ch.name),
-              originalName: ch.name || 'Unknown Channel',
-              url: ch.url,
-              logo: ch.logo || '',
-              category: (ch.category || 'tv').toLowerCase()
-            }))
-            .slice(0, 12); // Perfect grid fit for R1 display
-        }
-      } catch (apiError) {
-        console.log('API fallback needed:', apiError.message);
+      const response = await fetch(category.url);
+      if (!response.ok) {
+        throw new Error('Category not available');
       }
       
-      // Fallback to M3U parsing if API fails
-      if (channelData.length === 0) {
-        const m3uResponse = await fetch(`https://raw.githubusercontent.com/iptv-org/iptv/master/streams/${countryCode}.m3u`);
-        if (!m3uResponse.ok) {
-          throw new Error('No channel sources available');
-        }
+      const channelData = await response.json();
+      
+      // Filter by country and process channels
+      const countryChannels = channelData
+        .filter(ch => {
+          // Match country code in channel data
+          return ch.country && ch.country.toLowerCase() === selectedCountry.code.toLowerCase();
+        })
+        .filter(ch => {
+          // Ensure we have playable streams
+          return ch.iptv_urls && ch.iptv_urls.length > 0;
+        })
+        .slice(0, 12) // Perfect grid for R1
+        .map((ch, idx) => ({
+          id: `${selectedCountry.code}_${category.name}_${idx}`,
+          name: formatChannelName(ch),
+          originalName: ch.name || 'Unknown Channel',
+          country: ch.country || selectedCountry.code,
+          category: ch.category || category.name,
+          language: ch.language || '',
+          logo: ch.logo || '',
+          url: ch.iptv_urls[0], // Use first available stream
+          allUrls: ch.iptv_urls
+        }));
+      
+      if (countryChannels.length === 0) {
+        // Fallback: show any channels from this category
+        const fallbackChannels = channelData
+          .filter(ch => ch.iptv_urls && ch.iptv_urls.length > 0)
+          .slice(0, 12)
+          .map((ch, idx) => ({
+            id: `${category.name}_${idx}`,
+            name: formatChannelName(ch),
+            originalName: ch.name || 'Unknown Channel',
+            country: ch.country || 'international',
+            category: ch.category || category.name,
+            language: ch.language || '',
+            logo: ch.logo || '',
+            url: ch.iptv_urls[0],
+            allUrls: ch.iptv_urls
+          }));
         
-        const m3uContent = await m3uResponse.text();
-        const lines = m3uContent.split('\n');
-        
-        for (let i = 0; i < lines.length && channelData.length < 12; i++) {
-          if (lines[i].startsWith('#EXTINF:')) {
-            const nameMatch = lines[i].match(/,(.*)$/);
-            const rawName = nameMatch ? nameMatch[1].trim() : 'Unknown Channel';
-            const url = lines[i + 1]?.trim();
-            
-            if (url && url.startsWith('http')) {
-              channelData.push({
-                id: `${countryCode}_${channelData.length}`,
-                name: formatChannelName(rawName),
-                originalName: rawName,
-                url: url,
-                logo: '',
-                category: 'tv'
-              });
-            }
-          }
-        }
+        setChannels(fallbackChannels);
+      } else {
+        setChannels(countryChannels);
       }
       
-      if (channelData.length === 0) {
-        throw new Error('No valid streams found');
-      }
-      
-      setChannels(channelData);
+      setCurrentView('channels');
       
     } catch (err) {
-      console.error('Channel loading failed:', err);
-      setError('loading failed - try another country');
+      console.error('Failed to load category channels:', err);
+      setError('loading failed - try another category');
       setChannels([]);
     } finally {
       setLoading(false);
     }
-  };
-
-  // auto-load channels when country is selected
-  useEffect(() => {
-    if (selectedCountry && currentView === 'channels') {
-      loadChannels(selectedCountry.code);
-    }
-  }, [selectedCountry, currentView]);
-
-  const selectCountry = (country) => {
-    setSelectedCountry(country);
-    setCurrentView('channels');
   };
 
   const selectChannel = (channel) => {
@@ -147,15 +151,18 @@ function App() {
       setCurrentView('channels');
       setSelectedChannel(null);
     } else if (currentView === 'channels') {
+      setCurrentView('categories');
+      setChannels([]);
+    } else if (currentView === 'categories') {
       setCurrentView('countries');
       setSelectedCountry(null);
-      setChannels([]);
+      setCategories([]);
     }
   };
 
   return (
     <div className="r1-viewport">
-      {/* countries view */}
+      {/* Countries view */}
       {currentView === 'countries' && (
         <div className="r1-pane">
           <header className="r1-header">
@@ -166,7 +173,7 @@ function App() {
               <button
                 key={country.code}
                 className="r1-btn country-btn"
-                onClick={() => selectCountry(country)}
+                onClick={() => loadCountryCategories(country)}
               >
                 <span className="flag">{country.flag}</span>
                 <span className="name">{country.name}</span>
@@ -176,12 +183,33 @@ function App() {
         </div>
       )}
 
-      {/* channels view */}
-      {currentView === 'channels' && (
+      {/* Categories view */}
+      {currentView === 'categories' && (
         <div className="r1-pane">
           <header className="r1-header">
             <button className="r1-back" onClick={goBack}>←</button>
             <div className="r1-title">{selectedCountry?.name}</div>
+          </header>
+          <div className="r1-grid">
+            {categories.map(category => (
+              <button
+                key={category.name}
+                className="r1-btn category-btn"
+                onClick={() => loadCategoryChannels(category)}
+              >
+                <span className="name">{category.name}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Channels view */}
+      {currentView === 'channels' && (
+        <div className="r1-pane">
+          <header className="r1-header">
+            <button className="r1-back" onClick={goBack}>←</button>
+            <div className="r1-title">{selectedCategory?.name}</div>
           </header>
           
           {loading && <div className="r1-loading">loading channels...</div>}
@@ -191,7 +219,7 @@ function App() {
               <div className="error-text">{error}</div>
               <button 
                 className="r1-btn retry-btn" 
-                onClick={() => loadChannels(selectedCountry.code)}
+                onClick={() => loadCategoryChannels(selectedCategory)}
               >
                 retry
               </button>
@@ -205,9 +233,10 @@ function App() {
                   key={channel.id}
                   className="r1-btn channel-btn"
                   onClick={() => selectChannel(channel)}
-                  title={channel.originalName} // Show full name on hover
+                  title={`${channel.originalName} • ${channel.country}`}
                 >
                   <span className="name">{channel.name}</span>
+                  <span className="meta">{channel.country}</span>
                   <span className="play">▶</span>
                 </button>
               ))}
@@ -216,7 +245,7 @@ function App() {
         </div>
       )}
 
-      {/* player view */}
+      {/* Player view */}
       {currentView === 'player' && selectedChannel && (
         <div className="r1-pane">
           <header className="r1-header">
@@ -227,7 +256,7 @@ function App() {
           </header>
           <div className="r1-player">
             <video
-              key={selectedChannel.url} // Force reload on channel change
+              key={selectedChannel.url}
               controls
               autoPlay
               muted
@@ -243,7 +272,7 @@ function App() {
             </video>
             {error && (
               <div className="player-error">
-                <p>{error}</p>
+                {error}
                 <button className="r1-btn" onClick={goBack}>
                   ← back to channels
                 </button>
