@@ -159,33 +159,42 @@ function App() {
       setCurrentPage(currentPage - 1);
     }
   };
+
+  // Get country flag emoji from country code
+  const getCountryFlag = (countryCode) => {
+    const codePoints = countryCode
+      .toUpperCase()
+      .split('')
+      .map(char => 127397 + char.charCodeAt());
+    return String.fromCodePoint(...codePoints);
+  };
   
   const exitBtnStyle = {
     position: 'absolute',
-    top: '10px',
-    right: '10px',
+    top: '8px',
+    right: '8px',
     zIndex: 1000,
     backgroundColor: 'rgba(0,0,0,0.7)',
     color: 'white',
     border: 'none',
-    padding: '8px 12px',
+    padding: '6px 10px',
     borderRadius: '4px',
     cursor: 'pointer',
-    fontSize: '14px'
+    fontSize: '12px'
   };
   
   const softwareBackBtnStyle = {
     position: 'absolute',
-    top: '10px',
-    left: '10px',
+    top: '8px',
+    left: '8px',
     zIndex: 1000,
     backgroundColor: 'rgba(0,0,0,0.7)',
     color: 'white',
     border: 'none',
-    padding: '8px 12px',
+    padding: '6px 10px',
     borderRadius: '4px',
     cursor: 'pointer',
-    fontSize: '14px'
+    fontSize: '12px'
   };
   
   return (
@@ -195,7 +204,7 @@ function App() {
         <div className="r1-pane">
           <header className="r1-header">
             <div className="r1-title">
-              r1 tv <img src='r1-tv.png' alt='r1 tv logo' style={{height:'18px',verticalAlign:'middle'}}/>
+              r1 tv 📺
             </div>
           </header>
           <div className="r1-grid">
@@ -206,28 +215,29 @@ function App() {
                 onClick={() => selectCountry(country)}
                 title={country.name}
               >
-                <div className="r1-channel-name">{country.name}</div>
+                <div className="flag">{getCountryFlag(country.code)}</div>
+                <div className="r1-channel-name">{country.name.toLowerCase()}</div>
               </button>
             ))}
           </div>
           {totalPages > 1 && (
             <div className="r1-pagination">
-              <button 
+              <button
                 className="r1-btn"
                 onClick={prevPage}
                 disabled={currentPage === 0}
               >
-                ← Previous
+                ← previous
               </button>
               <span className="r1-page-info">
-                Page {currentPage + 1} of {totalPages}
+                page {currentPage + 1} of {totalPages}
               </span>
-              <button 
+              <button
                 className="r1-btn"
                 onClick={nextPage}
                 disabled={currentPage === totalPages - 1}
               >
-                Next →
+                next →
               </button>
             </div>
           )}
@@ -240,7 +250,7 @@ function App() {
           <header className="r1-header">
             <button className="r1-back" onClick={goBack}>←</button>
             <div className="r1-title">
-              r1 tv <img src='r1-tv.png' alt='r1 tv logo' style={{height:'18px',verticalAlign:'middle'}}/> - {selectedCountry?.name}
+              r1 tv 📺 - {selectedCountry?.name.toLowerCase()}
             </div>
           </header>
           <div className="r1-grid">
@@ -251,28 +261,28 @@ function App() {
                 onClick={() => selectChannel(channel)}
                 title={channel.name}
               >
-                <div className="r1-channel-name">{channel.name}</div>
+                <div className="r1-channel-name">{channel.name.toLowerCase()}</div>
               </button>
             ))}
           </div>
           {totalPages > 1 && (
             <div className="r1-pagination">
-              <button 
+              <button
                 className="r1-btn"
                 onClick={prevPage}
                 disabled={currentPage === 0}
               >
-                ← Previous
+                ← previous
               </button>
               <span className="r1-page-info">
-                Page {currentPage + 1} of {totalPages}
+                page {currentPage + 1} of {totalPages}
               </span>
-              <button 
+              <button
                 className="r1-btn"
                 onClick={nextPage}
                 disabled={currentPage === totalPages - 1}
               >
-                Next →
+                next →
               </button>
             </div>
           )}
@@ -285,14 +295,14 @@ function App() {
           <header className="r1-header">
             <button className="r1-back" onClick={goBack}>←</button>
             <div className="r1-title" title={selectedChannel.name}>
-              {selectedChannel.name}
+              {selectedChannel.name.toLowerCase()}
             </div>
-            <button className="r1-rotate-btn" onClick={toggleVideoRotation} title="Rotate video (90°)">
+            <button className="r1-rotate-btn" onClick={toggleVideoRotation} title="rotate video (90°)">
               ↻
             </button>
             {shouldRenderFullscreen && (
-              <button className="r1-more-tv-btn" onClick={toggleFullscreen} style={{marginLeft: '8px'}} title="Toggle fullscreen">
-                Fullscreen
+              <button className="r1-more-tv-btn" onClick={toggleFullscreen} title="toggle fullscreen">
+                fullscreen
               </button>
             )}
           </header>
@@ -302,7 +312,7 @@ function App() {
               <button
                 className="r1-software-back-btn"
                 onClick={handleSoftwareBack}
-                title="Back to channels"
+                title="back to channels"
                 style={softwareBackBtnStyle}
               >
                 ←
@@ -314,10 +324,10 @@ function App() {
               <button
                 className="r1-more-tv-btn"
                 onClick={exitFs}
-                title="Exit fullscreen"
+                title="exit fullscreen"
                 style={exitBtnStyle}
               >
-                Exit
+                exit
               </button>
             )}
             <video
@@ -326,20 +336,20 @@ function App() {
               controls
               key={selectedChannel.url}
               onError={(e) => {
-                console.error('Stream error:', e);
-                setError('Stream unavailable');
+                console.error('stream error:', e);
+                setError('stream unavailable');
               }}
               onLoadStart={() => setError(null)}
               ref={videoRef}
               src={selectedChannel.url}
             >
-              Your browser does not support video playback
+              your browser does not support video playback
             </video>
             {error && (
               <div className="player-error">
                 {error}
                 <button className="r1-btn" onClick={goBack}>
-                  ← Back to channels
+                  ← back to channels
                 </button>
               </div>
             )}
