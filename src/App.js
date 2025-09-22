@@ -288,7 +288,6 @@ function App() {
               key={selectedChannel.url}
               controls
               autoPlay
-              muted
               className="r1-video"
               style={{
                 transform: `rotate(${videoRotation}deg)`,
