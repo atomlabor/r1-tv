@@ -1,0 +1,146 @@
+{
+  "app": {
+    "title": "R1-TV",
+    "description": "TV-App für Rabbit R1 mit Länderauswahl, Senderliste, Player und Favoriten"
+  },
+  "navigation": {
+    "home": "Startseite",
+    "back": "Zurück",
+    "settings": "Einstellungen",
+    "language": "Sprache"
+  },
+  "country": {
+    "selector": {
+      "title": "TV Kanäle",
+      "subtitle": "Land auswählen",
+      "subtitleSelected": "{{country}} ausgewählt",
+      "search": {
+        "placeholder": "Land suchen...",
+        "noResults": "Keine Länder gefunden"
+      },
+      "loading": "Lade verfügbare Länder...",
+      "error": "Fehler beim Laden der Länder",
+      "retry": "Erneut versuchen",
+      "channels": "{{count}} Kanäle"
+    }
+  },
+  "channels": {
+    "title": "TV Kanäle - {{country}}",
+    "count": "{{count}} Kanäle verfügbar",
+    "favorites": {
+      "title": "⭐ Favoriten ({{count}})",
+      "addTooltip": "Zu Favoriten hinzufügen",
+      "removeTooltip": "Aus Favoriten entfernen"
+    },
+    "allChannels": "📺 Alle Kanäle ({{count}})",
+    "loading": "Lade Kanäle für {{country}}...",
+    "error": "Fehler beim Laden der Kanäle",
+    "noChannels": "Bitte wählen Sie ein Land aus, um TV-Kanäle anzuzeigen",
+    "noChannelsDescription": "Wählen Sie aus Ländern mit verfügbaren Kanälen über die Länderauswahl.",
+    "retry": "Wiederholen",
+    "play": "▶️ Abspielen",
+    "playTooltip": "{{channel}} abspielen",
+    "noStream": "Kein Stream verfügbar",
+    "language": "Sprache: {{language}}",
+    "languageUnknown": "Sprache: Unbekannt",
+    "geoBlocked": "🌍 Geo-blockiert",
+    "streamTypes": {
+      "m3u8": "M3U8",
+      "youtube": "YouTube",
+      "none": "Kein Stream"
+    }
+  },
+  "player": {
+    "title": "Video Player",
+    "loading": "Lade Stream...",
+    "error": "Fehler beim Laden des Streams",
+    "noStream": "Kein Stream verfügbar",
+    "controls": {
+      "play": "Abspielen",
+      "pause": "Pausieren",
+      "fullscreen": "Vollbild",
+      "exitFullscreen": "Vollbild verlassen",
+      "volume": "Lautstärke",
+      "mute": "Stumm schalten",
+      "unmute": "Ton einschalten"
+    }
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "language": {
+      "title": "Sprache",
+      "description": "Wählen Sie Ihre bevorzugte Sprache",
+      "current": "Aktuelle Sprache: {{language}}",
+      "changeSuccess": "Sprache zu {{language}} geändert",
+      "changeError": "Fehler beim Ändern der Sprache"
+    },
+    "theme": {
+      "title": "Design",
+      "dark": "Dunkles Design",
+      "light": "Helles Design",
+      "auto": "Automatisch"
+    },
+    "reset": {
+      "title": "Einstellungen zurücksetzen",
+      "description": "Alle Einstellungen auf Standardwerte zurücksetzen",
+      "confirm": "Sind Sie sicher, dass Sie alle Einstellungen zurücksetzen möchten?",
+      "success": "Einstellungen erfolgreich zurückgesetzt"
+    }
+  },
+  "errors": {
+    "generic": "Ein Fehler ist aufgetreten",
+    "network": "Netzwerkfehler. Bitte überprüfen Sie Ihre Verbindung.",
+    "notFound": "Nicht gefunden",
+    "timeout": "Zeitüberschreitung",
+    "serverError": "Serverfehler",
+    "unauthorized": "Nicht autorisiert",
+    "forbidden": "Zugriff verweigert"
+  },
+  "common": {
+    "loading": "Laden...",
+    "error": "Fehler",
+    "success": "Erfolgreich",
+    "warning": "Warnung",
+    "info": "Information",
+    "ok": "OK",
+    "cancel": "Abbrechen",
+    "yes": "Ja",
+    "no": "Nein",
+    "save": "Speichern",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "close": "Schließen",
+    "open": "Öffnen",
+    "search": "Suchen",
+    "filter": "Filter",
+    "sort": "Sortieren",
+    "refresh": "Aktualisieren",
+    "share": "Teilen",
+    "copy": "Kopieren",
+    "paste": "Einfügen",
+    "select": "Auswählen",
+    "selectAll": "Alle auswählen",
+    "clear": "Löschen",
+    "reset": "Zurücksetzen",
+    "apply": "Anwenden",
+    "confirm": "Bestätigen",
+    "next": "Weiter",
+    "previous": "Zurück",
+    "first": "Erste",
+    "last": "Letzte"
+  },
+  "rabbit": {
+    "deviceName": "Rabbit R1",
+    "optimized": "Optimiert für Rabbit R1",
+    "controls": {
+      "scrollWheel": "Scrollrad verwenden",
+      "pushToTalk": "Push-to-Talk",
+      "homeButton": "Home-Taste"
+    },
+    "features": {
+      "voiceControl": "Sprachsteuerung",
+      "gestureNavigation": "Gestennavigation",
+      "compactView": "Kompakte Ansicht"
+    }
+  }
+}
