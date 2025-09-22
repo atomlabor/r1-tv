@@ -1,6 +1,7 @@
 {
   "name": "r1-tv",
   "version": "1.0.0",
+  "homepage": "https://atomlabor.github.io/r1-tv",
   "description": "TV-App für Rabbit R1 mit Länderauswahl, Senderliste, Player und Favoriten",
   "main": "src/index.js",
   "scripts": {
