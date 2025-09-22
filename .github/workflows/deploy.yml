@@ -27,18 +27,12 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: '18'
-        cache: 'npm'
         
     - name: Install dependencies
-      run: npm ci
+      run: npm install
       
     - name: Build React app
-      run: |
-        npm run build
-        # Copy build files to public for GitHub Pages
-        cp -r build/* public/
-        # Make sure index.html is in root for Pages
-        cp public/index.html ./
+      run: npm run build
       
     - name: Setup Pages
       uses: actions/configure-pages@v4
