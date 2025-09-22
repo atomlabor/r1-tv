@@ -1,21 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './styles/App.css';
 
 /**
  * R1-TV - Modern TV streaming app optimized for Rabbit R1 display
  * Screen: 240x254px content area, 28px status bar offset
  * Total viewport: 240x282px
+ * Now integrated with TVGarden API for real channel data
  */
 function App() {
-  const [currentView, setCurrentView] = useState('categories'); // categories, countries, channels, player
+  const [currentView, setCurrentView] = useState('categories'); // categories, channels, player
   const [selectedCategory, setSelectedCategory] = useState(null);
-  const [selectedCountry, setSelectedCountry] = useState(null);
   const [selectedChannel, setSelectedChannel] = useState(null);
   const [favorites, setFavorites] = useState([]);
+  const [channels, setChannels] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  // Categories matching r1-tv.netlify.app
+  // Categories with TVGarden API integration - focusing on animation, news, sports as requested
   const categories = [
-    { id: 'animation', name: 'Animation', emoji: '🎨' },
+    { id: 'animation', name: 'Animation', emoji: '🎨', apiUrl: 'https://iptv-org.github.io/api/categories/animation.json' },
+    { id: 'news', name: 'News', emoji: '📰', apiUrl: 'https://iptv-org.github.io/api/categories/news.json' },
+    { id: 'sports', name: 'Sports', emoji: '⚽', apiUrl: 'https://iptv-org.github.io/api/categories/sports.json' },
     { id: 'comedy', name: 'Comedy', emoji: '😂' },
     { id: 'cooking', name: 'Cooking', emoji: '👨‍🍳' },
     { id: 'documentary', name: 'Documentary', emoji: '📚' },
@@ -27,70 +32,95 @@ function App() {
     { id: 'lifestyle', name: 'Lifestyle', emoji: '✨' },
     { id: 'movies', name: 'Movies', emoji: '🎬' },
     { id: 'music', name: 'Music', emoji: '🎵' },
-    { id: 'news', name: 'News', emoji: '📰' },
-    { id: 'sports', name: 'Sports', emoji: '⚽' },
     { id: 'travel', name: 'Travel', emoji: '✈️' }
   ];
 
-  // Mock countries data
-  const countries = [
-    { code: 'DE', name: 'Deutschland', flag: '🇩🇪' },
-    { code: 'US', name: 'United States', flag: '🇺🇸' },
-    { code: 'GB', name: 'United Kingdom', flag: '🇬🇧' },
-    { code: 'FR', name: 'France', flag: '🇫🇷' },
-    { code: 'IT', name: 'Italy', flag: '🇮🇹' },
-    { code: 'ES', name: 'Spain', flag: '🇪🇸' },
-    { code: 'NL', name: 'Netherlands', flag: '🇳🇱' },
-    { code: 'BE', name: 'Belgium', flag: '🇧🇪' }
-  ];
+  // Load channels from TVGarden API
+  const loadChannelsForCategory = async (category) => {
+    if (!category.apiUrl) {
+      // For categories without API integration, show placeholder
+      setChannels([{
+        id: 'placeholder',
+        name: `${category.name} channels coming soon`,
+        logo: category.emoji,
+        stream: null,
+        category: category.id
+      }]);
+      return;
+    }
 
-  // Mock channels data with categories
-  const mockChannels = {
-    'DE': {
-      'news': [
-        { id: 'ard', name: 'ARD', logo: '🇩🇪', stream: 'https://example.com/ard', category: 'news' },
-        { id: 'zdf', name: 'ZDF', logo: '📺', stream: 'https://example.com/zdf', category: 'news' }
-      ],
-      'entertainment': [
-        { id: 'rtl', name: 'RTL', logo: '🎆', stream: 'https://example.com/rtl', category: 'entertainment' },
-        { id: 'sat1', name: 'Sat.1', logo: '🌟', stream: 'https://example.com/sat1', category: 'entertainment' }
-      ],
-      'sports': [
-        { id: 'sport1', name: 'Sport1', logo: '⚽', stream: 'https://example.com/sport1', category: 'sports' }
-      ]
-    },
-    'US': {
-      'news': [
-        { id: 'cnn', name: 'CNN', logo: '📰', stream: 'https://example.com/cnn', category: 'news' },
-        { id: 'fox', name: 'Fox News', logo: '🦊', stream: 'https://example.com/fox', category: 'news' }
-      ],
-      'entertainment': [
-        { id: 'nbc', name: 'NBC', logo: '📺', stream: 'https://example.com/nbc', category: 'entertainment' }
-      ]
-    },
-    'GB': {
-      'news': [
-        { id: 'bbc', name: 'BBC One', logo: '📻', stream: 'https://example.com/bbc', category: 'news' }
-      ]
-    },
-    'FR': {
-      'general': [
-        { id: 'tf1', name: 'TF1', logo: '📺', stream: 'https://example.com/tf1', category: 'general' }
-      ]
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const response = await fetch(category.apiUrl);
+      if (!response.ok) {
+        throw new Error(`Failed to load ${category.name} channels`);
+      }
+      
+      const channelData = await response.json();
+      
+      // Transform TVGarden data to our format
+      const transformedChannels = channelData
+        .filter(channel => channel.url && channel.url.includes('.m3u8')) // Only M3U8 streams
+        .slice(0, 20) // Limit to first 20 channels for performance
+        .map((channel, index) => ({
+          id: `${category.id}_${index}`,
+          name: channel.name || `${category.name} Channel ${index + 1}`,
+          logo: getChannelEmoji(channel.name, category.id),
+          stream: channel.url,
+          category: category.id,
+          country: channel.country,
+          language: channel.languages ? channel.languages.join(', ') : 'Unknown'
+        }));
+      
+      setChannels(transformedChannels);
+    } catch (err) {
+      setError(`Failed to load ${category.name} channels: ${err.message}`);
+      setChannels([]);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleCategorySelect = (category) => {
-    setSelectedCategory(category);
-    setCurrentView('countries');
+  // Get appropriate emoji for channel based on name and category
+  const getChannelEmoji = (channelName, categoryId) => {
+    const name = (channelName || '').toLowerCase();
+    
+    if (categoryId === 'animation') {
+      if (name.includes('cartoon')) return '🎭';
+      if (name.includes('anime')) return '🎌';
+      if (name.includes('kids')) return '🧸';
+      return '🎨';
+    }
+    
+    if (categoryId === 'news') {
+      if (name.includes('bbc')) return '🇬🇧';
+      if (name.includes('cnn')) return '🇺🇸';
+      if (name.includes('france')) return '🇫🇷';
+      if (name.includes('deutsch') || name.includes('german')) return '🇩🇪';
+      return '📰';
+    }
+    
+    if (categoryId === 'sports') {
+      if (name.includes('football') || name.includes('soccer')) return '⚽';
+      if (name.includes('basketball')) return '🏀';
+      if (name.includes('tennis')) return '🎾';
+      if (name.includes('motor') || name.includes('racing')) return '🏎️';
+      return '⚽';
+    }
+    
+    return '📺';
   };
 
-  const handleCountrySelect = (country) => {
-    setSelectedCountry(country);
+  const handleCategorySelect = async (category) => {
+    setSelectedCategory(category);
     setCurrentView('channels');
+    await loadChannelsForCategory(category);
   };
 
   const handleChannelSelect = (channel) => {
+    if (!channel.stream) return; // Don't play placeholder channels
     setSelectedChannel(channel);
     setCurrentView('player');
   };
@@ -110,19 +140,9 @@ function App() {
     if (currentView === 'player') {
       setCurrentView('channels');
     } else if (currentView === 'channels') {
-      setCurrentView('countries');
-    } else if (currentView === 'countries') {
       setCurrentView('categories');
     }
   };
-
-  const getChannelsForCategoryAndCountry = () => {
-    if (!selectedCountry || !selectedCategory) return [];
-    const countryChannels = mockChannels[selectedCountry.code] || {};
-    return countryChannels[selectedCategory.id] || [];
-  };
-
-  const channels = getChannelsForCategoryAndCountry();
 
   return (
     <div className="app r1-optimized">
@@ -160,6 +180,7 @@ function App() {
                 >
                   <span className="category-emoji">{category.emoji}</span>
                   <span className="category-name">{category.name}</span>
+                  {category.apiUrl && <span className="live-indicator">🔴 LIVE</span>}
                 </button>
               ))}
             </div>
@@ -169,54 +190,67 @@ function App() {
           </div>
         )}
 
-        {currentView === 'countries' && (
-          <div className="countries-view">
-            <h2 className="view-title">{selectedCategory?.name} Channels</h2>
-            <p className="view-subtitle">Select your country</p>
-            <div className="countries-grid">
-              {countries.map(country => (
-                <button
-                  key={country.code}
-                  className="country-button"
-                  onClick={() => handleCountrySelect(country)}
-                >
-                  <span className="country-flag">{country.flag}</span>
-                  <span className="country-name">{country.name}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
         {currentView === 'channels' && (
           <div className="channels-view">
-            <h2 className="view-title">{selectedCategory?.name} - {selectedCountry?.name}</h2>
-            <div className="channels-grid">
-              {channels.map(channel => (
-                <div className="channel-item" key={channel.id}>
-                  <button
-                    className="channel-button"
-                    onClick={() => handleChannelSelect(channel)}
-                  >
-                    <span className="channel-logo">{channel.logo}</span>
-                    <span className="channel-name">{channel.name}</span>
-                  </button>
-                  <button
-                    className={`favorite-button ${
-                      favorites.some(fav => fav.id === channel.id) ? 'active' : ''
-                    }`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleFavorite(channel);
-                    }}
-                  >
-                    {favorites.some(fav => fav.id === channel.id) ? '❤️' : '🤍'}
-                  </button>
-                </div>
-              ))}
-            </div>
-            {channels.length === 0 && (
-              <p className="no-channels">No {selectedCategory?.name.toLowerCase()} channels available for {selectedCountry?.name}.</p>
+            <h2 className="view-title">{selectedCategory?.name} Channels</h2>
+            
+            {loading && (
+              <div className="loading-state">
+                <div className="loading-spinner">⏳</div>
+                <p>Loading {selectedCategory?.name} channels...</p>
+              </div>
+            )}
+            
+            {error && (
+              <div className="error-state">
+                <p className="error-message">❌ {error}</p>
+                <button 
+                  className="retry-button" 
+                  onClick={() => loadChannelsForCategory(selectedCategory)}
+                >
+                  🔄 Retry
+                </button>
+              </div>
+            )}
+            
+            {!loading && !error && (
+              <div className="channels-grid">
+                {channels.map(channel => (
+                  <div className="channel-item" key={channel.id}>
+                    <button
+                      className={`channel-button ${!channel.stream ? 'disabled' : ''}`}
+                      onClick={() => handleChannelSelect(channel)}
+                      disabled={!channel.stream}
+                    >
+                      <span className="channel-logo">{channel.logo}</span>
+                      <span className="channel-name">{channel.name}</span>
+                      {channel.stream && <span className="stream-indicator">📡</span>}
+                      {channel.country && (
+                        <span className="channel-country">{channel.country}</span>
+                      )}
+                    </button>
+                    {channel.stream && (
+                      <button
+                        className={`favorite-button ${
+                          favorites.some(fav => fav.id === channel.id) ? 'active' : ''
+                        }`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleFavorite(channel);
+                        }}
+                      >
+                        {favorites.some(fav => fav.id === channel.id) ? '❤️' : '🤍'}
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+            
+            {!loading && !error && channels.length === 0 && (
+              <p className="no-channels">
+                No {selectedCategory?.name.toLowerCase()} channels available.
+              </p>
             )}
           </div>
         )}
@@ -225,13 +259,39 @@ function App() {
           <div className="player-view">
             <h2 className="view-title">Now Playing: {selectedChannel.name}</h2>
             <div className="video-container">
-              <div className="video-placeholder">
-                <div className="channel-display">
-                  <span className="playing-logo">{selectedChannel.logo}</span>
-                  {selectedChannel.name}
-                  <p className="stream-info">Live Stream</p>
+              {selectedChannel.stream ? (
+                <iframe
+                  src={`data:text/html;charset=utf-8,
+                    <!DOCTYPE html>
+                    <html>
+                      <head>
+                        <style>
+                          body { margin: 0; padding: 0; background: black; }
+                          video { width: 100%; height: 100%; object-fit: contain; }
+                        </style>
+                      </head>
+                      <body>
+                        <video controls autoplay muted>
+                          <source src="${selectedChannel.stream}" type="application/x-mpegURL">
+                          Your browser does not support HLS video.
+                        </video>
+                      </body>
+                    </html>`}
+                  width="240"
+                  height="254"
+                  style={{ border: 'none', marginTop: '28px' }}
+                  title={selectedChannel.name}
+                  allowFullScreen
+                />
+              ) : (
+                <div className="video-placeholder">
+                  <div className="channel-display">
+                    <span className="playing-logo">{selectedChannel.logo}</span>
+                    {selectedChannel.name}
+                    <p className="stream-info">Stream not available</p>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
             <div className="player-controls">
               <button className="control-button">
@@ -252,13 +312,25 @@ function App() {
                 {favorites.some(fav => fav.id === selectedChannel.id) ? '❤️' : '🤍'}
               </button>
             </div>
+            <div className="stream-info">
+              <p><strong>Category:</strong> {selectedChannel.category}</p>
+              {selectedChannel.country && (
+                <p><strong>Country:</strong> {selectedChannel.country}</p>
+              )}
+              {selectedChannel.language && (
+                <p><strong>Language:</strong> {selectedChannel.language}</p>
+              )}
+              {selectedChannel.stream && (
+                <p><strong>Stream:</strong> M3U8 Live Stream</p>
+              )}
+            </div>
           </div>
         )}
       </main>
 
       <footer className="app-footer">
         <div className="footer-content">
-          Entwickelt für Rabbit R1 | R1-create.js & tv.garden API
+          Entwickelt für Rabbit R1 | TVGarden API Integration
         </div>
       </footer>
     </div>
