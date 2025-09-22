@@ -36,7 +36,7 @@ body {
 .r1-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   padding: 4px 6px;
   background: rgba(0, 0, 0, 0.15);
   backdrop-filter: blur(10px);
@@ -66,6 +66,7 @@ body {
   display: inline-block;
 }
 
+/* Buttons */
 .r1-btn {
   background: rgba(255, 255, 255, 0.15);
   border: 1px solid rgba(255, 255, 255, 0.25);
@@ -93,6 +94,27 @@ body {
   transform: translateY(-1px);
 }
 
+.r1-back-btn {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 4px;
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  margin-right: 8px;
+}
+
+.r1-back-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-1px);
+}
+
 /* Countries section */
 .r1-countries {
   flex: 1;
@@ -113,6 +135,7 @@ body {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 6px;
+  flex: 1;
 }
 
 .r1-country-btn {
@@ -124,6 +147,7 @@ body {
   cursor: pointer;
   transition: all 0.15s ease;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
@@ -131,13 +155,23 @@ body {
   font-weight: 500;
   text-transform: lowercase;
   padding: 8px 4px;
-  min-height: 32px;
+  min-height: 40px;
 }
 
 .r1-country-btn:hover {
   background: rgba(255, 255, 255, 0.2);
   transform: translateY(-1px);
   border-color: rgba(255, 255, 255, 0.25);
+}
+
+.country-emoji {
+  font-size: 16px;
+  margin-bottom: 2px;
+}
+
+.country-name {
+  font-size: 8px;
+  text-transform: lowercase;
 }
 
 /* Channels section */
@@ -149,6 +183,8 @@ body {
 }
 
 .r1-channels-header {
+  display: flex;
+  align-items: center;
   font-size: 10px;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.9);
@@ -176,6 +212,7 @@ body {
   gap: 3px;
   height: 165px;
   overflow: hidden;
+  flex: 1;
 }
 
 .r1-channel-btn {
@@ -224,7 +261,7 @@ body {
   padding: 6px 0;
 }
 
-.r1-load-more-btn {
+.r1-more-tv-btn {
   background: rgba(255, 255, 255, 0.15);
   border: 1px solid rgba(255, 255, 255, 0.25);
   border-radius: 4px;
@@ -238,7 +275,7 @@ body {
   height: 22px;
 }
 
-.r1-load-more-btn:hover:not(:disabled) {
+.r1-more-tv-btn:hover:not(:disabled) {
   background: rgba(255, 255, 255, 0.25);
   border-color: rgba(255, 255, 255, 0.35);
   transform: translateY(-1px);
@@ -251,25 +288,23 @@ body {
   flex-direction: column;
 }
 
-.r1-player-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 4px 6px;
-  background: rgba(0, 0, 0, 0.15);
-  backdrop-filter: blur(10px);
-  height: 24px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  font-size: 9px;
-  font-weight: 600;
-  text-transform: lowercase;
-}
-
 .r1-player {
   flex: 1;
   background: #000;
   position: relative;
   overflow: hidden;
+  width: 240px;
+  height: 230px;
+  transition: all 0.3s ease;
+}
+
+/* Rotation effect */
+.r1-player.rotated {
+  transform: rotate(90deg);
+  width: 282px;
+  height: 282px;
+  margin-left: -21px;
+  margin-top: -26px;
 }
 
 .r1-video {
@@ -279,47 +314,76 @@ body {
   object-fit: contain;
 }
 
-/* Software back button */
-.r1-software-back-btn {
+/* Player controls */
+.r1-player-controls {
   position: absolute;
-  top: 8px;
-  left: 8px;
-  z-index: 1000;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 4px;
+  z-index: 100;
+}
+
+.r1-control-btn {
   background: rgba(0, 0, 0, 0.7);
   color: white;
-  border: none;
-  padding: 6px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 4px;
+  padding: 4px 8px;
   cursor: pointer;
   font-size: 12px;
   font-weight: 600;
-}
-
-/* More TV button */
-.r1-more-tv-btn {
-  background: rgba(255, 255, 255, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  border-radius: 4px;
-  color: white;
-  font-size: 8px;
-  font-weight: 600;
-  padding: 2px 6px;
-  cursor: pointer;
   transition: all 0.15s ease;
-  text-transform: lowercase;
-  height: 16px;
+  min-width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
+  justify-content: center;
 }
 
-.r1-more-tv-btn:hover {
-  background: rgba(255, 255, 255, 0.25);
-  border-color: rgba(255, 255, 255, 0.35);
+.r1-control-btn:hover {
+  background: rgba(0, 0, 0, 0.9);
+  border-color: rgba(255, 255, 255, 0.5);
   transform: translateY(-1px);
 }
 
-/* Error state */
-.player-error {
+.r1-control-btn.back {
+  background: rgba(255, 107, 53, 0.9);
+}
+
+.r1-control-btn.rotate {
+  background: rgba(0, 150, 255, 0.9);
+}
+
+.r1-control-btn.fullscreen {
+  background: rgba(50, 200, 50, 0.9);
+}
+
+/* Exit fullscreen button */
+.r1-exit-fullscreen {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 600;
+  z-index: 200;
+  transition: all 0.15s ease;
+}
+
+.r1-exit-fullscreen:hover {
+  background: rgba(0, 0, 0, 0.9);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+/* Error states */
+.r1-player-error {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -331,6 +395,7 @@ body {
   font-size: 10px;
   padding: 12px;
   text-transform: lowercase;
+  background: rgba(0, 0, 0, 0.8);
 }
 
 /* Responsive - center on larger screens */
