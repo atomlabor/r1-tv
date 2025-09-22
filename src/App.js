@@ -134,7 +134,7 @@ function App() {
     }
   };
   
-  // Load next 12 channels from the same country JSON
+  // Load next 12 channels from the same country JSON - PAGE VIEW (replace, not add)
   const loadMoreChannels = async () => {
     if (!selectedCountry || !hasMoreChannels || loading) return;
     
@@ -145,15 +145,15 @@ function App() {
       const nextPage = currentPage + 1;
       const startIndex = nextPage * 12;
       
-      // Process next 12 channels from already loaded data
+      // Process next 12 channels from already loaded data - REPLACE current channels
       const nextPageChannels = processChannels(allCountryChannels, startIndex, 12);
       
       if (nextPageChannels.length === 0) {
         setError('no more channels available');
         setHasMoreChannels(false);
       } else {
-        // Add next page channels to existing ones
-        setChannels(prevChannels => [...prevChannels, ...nextPageChannels]);
+        // REPLACE channels instead of adding (page view)
+        setChannels(nextPageChannels);
         setCurrentPage(nextPage);
         
         // Check if even more channels are available
@@ -264,7 +264,7 @@ function App() {
           {/* Page indicator */}
           {channels.length > 0 && (
             <div className="r1-page-info">
-              {channels.length} Kanäle{hasMoreChannels ? ' (mehr verfügbar)' : ''}
+              Seite {currentPage + 1} • {channels.length} Kanäle{hasMoreChannels ? ' (mehr verfügbar)' : ''}
             </div>
           )}
         </div>
