@@ -1,0 +1,229 @@
+/* Web-Responsive Styles for R1 TV */
+
+/* PWA Optimizations */
+@media (display-mode: standalone) {
+  .app {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* Web-specific responsive breakpoints */
+@media (min-width: 1200px) {
+  .app-main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px;
+  }
+  
+  .channel-list {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  
+  .channels-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1199px) {
+  .app-main {
+    padding: 30px;
+  }
+  
+  .channels-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+  }
+  
+  .video-player {
+    max-width: 90vw;
+    max-height: 70vh;
+  }
+}
+
+@media (max-width: 767px) {
+  .app-header {
+    padding: 15px;
+    font-size: 1.3rem;
+  }
+  
+  .channels-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  
+  .channel-item {
+    min-height: 80px;
+  }
+  
+  .video-player {
+    width: 100vw;
+    height: 50vh;
+    position: relative;
+    left: 50%;
+    right: 50%;
+    margin-left: -50vw;
+    margin-right: -50vw;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-main {
+    padding: 10px;
+  }
+  
+  .channels-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  
+  .channel-item {
+    min-height: 60px;
+  }
+  
+  .channel-button {
+    padding: 10px;
+    font-size: 0.9rem;
+  }
+  
+  .navigation-header {
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+  }
+  
+  .back-button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Touch-friendly interactions */
+@media (pointer: coarse) {
+  .btn,
+  .channel-button,
+  .favorite-button {
+    min-height: 44px;
+    min-width: 44px;
+    touch-action: manipulation;
+  }
+  
+  .channel-item {
+    min-height: 60px;
+  }
+}
+
+/* High DPI displays */
+@media (min-resolution: 2dppx) {
+  .channel-logo {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+  }
+}
+
+/* Landscape orientation on mobile */
+@media (orientation: landscape) and (max-height: 500px) {
+  .app-header {
+    padding: 8px 15px;
+    font-size: 1.1rem;
+  }
+  
+  .app-main {
+    padding: 15px;
+  }
+  
+  .video-player {
+    height: 80vh;
+  }
+  
+  .navigation-header {
+    padding: 8px 0;
+  }
+}
+
+/* Dark mode preference */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: #000000;
+    --bg-secondary: #1a1a1a;
+    --text-primary: #ffffff;
+    --text-secondary: #cccccc;
+  }
+}
+
+/* Light mode (for users who prefer it) */
+@media (prefers-color-scheme: light) {
+  .app {
+    background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+    color: #333333;
+  }
+  
+  .app-header,
+  .app-footer {
+    background: rgba(255, 255, 255, 0.9);
+    color: #333333;
+    border-color: rgba(0, 0, 0, 0.1);
+  }
+  
+  .btn-secondary {
+    background: rgba(0, 0, 0, 0.1);
+    color: #333333;
+  }
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  .loading::after {
+    animation: none;
+  }
+}
+
+/* Print styles */
+@media print {
+  .app {
+    background: white !important;
+    color: black !important;
+  }
+  
+  .app-header,
+  .app-footer,
+  .video-player,
+  .btn {
+    display: none !important;
+  }
+  
+  .channel-list {
+    break-inside: avoid;
+  }
+}
+
+/* Focus management for keyboard users */
+@media (prefers-reduced-motion: no-preference) {
+  :focus-visible {
+    transition: outline-offset 0.2s ease;
+  }
+}
+
+/* Container queries (for modern browsers) */
+@container (min-width: 600px) {
+  .channels-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@container (min-width: 900px) {
+  .channels-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
