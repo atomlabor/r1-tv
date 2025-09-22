@@ -1,97 +1,57 @@
 import React, { useState, useEffect } from 'react';
 import './styles/App.css';
+
 /**
- * R1-TV - Enhanced Country/Channel Selector with Category Tabs & TVGarden Integration
- * Content area: 240x254px, Top offset: 28px, Viewport: 240x282px
- * Features: Country selection, channel categories, direct player launch
+ * TVGarden RAW Integration - Minimal Weather-Style Button UI
+ * Direct channel loading from TVGarden RAW API with instant player
  */
 function App() {
   const [currentView, setCurrentView] = useState('countries');
   const [selectedCountry, setSelectedCountry] = useState(null);
   const [channels, setChannels] = useState([]);
   const [selectedChannel, setSelectedChannel] = useState(null);
-  const [selectedCategory, setSelectedCategory] = useState('All');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Popular countries for TV streaming
+  // Country codes for TVGarden RAW API
   const countries = [
-    { code: 'US', name: 'United States' },
-    { code: 'GB', name: 'United Kingdom' },
-    { code: 'DE', name: 'Germany' },
-    { code: 'FR', name: 'France' },
-    { code: 'ES', name: 'Spain' },
-    { code: 'IT', name: 'Italy' },
-    { code: 'CA', name: 'Canada' },
-    { code: 'AU', name: 'Australia' },
-    { code: 'JP', name: 'Japan' },
-    { code: 'KR', name: 'South Korea' },
-    { code: 'BR', name: 'Brazil' },
-    { code: 'MX', name: 'Mexico' }
+    { code: 'us', name: 'United States', flag: '🇺🇸' },
+    { code: 'gb', name: 'United Kingdom', flag: '🇬🇧' },
+    { code: 'de', name: 'Germany', flag: '🇩🇪' },
+    { code: 'fr', name: 'France', flag: '🇫🇷' },
+    { code: 'es', name: 'Spain', flag: '🇪🇸' },
+    { code: 'it', name: 'Italy', flag: '🇮🇹' },
+    { code: 'ca', name: 'Canada', flag: '🇨🇦' },
+    { code: 'au', name: 'Australia', flag: '🇦🇺' },
+    { code: 'jp', name: 'Japan', flag: '🇯🇵' },
+    { code: 'kr', name: 'South Korea', flag: '🇰🇷' },
+    { code: 'br', name: 'Brazil', flag: '🇧🇷' },
+    { code: 'mx', name: 'Mexico', flag: '🇲🇽' }
   ];
 
-  // Channel categories
-  const categories = ['All', 'News', 'Sports', 'Entertainment', 'Music', 'Kids', 'Documentary', 'Movies', 'General'];
-
-  // Category mapping for better classification
-  const categoryMapping = {
-    'news': 'News',
-    'sport': 'Sports',
-    'sports': 'Sports',
-    'entertainment': 'Entertainment',
-    'music': 'Music',
-    'kids': 'Kids',
-    'children': 'Kids',
-    'documentary': 'Documentary',
-    'movies': 'Movies',
-    'movie': 'Movies',
-    'general': 'General'
-  };
-
-  const categorizeChannel = (category) => {
-    if (!category) return 'General';
-    const lowerCategory = category.toLowerCase();
-    
-    for (const [key, value] of Object.entries(categoryMapping)) {
-      if (lowerCategory.includes(key)) {
-        return value;
-      }
-    }
-    return 'General';
-  };
-
-  // useEffect for handling state changes when selectedCountry changes
-  useEffect(() => {
-    if (selectedCountry && currentView === 'channels') {
-      loadChannels(selectedCountry.code);
-    }
-  }, [selectedCountry, currentView]);
-
+  // Load channels directly from TVGarden RAW API
   const loadChannels = async (countryCode) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`https://iptv-org.github.io/api/countries/${countryCode.toLowerCase()}.json`);
+      const response = await fetch(`https://raw.githubusercontent.com/TVGarden/tv-garden-channel-list/main/channels/raw/countries/${countryCode}.json`);
       if (!response.ok) throw new Error('Failed to load channels');
       const data = await response.json();
       
-      // Filter for working streams with better categorization
+      // Filter for m3u8 streams only
       const validChannels = data
-        .filter(ch => ch.url && (ch.url.includes('.m3u8') || ch.url.includes('http')))
+        .filter(ch => ch.url && ch.url.includes('.m3u8'))
         .map((ch, idx) => ({
           id: `${countryCode}_${idx}`,
           name: ch.name || 'Unknown Channel',
           url: ch.url,
-          category: categorizeChannel(ch.category),
-          logo: ch.logo || '',
-          originalCategory: ch.category || 'General'
+          logo: ch.logo || ''
         }))
-        .slice(0, 50); // Increased limit for better variety
+        .slice(0, 20); // Limit for performance
       
       setChannels(validChannels);
-      setSelectedCategory('All');
     } catch (err) {
-      setError(err.message);
+      setError(`Could not load ${countryCode.toUpperCase()} channels`);
       setChannels([]);
     } finally {
       setLoading(false);
@@ -100,7 +60,8 @@ function App() {
 
   const selectCountry = (country) => {
     setSelectedCountry(country);
-    setCurrentView('channels'); // Auto switch to channels state
+    setCurrentView('channels');
+    loadChannels(country.code);
   };
 
   const selectChannel = (channel) => {
@@ -116,144 +77,95 @@ function App() {
       setCurrentView('countries');
       setSelectedCountry(null);
       setChannels([]);
-      setSelectedCategory('All');
     }
   };
 
-  // Filter channels by selected category
-  const filteredChannels = selectedCategory === 'All' 
-    ? channels 
-    : channels.filter(channel => channel.category === selectedCategory);
-
-  // Get available categories from current channels
-  const availableCategories = ['All', ...new Set(channels.map(ch => ch.category))].filter(cat => 
-    cat === 'All' || channels.some(ch => ch.category === cat)
-  );
-
   return (
-    <div className="viewport">
-      <div className="status-offset"></div>
-      
-      {/* Country Selection View */}
+    <div className="app">
+      {/* Country Selection */}
       {currentView === 'countries' && (
-        <div className="pane">
-          <header className="topbar">
-            <div className="brand">R1 TV</div>
-            <div className="subtitle">Select Country</div>
-          </header>
-          <main className="content">
-            <div className="country-grid">
-              {countries.map(country => (
-                <li 
-                  key={country.code}
-                  className="card"
-                  onClick={() => selectCountry(country)}
-                >
-                  <div className="country-flag">{country.code}</div>
-                  <div className="country-name">{country.name}</div>
-                </li>
-              ))}
-            </div>
-          </main>
-        </div>
-      )}
-
-      {/* Channel List View with Categories */}
-      {currentView === 'channels' && (
-        <div className="pane">
-          <header className="topbar">
-            <button className="btn-back" onClick={goBack}>←</button>
-            <div className="brand">{selectedCountry?.name}</div>
-          </header>
-          
-          {/* Category Tabs */}
-          <div className="category-tabs">
-            {availableCategories.map(category => (
+        <div className="weather-container">
+          <h1 className="weather-title">R1 TV</h1>
+          <div className="weather-subtitle">Select Country</div>
+          <div className="weather-grid">
+            {countries.map(country => (
               <button
-                key={category}
-                className={`category-tab ${selectedCategory === category ? 'active' : ''}`}
-                onClick={() => setSelectedCategory(category)}
+                key={country.code}
+                className="weather-button"
+                onClick={() => selectCountry(country)}
               >
-                {category}
+                <div className="weather-icon">{country.flag}</div>
+                <div className="weather-code">{country.code.toUpperCase()}</div>
+                <div className="weather-name">{country.name}</div>
               </button>
             ))}
           </div>
-
-          <main className="content">
-            {loading && <div className="loading">Loading channels...</div>}
-            {error && (
-              <div className="error">
-                {error}
-                <button onClick={() => loadChannels(selectedCountry.code)}>Retry</button>
-              </div>
-            )}
-            {!loading && !error && (
-              <div className="channel-grid">
-                {filteredChannels.map(channel => (
-                  <div
-                    key={channel.id}
-                    className="channel-card"
-                    onClick={() => selectChannel(channel)}
-                  >
-                    <div className="channel-header">
-                      {channel.logo && (
-                        <img 
-                          src={channel.logo} 
-                          alt={channel.name}
-                          className="channel-logo"
-                          onError={(e) => { e.target.style.display = 'none'; }}
-                        />
-                      )}
-                      <div className="channel-name">{channel.name}</div>
-                    </div>
-                    <div className="channel-info">
-                      <span className="channel-category">{channel.category}</span>
-                      <button className="play-button">▶</button>
-                    </div>
-                  </div>
-                ))}
-                {filteredChannels.length === 0 && (
-                  <div className="no-channels">
-                    {selectedCategory === 'All' 
-                      ? 'No channels available' 
-                      : `No channels in ${selectedCategory} category`
-                    }
-                  </div>
-                )}
-              </div>
-            )}
-          </main>
         </div>
       )}
 
-      {/* Video Player View */}
-      {currentView === 'player' && selectedChannel && (
-        <div className="pane">
-          <header className="topbar">
-            <button className="btn-back" onClick={goBack}>←</button>
-            <div className="brand truncate" title={selectedChannel.name}>
-              {selectedChannel.name}
-            </div>
-            <div className="channel-category-badge">{selectedChannel.category}</div>
-          </header>
-          <main className="content player-content">
-            <div className="player-wrapper">
-              <video 
-                controls 
-                autoPlay
-                className="video-player"
-                src={selectedChannel.url}
-                poster={selectedChannel.logo}
+      {/* Channel List */}
+      {currentView === 'channels' && (
+        <div className="weather-container">
+          <div className="weather-header">
+            <button className="weather-back" onClick={goBack}>←</button>
+            <h1 className="weather-title">{selectedCountry?.flag} {selectedCountry?.name}</h1>
+          </div>
+          
+          {loading && <div className="weather-loading">Loading channels...</div>}
+          
+          {error && (
+            <div className="weather-error">
+              {error}
+              <button 
+                className="weather-retry" 
+                onClick={() => loadChannels(selectedCountry.code)}
               >
-                Your browser does not support the video tag.
-              </video>
-              <div className="player-info">
-                {selectedChannel.name}
-                Category: {selectedChannel.category}
-                Country: {selectedCountry?.name}
-              </div>
+                Retry
+              </button>
             </div>
-          </main>
+          )}
+          
+          {!loading && !error && (
+            <div className="weather-grid">
+              {channels.map(channel => (
+                <button
+                  key={channel.id}
+                  className="weather-button channel-button"
+                  onClick={() => selectChannel(channel)}
+                >
+                  <div className="weather-icon">📺</div>
+                  <div className="weather-name channel-name">{channel.name}</div>
+                  <div className="weather-code">▶ PLAY</div>
+                </button>
+              ))}
+              {channels.length === 0 && (
+                <div className="weather-empty">No channels available</div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Video Player */}
+      {currentView === 'player' && selectedChannel && (
+        <div className="player-container">
+          <div className="player-header">
+            <button className="weather-back" onClick={goBack}>←</button>
+            <div className="player-info">
+              <div className="player-title">{selectedChannel.name}</div>
+              <div className="player-country">{selectedCountry?.flag} {selectedCountry?.name}</div>
+            </div>
+          </div>
+          <div className="player-wrapper">
+            <video
+              controls
+              autoPlay
+              className="video-player"
+              src={selectedChannel.url}
+            >
+              Your browser does not support the video tag.
+            </video>
+          </div>
         </div>
       )}
     </div>
