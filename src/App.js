@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import './styles/App.css';
-
 /**
  * R1-TV - Enhanced Country/Channel Selector with Category Tabs & TVGarden Integration
  * Content area: 240x254px, Top offset: 28px, Viewport: 240x282px
@@ -61,6 +60,13 @@ function App() {
     return 'General';
   };
 
+  // useEffect for handling state changes when selectedCountry changes
+  useEffect(() => {
+    if (selectedCountry && currentView === 'channels') {
+      loadChannels(selectedCountry.code);
+    }
+  }, [selectedCountry, currentView]);
+
   const loadChannels = async (countryCode) => {
     setLoading(true);
     setError(null);
@@ -84,7 +90,6 @@ function App() {
       
       setChannels(validChannels);
       setSelectedCategory('All');
-      setCurrentView('channels');
     } catch (err) {
       setError(err.message);
       setChannels([]);
@@ -95,7 +100,7 @@ function App() {
 
   const selectCountry = (country) => {
     setSelectedCountry(country);
-    loadChannels(country.code);
+    setCurrentView('channels'); // Auto switch to channels state
   };
 
   const selectChannel = (channel) => {
@@ -139,14 +144,14 @@ function App() {
           <main className="content">
             <div className="country-grid">
               {countries.map(country => (
-                <button
+                <li 
                   key={country.code}
-                  className="country-card"
+                  className="card"
                   onClick={() => selectCountry(country)}
                 >
                   <div className="country-flag">{country.code}</div>
                   <div className="country-name">{country.name}</div>
-                </button>
+                </li>
               ))}
             </div>
           </main>
@@ -233,7 +238,7 @@ function App() {
           </header>
           <main className="content player-content">
             <div className="player-wrapper">
-              <video
+              <video 
                 controls 
                 autoPlay
                 className="video-player"
@@ -243,9 +248,9 @@ function App() {
                 Your browser does not support the video tag.
               </video>
               <div className="player-info">
-                <h3>{selectedChannel.name}</h3>
-                <p>Category: {selectedChannel.category}</p>
-                <p>Country: {selectedCountry?.name}</p>
+                {selectedChannel.name}
+                Category: {selectedChannel.category}
+                Country: {selectedCountry?.name}
               </div>
             </div>
           </main>
