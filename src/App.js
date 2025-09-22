@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import './App.css';
+import './styles/App.css';
 
 function App() {
   const [channels, setChannels] = useState([]);
@@ -143,7 +143,15 @@ function App() {
       {currentView === 'channels' && (
         <div className="r1-pane">
           <header className="r1-header">
-            <img src="/r1-tv.png" alt="r1 tv logo" style={{height: '18px', marginRight: '8px', verticalAlign: 'middle'}} />
+            <img 
+              src="/r1-tv.png" 
+              alt="r1 tv logo" 
+              style={{
+                height: '24px', 
+                verticalAlign: 'middle', 
+                marginRight: '8px'
+              }} 
+            />
             <div className="r1-title">r1.tv</div>
           </header>
           <div className="r1-grid">
@@ -174,7 +182,7 @@ function App() {
             </button>
             {shouldRenderFullscreen && (
               <>
-                <button className="r1-more-tv-btn" style={{marginLeft: ''}} onClick={toggleFullscreen} title="Toggle fullscreen">
+                <button className="r1-more-tv-btn" onClick={toggleFullscreen} style={{marginLeft: '8px'}} title="Toggle fullscreen">
                   fullscreen
                 </button>
               </>
