@@ -2,7 +2,7 @@
   "name": "r1-tv",
   "version": "1.0.0",
   "homepage": "https://atomlabor.github.io/r1-tv",
-  "description": "TV-App für Rabbit R1 mit Länderauswahl, Senderliste, Player und Favoriten",
+  "description": "TV app for Rabbit R1 with country selection, channel list, player and favorites functionality",
   "main": "src/index.js",
   "scripts": {
     "start": "react-scripts start",
@@ -17,7 +17,10 @@
     "tv",
     "streaming",
     "react",
-    "tv-garden"
+    "tv-garden",
+    "television",
+    "channels",
+    "favorites"
   ],
   "author": "atomlabor",
   "license": "MIT",
