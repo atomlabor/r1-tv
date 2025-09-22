@@ -30,122 +30,134 @@ const countryFlags = {
 };
 
 /**
- * CountrySelector - Komponente für die Auswahl verschiedener Länder
- * Lädt verfügbare Länder mit TV-Kanälen aus der tv-garden-channel-list API
+ * CountrySelector - Modern UI component for selecting countries with TV channels
+ * Loads available countries from tv-garden-channel-list API
+ * Features dark mode design optimized for Rabbit R1 display
  */
 const CountrySelector = ({ onCountrySelect, selectedCountry }) => {
   const [countries, setCountries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
-    const fetchCountries = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        
-        // Lade Länder-Metadaten von tv-garden-channel-list
-        const response = await fetch(
-          'https://raw.githubusercontent.com/TVGarden/tv-garden-channel-list/main/channels/raw/countries_metadata.json'
-        );
-        
-        if (!response.ok) {
-          throw new Error('Failed to fetch countries metadata');
-        }
-        
-        const countriesData = await response.json();
-        
-        // Filtere nur Länder mit verfügbaren Kanälen
-        const availableCountries = Object.entries(countriesData)
-          .filter(([code, data]) => data.hasChannels)
-          .map(([code, data]) => ({
-            code: code.toUpperCase(),
-            name: data.country,
-            flag: countryFlags[code.toUpperCase()] || '🏳️',
-            capital: data.capital,
-            timeZone: data.timeZone
-          }))
-          .sort((a, b) => a.name.localeCompare(b.name)); // Alphabetisch sortieren
-        
-        setCountries(availableCountries);
-      } catch (error) {
-        console.error('Fehler beim Laden der Länder:', error);
-        setError(error.message);
-        
-        // Fallback: Einige wichtige Länder
-        const fallbackCountries = [
-          { code: 'DE', name: 'Deutschland', flag: '🇩🇪' },
-          { code: 'US', name: 'United States', flag: '🇺🇸' },
-          { code: 'UK', name: 'United Kingdom', flag: '🇬🇧' },
-          { code: 'FR', name: 'France', flag: '🇫🇷' },
-          { code: 'IT', name: 'Italy', flag: '🇮🇹' },
-          { code: 'ES', name: 'Spain', flag: '🇪🇸' }
-        ];
-        setCountries(fallbackCountries);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchCountries();
   }, []);
 
-  const handleCountryClick = (country) => {
-    if (onCountrySelect) {
-      onCountrySelect(country);
+  const fetchCountries = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const response = await fetch('https://tv-garden-channel-list.vercel.app/api/countries');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      // Sort countries alphabetically
+      const sortedCountries = data.sort((a, b) => a.name.localeCompare(b.name));
+      setCountries(sortedCountries);
+    } catch (err) {
+      console.error('Error fetching countries:', err);
+      setError('Fehler beim Laden der Länder');
+    } finally {
+      setLoading(false);
     }
   };
 
+  const handleCountryClick = (country) => {
+    onCountrySelect(country);
+  };
+
+  const filteredCountries = countries.filter(country =>
+    country.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    country.code.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   if (loading) {
     return (
-      <div className="country-selector loading">
-        <h3>Länder werden geladen...</h3>
-        <div className="loading-spinner"></div>
+      <div className="country-selector">
+        <div className="header">
+          <h1 className="title">TV Kanäle</h1>
+          <p className="subtitle">Lade verfügbare Länder...</p>
+        </div>
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+        </div>
       </div>
     );
   }
 
-  if (error && countries.length === 0) {
+  if (error) {
     return (
-      <div className="country-selector error">
-        <h3>Fehler beim Laden der Länder</h3>
-        <p>{error}</p>
-        <button onClick={() => window.location.reload()}>
-          Erneut versuchen
-        </button>
+      <div className="country-selector">
+        <div className="header">
+          <h1 className="title">TV Kanäle</h1>
+          <p className="subtitle">Fehler beim Laden</p>
+        </div>
+        <div className="error-container">
+          <div className="error-card">
+            <span className="error-icon">⚠️</span>
+            <p className="error-message">{error}</p>
+            <button className="retry-button" onClick={fetchCountries}>
+              Erneut versuchen
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="country-selector">
-      <div className="selector-header">
-        <h3>Land auswählen</h3>
-        <div className="country-count">
-          {countries.length} Länder mit TV-Kanälen verfügbar
-        </div>
-        {error && (
-          <div className="warning">
-            ⚠️ Fallback-Daten werden verwendet
-          </div>
-        )}
+      <div className="header">
+        <h1 className="title">TV Kanäle</h1>
+        <p className="subtitle">{selectedCountry ? `${selectedCountry.name} ausgewählt` : 'Land auswählen'}</p>
       </div>
-      
+
+      <div className="search-container">
+        <div className="search-card">
+          <span className="search-icon">🔍</span>
+          <input
+            type="text"
+            placeholder="Land suchen..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="search-input"
+          />
+        </div>
+      </div>
+
       <div className="countries-grid">
-        {countries.map((country) => (
-          <button
-            key={country.code}
-            className={`country-item ${
-              selectedCountry?.code === country.code ? 'selected' : ''
-            }`}
-            onClick={() => handleCountryClick(country)}
-            title={`${country.name}${country.capital ? ` - ${country.capital}` : ''}`}
-          >
-            <span className="flag">{country.flag}</span>
-            <span className="name">{country.name}</span>
-            <span className="code">{country.code}</span>
-          </button>
-        ))}
+        {filteredCountries.length === 0 ? (
+          <div className="no-results">
+            <span className="no-results-icon">🌍</span>
+            <p>Keine Länder gefunden</p>
+          </div>
+        ) : (
+          filteredCountries.map((country) => (
+            <div
+              key={country.code}
+              className={`country-card ${
+                selectedCountry?.code === country.code ? 'selected' : ''
+              }`}
+              onClick={() => handleCountryClick(country)}
+            >
+              <div className="country-flag">
+                {countryFlags[country.code] || '🏳️'}
+              </div>
+              <div className="country-info">
+                <h3 className="country-name">{country.name}</h3>
+                <p className="country-code">{country.code}</p>
+                <p className="country-channels">
+                  {country.channelCount || 0} Kanäle
+                </p>
+              </div>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );
