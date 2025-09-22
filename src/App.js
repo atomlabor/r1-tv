@@ -110,140 +110,143 @@ function App() {
   const hasMoreChannels = channels.length > visibleChannels.length;
 
   return (
-    <div className="r1-app">
-      <header className="r1-header">
-        <div className="r1-header-content">
-          <img 
-            src="https://github.com/atomlabor/r1-tv/blob/main/r1-tv.png?raw=true" 
-            alt="r1 tv logo" 
-            className="r1-logo"
-          />
-          <h1 className="r1-title">r1 tv</h1>
-        </div>
-      </header>
-      
-      {!selectedCountry ? (
-        <div className="r1-countries">
-          <div className="r1-section-title">choose country</div>
-          <div className="r1-country-grid">
-            {countries.map((country) => (
-              <button
-                key={country.code}
-                className="r1-country-btn"
-                onClick={() => handleCountrySelect(country)}
-              >
-                <div className="country-emoji">{country.emoji}</div>
-                <div className="country-name">{country.name}</div>
-              </button>
-            ))}
+    <div className="viewport">
+      <div className="status-bar" />
+      <div className="r1-app">
+        <header className="r1-header">
+          <div className="r1-header-content">
+            <img 
+              src="https://github.com/atomlabor/r1-tv/blob/main/r1-tv.png?raw=true" 
+              alt="r1 tv logo" 
+              className="r1-logo"
+            />
+            <h1 className="r1-title">r1 tv</h1>
           </div>
-        </div>
-      ) : !selectedChannel ? (
-        <div className="r1-channels">
-          <div className="r1-channels-header">
-            <button className="r1-back-btn" onClick={goBack}>←</button>
-            <span>{selectedCountry.name} channels</span>
-          </div>
-          
-          {loading && channels.length === 0 && (
-            <div className="r1-loading">loading channels...</div>
-          )}
-          
-          {error && (
-            <div className="r1-error">
-              {error}
-              <button className="r1-btn" onClick={() => setSelectedCountry(null)}>
-                ← back to countries
-              </button>
+        </header>
+        
+        {!selectedCountry ? (
+          <div className="r1-countries">
+            <div className="r1-section-title">choose country</div>
+            <div className="r1-country-grid">
+              {countries.map((country) => (
+                <button
+                  key={country.code}
+                  className="r1-country-btn"
+                  onClick={() => handleCountrySelect(country)}
+                >
+                  <div className="country-emoji">{country.emoji}</div>
+                  <div className="country-name">{country.name}</div>
+                </button>
+              ))}
             </div>
-          )}
-          
-          {visibleChannels.length > 0 && (
-            <>
-              <div className="r1-channel-grid">
-                {visibleChannels.map((channel, index) => (
-                  <button
-                    key={`${channel.id || index}-${channel.name}`}
-                    className="r1-channel-btn"
-                    onClick={() => setSelectedChannel(channel)}
-                    title={channel.name}
-                  >
-                    <div className="r1-channel-name">{channel.name}</div>
-                  </button>
-                ))}
-              </div>
-              
-              {hasMoreChannels && (
-                <div className="r1-load-more">
-                  <button 
-                    className="r1-more-tv-btn" 
-                    onClick={loadMoreChannels}
-                    disabled={loading}
-                  >
-                    {loading ? 'loading...' : 'more tv'}
-                  </button>
-                </div>
-              )}
-            </>
-          )}
-        </div>
-      ) : (
-        <div className="r1-player-container">
-          <div 
-            className={`r1-player ${videoRotation === 90 ? 'rotated' : ''}`} 
-            ref={playerRef}
-          >
-            {/* Player controls */}
-            <div className="r1-player-controls">
-              <button className="r1-control-btn back" onClick={goBack} title="back">
-                ←
-              </button>
-              <button className="r1-control-btn rotate" onClick={toggleRotate} title="rotate">
-                ↻
-              </button>
-              <button className="r1-control-btn fullscreen" onClick={toggleFullscreen} title="fullscreen">
-                ⛶
-              </button>
+          </div>
+        ) : !selectedChannel ? (
+          <div className="r1-channels">
+            <div className="r1-channels-header">
+              <button className="r1-back-btn" onClick={goBack}>←</button>
+              {selectedCountry.name} channels
             </div>
             
-            {/* Exit fullscreen button (only visible in fullscreen) */}
-            {isFullscreen && (
-              <button 
-                className="r1-exit-fullscreen"
-                onClick={exitFullscreen}
-                title="exit fullscreen"
-              >
-                exit
-              </button>
+            {loading && channels.length === 0 && (
+              <div className="r1-loading">loading channels...</div>
             )}
             
-            <video
-              ref={videoRef}
-              className="r1-video"
-              src={selectedChannel.url}
-              autoPlay
-              controls
-              key={selectedChannel.url}
-              onError={(e) => {
-                console.error('stream error:', e);
-                setError('stream not available');
-              }}
-              onLoadStart={() => setError(null)}
-            >
-              your browser does not support video playback
-            </video>
-            
             {error && (
-              <div className="r1-player-error">
+              <div className="r1-error">
                 {error}
-                <button className="r1-btn" onClick={goBack}>
-                  ← back to channels
+                <button className="r1-btn" onClick={() => setSelectedCountry(null)}>
+                  ← back to countries
                 </button>
               </div>
             )}
+            
+            {visibleChannels.length > 0 && (
+              <>
+                <div className="r1-channel-grid">
+                  {visibleChannels.map((channel, index) => (
+                    <button
+                      key={`${channel.id || index}-${channel.name}`}
+                      className="r1-channel-btn"
+                      onClick={() => setSelectedChannel(channel)}
+                      title={channel.name}
+                    >
+                      <div className="r1-channel-name">{channel.name}</div>
+                    </button>
+                  ))}
+                </div>
+                
+                {hasMoreChannels && (
+                  <div className="r1-load-more">
+                    <button 
+                      className="r1-more-tv-btn" 
+                      onClick={loadMoreChannels}
+                      disabled={loading}
+                    >
+                      {loading ? 'loading...' : 'more tv'}
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
           </div>
-        </div>
-      )}
+        ) : (
+          <div className="r1-player-container">
+            <div 
+              className={`r1-player ${videoRotation === 90 ? 'rotated' : ''}`} 
+              ref={playerRef}
+            >
+              {/* Player controls */}
+              <div className="r1-player-controls">
+                <button className="r1-control-btn back" onClick={goBack} title="back">
+                  ←
+                </button>
+                <button className="r1-control-btn rotate" onClick={toggleRotate} title="rotate">
+                  ↻
+                </button>
+                <button className="r1-control-btn fullscreen" onClick={toggleFullscreen} title="fullscreen">
+                  ⛶
+                </button>
+              </div>
+              
+              {/* Exit fullscreen button (only visible in fullscreen) */}
+              {isFullscreen && (
+                <button 
+                  className="r1-exit-fullscreen"
+                  onClick={exitFullscreen}
+                  title="exit fullscreen"
+                >
+                  exit
+                </button>
+              )}
+              
+              <video
+                ref={videoRef}
+                className="r1-video"
+                src={selectedChannel.url}
+                autoPlay
+                controls
+                key={selectedChannel.url}
+                onError={(e) => {
+                  console.error('stream error:', e);
+                  setError('stream not available');
+                }}
+                onLoadStart={() => setError(null)}
+              >
+                your browser does not support video playback
+              </video>
+              
+              {error && (
+                <div className="r1-player-error">
+                  {error}
+                  <button className="r1-btn" onClick={goBack}>
+                    ← back to channels
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
