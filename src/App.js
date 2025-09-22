@@ -2,337 +2,198 @@ import React, { useState, useEffect } from 'react';
 import './styles/App.css';
 
 /**
- * R1-TV - Modern TV streaming app optimized for Rabbit R1 display
- * Screen: 240x254px content area, 28px status bar offset
- * Total viewport: 240x282px
- * Now integrated with TVGarden API for real channel data
+ * R1-TV - Minimalist Weather-App-inspired TV UI for Rabbit R1
+ * Content area: 240x254px, Top offset: 28px, Viewport: 240x282px
+ * Uses TVGarden (iptv-org) JSON to load real streams for animation/news/sports
  */
 function App() {
-  const [currentView, setCurrentView] = useState('categories'); // categories, channels, player
-  const [selectedCategory, setSelectedCategory] = useState(null);
-  const [selectedChannel, setSelectedChannel] = useState(null);
-  const [favorites, setFavorites] = useState([]);
+  // Views: channels (tabs) and player
+  const [currentView, setCurrentView] = useState('channels');
+  const [activeTab, setActiveTab] = useState('animation'); // animation | news | sports
   const [channels, setChannels] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [selectedChannel, setSelectedChannel] = useState(null);
+  const [rotation, setRotation] = useState(0); // 0 or 90
 
-  // Categories with TVGarden API integration - focusing on animation, news, sports as requested
-  const categories = [
-    { id: 'animation', name: 'Animation', emoji: '🎨', apiUrl: 'https://iptv-org.github.io/api/categories/animation.json' },
-    { id: 'news', name: 'News', emoji: '📰', apiUrl: 'https://iptv-org.github.io/api/categories/news.json' },
-    { id: 'sports', name: 'Sports', emoji: '⚽', apiUrl: 'https://iptv-org.github.io/api/categories/sports.json' },
-    { id: 'comedy', name: 'Comedy', emoji: '😂' },
-    { id: 'cooking', name: 'Cooking', emoji: '👨‍🍳' },
-    { id: 'documentary', name: 'Documentary', emoji: '📚' },
-    { id: 'educational', name: 'Educational', emoji: '🎓' },
-    { id: 'entertainment', name: 'Entertainment', emoji: '🎭' },
-    { id: 'family', name: 'Family', emoji: '👨‍👩‍👧‍👦' },
-    { id: 'general', name: 'General', emoji: '📺' },
-    { id: 'kids', name: 'Kids', emoji: '🧸' },
-    { id: 'lifestyle', name: 'Lifestyle', emoji: '✨' },
-    { id: 'movies', name: 'Movies', emoji: '🎬' },
-    { id: 'music', name: 'Music', emoji: '🎵' },
-    { id: 'travel', name: 'Travel', emoji: '✈️' }
+  // TVGarden category endpoints (iptv-org)
+  const tabs = [
+    { id: 'animation', label: 'Animation', apiUrl: 'https://iptv-org.github.io/api/categories/animation.json' },
+    { id: 'news', label: 'News', apiUrl: 'https://iptv-org.github.io/api/categories/news.json' },
+    { id: 'sports', label: 'Sports', apiUrl: 'https://iptv-org.github.io/api/categories/sports.json' },
   ];
 
-  // Load channels from TVGarden API
-  const loadChannelsForCategory = async (category) => {
-    if (!category.apiUrl) {
-      // For categories without API integration, show placeholder
-      setChannels([{
-        id: 'placeholder',
-        name: `${category.name} channels coming soon`,
-        logo: category.emoji,
-        stream: null,
-        category: category.id
-      }]);
-      return;
-    }
+  useEffect(() => {
+    const tab = tabs.find(t => t.id === activeTab);
+    if (tab) loadChannels(tab);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab]);
 
+  const loadChannels = async (tab) => {
     setLoading(true);
     setError(null);
-    
     try {
-      const response = await fetch(category.apiUrl);
-      if (!response.ok) {
-        throw new Error(`Failed to load ${category.name} channels`);
-      }
-      
-      const channelData = await response.json();
-      
-      // Transform TVGarden data to our format
-      const transformedChannels = channelData
-        .filter(channel => channel.url && channel.url.includes('.m3u8')) // Only M3U8 streams
-        .slice(0, 20) // Limit to first 20 channels for performance
-        .map((channel, index) => ({
-          id: `${category.id}_${index}`,
-          name: channel.name || `${category.name} Channel ${index + 1}`,
-          logo: getChannelEmoji(channel.name, category.id),
-          stream: channel.url,
-          category: category.id,
-          country: channel.country,
-          language: channel.languages ? channel.languages.join(', ') : 'Unknown'
-        }));
-      
-      setChannels(transformedChannels);
-    } catch (err) {
-      setError(`Failed to load ${category.name} channels: ${err.message}`);
+      const res = await fetch(tab.apiUrl);
+      if (!res.ok) throw new Error('Failed to load channels');
+      const data = await res.json();
+
+      // Only include playable m3u8 streams. Normalize minimal card format.
+      const list = data
+        .filter(ch => (ch.url && ch.url.includes('.m3u8')) || (Array.isArray(ch.urls) && ch.urls.some(u => u.includes('.m3u8'))))
+        .map((ch, idx) => {
+          const url = ch.url && ch.url.includes('.m3u8')
+            ? ch.url
+            : (Array.isArray(ch.urls) ? ch.urls.find(u => u.includes('.m3u8')) : null);
+          return {
+            id: `${tab.id}_${idx}`,
+            name: (ch.name || 'Channel').replace(/[^\w\s\-.:]/g, ''), // no emojis/symbols
+            stream: url,
+            country: ch.country || '',
+            lang: Array.isArray(ch.languages) ? ch.languages.join(', ') : (ch.language || ''),
+          };
+        })
+        .filter(ch => !!ch.stream)
+        .slice(0, 24);
+
+      setChannels(list);
+    } catch (e) {
+      setError(e.message);
       setChannels([]);
     } finally {
       setLoading(false);
     }
   };
 
-  // Get appropriate emoji for channel based on name and category
-  const getChannelEmoji = (channelName, categoryId) => {
-    const name = (channelName || '').toLowerCase();
-    
-    if (categoryId === 'animation') {
-      if (name.includes('cartoon')) return '🎭';
-      if (name.includes('anime')) return '🎌';
-      if (name.includes('kids')) return '🧸';
-      return '🎨';
-    }
-    
-    if (categoryId === 'news') {
-      if (name.includes('bbc')) return '🇬🇧';
-      if (name.includes('cnn')) return '🇺🇸';
-      if (name.includes('france')) return '🇫🇷';
-      if (name.includes('deutsch') || name.includes('german')) return '🇩🇪';
-      return '📰';
-    }
-    
-    if (categoryId === 'sports') {
-      if (name.includes('football') || name.includes('soccer')) return '⚽';
-      if (name.includes('basketball')) return '🏀';
-      if (name.includes('tennis')) return '🎾';
-      if (name.includes('motor') || name.includes('racing')) return '🏎️';
-      return '⚽';
-    }
-    
-    return '📺';
-  };
-
-  const handleCategorySelect = async (category) => {
-    setSelectedCategory(category);
-    setCurrentView('channels');
-    await loadChannelsForCategory(category);
-  };
-
-  const handleChannelSelect = (channel) => {
-    if (!channel.stream) return; // Don't play placeholder channels
-    setSelectedChannel(channel);
+  const openPlayer = (ch) => {
+    setSelectedChannel(ch);
     setCurrentView('player');
   };
 
-  const toggleFavorite = (channel) => {
-    setFavorites(prev => {
-      const isFavorite = prev.some(fav => fav.id === channel.id);
-      if (isFavorite) {
-        return prev.filter(fav => fav.id !== channel.id);
-      } else {
-        return [...prev, channel];
-      }
-    });
+  const closePlayer = () => {
+    setCurrentView('channels');
+    setSelectedChannel(null);
+    setRotation(0);
   };
 
-  const goBack = () => {
-    if (currentView === 'player') {
-      setCurrentView('channels');
-    } else if (currentView === 'channels') {
-      setCurrentView('categories');
+  const toggleRotation = () => {
+    setRotation(prev => (prev === 0 ? 90 : 0));
+  };
+
+  const requestFullscreen = () => {
+    const iframe = document.getElementById('r1-player');
+    if (iframe) {
+      if (iframe.requestFullscreen) iframe.requestFullscreen();
+      else if (iframe.webkitRequestFullscreen) iframe.webkitRequestFullscreen();
+      else if (iframe.msRequestFullscreen) iframe.msRequestFullscreen();
+      // also tell the inner doc to go fullscreen
+      iframe.contentWindow && iframe.contentWindow.postMessage('fullscreen', '*');
     }
   };
 
   return (
-    <div className="app r1-optimized">
-      <header className="app-header">
-        <div className="header-content">
-          <div className="logo">
-            🐰📺 <span className="logo-text">R1-TV</span>
-          </div>
-          <div className="header-info">
-            {currentView !== 'categories' && (
-              <button className="back-button" onClick={goBack}>
-                🔙
-              </button>
-            )}
-            {favorites.length > 0 && (
-              <div className="favorites-count">
-                ❤️ {favorites.length}
-              </div>
-            )}
-          </div>
-        </div>
-      </header>
+    <div className="viewport">
+      <div className="status-offset" />
 
-      <main className="app-main">
-        {currentView === 'categories' && (
-          <div className="categories-view">
-            <h2 className="view-title">Categories</h2>
-            <p className="categories-subtitle">{categories.length} categories</p>
-            <div className="categories-grid">
-              {categories.map(category => (
+      {currentView === 'channels' && (
+        <div className="pane">
+          <header className="topbar">
+            <div className="brand">R1 TV</div>
+            <nav className="tabs" role="tablist">
+              {tabs.map(t => (
                 <button
-                  key={category.id}
-                  className="category-button"
-                  onClick={() => handleCategorySelect(category)}
+                  key={t.id}
+                  role="tab"
+                  aria-selected={activeTab === t.id}
+                  className={`tab ${activeTab === t.id ? 'active' : ''}`}
+                  onClick={() => setActiveTab(t.id)}
                 >
-                  <span className="category-emoji">{category.emoji}</span>
-                  <span className="category-name">{category.name}</span>
-                  {category.apiUrl && <span className="live-indicator">🔴 LIVE</span>}
+                  {t.label}
                 </button>
               ))}
-            </div>
-            <div className="navigation-hint">
-              Scroll: Navigate • Side Button: Select
-            </div>
-          </div>
-        )}
+            </nav>
+          </header>
 
-        {currentView === 'channels' && (
-          <div className="channels-view">
-            <h2 className="view-title">{selectedCategory?.name} Channels</h2>
-            
-            {loading && (
-              <div className="loading-state">
-                <div className="loading-spinner">⏳</div>
-                <p>Loading {selectedCategory?.name} channels...</p>
-              </div>
-            )}
-            
+          <main className="content">
+            {loading && <div className="state text-dim">Loading…</div>}
             {error && (
-              <div className="error-state">
-                <p className="error-message">❌ {error}</p>
-                <button 
-                  className="retry-button" 
-                  onClick={() => loadChannelsForCategory(selectedCategory)}
-                >
-                  🔄 Retry
-                </button>
+              <div className="state text-error">
+                {error}
+                <button className="btn-ghost" onClick={() => loadChannels(tabs.find(t => t.id === activeTab))}>Retry</button>
               </div>
             )}
-            
             {!loading && !error && (
-              <div className="channels-grid">
-                {channels.map(channel => (
-                  <div className="channel-item" key={channel.id}>
-                    <button
-                      className={`channel-button ${!channel.stream ? 'disabled' : ''}`}
-                      onClick={() => handleChannelSelect(channel)}
-                      disabled={!channel.stream}
-                    >
-                      <span className="channel-logo">{channel.logo}</span>
-                      <span className="channel-name">{channel.name}</span>
-                      {channel.stream && <span className="stream-indicator">📡</span>}
-                      {channel.country && (
-                        <span className="channel-country">{channel.country}</span>
-                      )}
-                    </button>
-                    {channel.stream && (
-                      <button
-                        className={`favorite-button ${
-                          favorites.some(fav => fav.id === channel.id) ? 'active' : ''
-                        }`}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleFavorite(channel);
-                        }}
-                      >
-                        {favorites.some(fav => fav.id === channel.id) ? '❤️' : '🤍'}
-                      </button>
-                    )}
-                  </div>
+              <div className="grid">
+                {channels.map(ch => (
+                  <button key={ch.id} className="card" onClick={() => openPlayer(ch)}>
+                    <div className="card-title">{ch.name}</div>
+                    <div className="card-meta">
+                      <span>{ch.country}</span>
+                      <span>{ch.lang}</span>
+                    </div>
+                  </button>
                 ))}
+                {channels.length === 0 && (
+                  <div className="state text-dim">No channels available</div>
+                )}
               </div>
             )}
-            
-            {!loading && !error && channels.length === 0 && (
-              <p className="no-channels">
-                No {selectedCategory?.name.toLowerCase()} channels available.
-              </p>
-            )}
-          </div>
-        )}
-
-        {currentView === 'player' && selectedChannel && (
-          <div className="player-view">
-            <h2 className="view-title">Now Playing: {selectedChannel.name}</h2>
-            <div className="video-container">
-              {selectedChannel.stream ? (
-                <iframe
-                  src={`data:text/html;charset=utf-8,
-                    <!DOCTYPE html>
-                    <html>
-                      <head>
-                        <style>
-                          body { margin: 0; padding: 0; background: black; }
-                          video { width: 100%; height: 100%; object-fit: contain; }
-                        </style>
-                      </head>
-                      <body>
-                        <video controls autoplay muted>
-                          <source src="${selectedChannel.stream}" type="application/x-mpegURL">
-                          Your browser does not support HLS video.
-                        </video>
-                      </body>
-                    </html>`}
-                  width="240"
-                  height="254"
-                  style={{ border: 'none', marginTop: '28px' }}
-                  title={selectedChannel.name}
-                  allowFullScreen
-                />
-              ) : (
-                <div className="video-placeholder">
-                  <div className="channel-display">
-                    <span className="playing-logo">{selectedChannel.logo}</span>
-                    {selectedChannel.name}
-                    <p className="stream-info">Stream not available</p>
-                  </div>
-                </div>
-              )}
-            </div>
-            <div className="player-controls">
-              <button className="control-button">
-                ⏮️
-              </button>
-              <button className="control-button play-button">
-                ▶️
-              </button>
-              <button className="control-button">
-                ⏭️
-              </button>
-              <button
-                className={`favorite-button-large ${
-                  favorites.some(fav => fav.id === selectedChannel.id) ? 'active' : ''
-                }`}
-                onClick={() => toggleFavorite(selectedChannel)}
-              >
-                {favorites.some(fav => fav.id === selectedChannel.id) ? '❤️' : '🤍'}
-              </button>
-            </div>
-            <div className="stream-info">
-              <p><strong>Category:</strong> {selectedChannel.category}</p>
-              {selectedChannel.country && (
-                <p><strong>Country:</strong> {selectedChannel.country}</p>
-              )}
-              {selectedChannel.language && (
-                <p><strong>Language:</strong> {selectedChannel.language}</p>
-              )}
-              {selectedChannel.stream && (
-                <p><strong>Stream:</strong> M3U8 Live Stream</p>
-              )}
-            </div>
-          </div>
-        )}
-      </main>
-
-      <footer className="app-footer">
-        <div className="footer-content">
-          Entwickelt für Rabbit R1 | TVGarden API Integration
+          </main>
         </div>
-      </footer>
+      )}
+
+      {currentView === 'player' && selectedChannel && (
+        <div className="pane">
+          <header className="topbar">
+            <button className="btn-ghost" onClick={closePlayer}>Back</button>
+            <div className="brand truncate" title={selectedChannel.name}>{selectedChannel.name}</div>
+            <div className="actions">
+              <button className="btn-ghost" onClick={toggleRotation}>{rotation === 0 ? 'Rotate' : 'Portrait'}</button>
+              <button className="btn-ghost" onClick={requestFullscreen}>Fullscreen</button>
+            </div>
+          </header>
+
+          <main className="content player-wrap">
+            {/* Inline minimal player page (keeps 240x254 content area) */}
+            <iframe
+              id="r1-player"
+              className={`player ${rotation === 90 ? 'rotated' : ''}`}
+              src={`data:text/html;charset=utf-8,${encodeURIComponent(`
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset=\"utf-8\" />
+    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />
+    <style>
+      html,body{margin:0;background:#000;height:100%;}
+      video{width:100%;height:100%;object-fit:contain;background:#000;}
+      .wrap{position:relative;width:240px;height:254px;}
+    </style>
+  </head>
+  <body>
+    <div class=\"wrap\">
+      <video controls autoplay playsinline>
+        <source src=\"${selectedChannel.stream}\" type=\"application/x-mpegURL\" />
+      </video>
+    </div>
+    <script>
+      window.addEventListener('message', (e)=>{
+        if(e.data==='fullscreen' && document.documentElement.requestFullscreen){
+          document.documentElement.requestFullscreen();
+        }
+      });
+    <\/script>
+  </body>
+</html>
+              `)}`}
+              width="240"
+              height="254"
+              allowFullScreen
+              frameBorder="0"
+              title={selectedChannel.name}
+            />
+          </main>
+        </div>
+      )}
     </div>
   );
 }
