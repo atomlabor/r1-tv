@@ -2,6 +2,34 @@
 
 This document describes how the R1-TV app can be used and deployed as a web application, including web access patterns, trigger systems, internationalization, and integration guidelines.
 
+## Live Demo
+
+🌐 **GitHub Pages Deployment:** https://atomlabor.github.io/r1-tv
+
+The R1-TV app is now available as a live web demo through GitHub Pages. This deployment:
+
+- ✅ **Automatically builds** from the main branch
+- ✅ **Fully functional** web version of the R1-TV app
+- ✅ **No installation required** - runs directly in modern browsers
+- ✅ **Mobile responsive** design for all devices
+- ✅ **Public access** for testing and demonstration
+
+### Accessing the Live Demo
+
+1. Navigate to https://atomlabor.github.io/r1-tv
+2. The app loads automatically with all features enabled
+3. Select a country to view available TV channels
+4. Click on any channel to start streaming
+5. Use favorites functionality to save preferred channels
+
+### Deployment Status
+
+The GitHub Pages deployment is configured to:
+- Deploy from the `main` branch root directory
+- Automatically rebuild when changes are pushed
+- Serve the application with HTTPS enabled
+- Support custom domains if needed in the future
+
 ## Web Access & Deployment
 
 ### Building for Web
@@ -124,7 +152,7 @@ webTriggers.registerTrigger('voice', async (command) => {
     };
     recognition.start();
   }
-}, 
+},
 // Fallback to text input
 (data) => {
   return createRabbitFromText(data.fallbackText);
@@ -173,7 +201,7 @@ export const useSettingsStore = defineStore('settings', {
     language: localStorage.getItem('language') || 'de',
     theme: localStorage.getItem('theme') || 'dark'
   }),
-  
+
   actions: {
     setLanguage(lang) {
       this.language = lang;
@@ -186,7 +214,7 @@ export const useSettingsStore = defineStore('settings', {
 
 ### Translation File Structure
 
-```json
+```javascript
 // src/i18n/locales/en.json
 {
   "app": {
@@ -304,14 +332,14 @@ class PluginManager {
   constructor() {
     this.plugins = new Map();
   }
-  
+
   register(name, plugin) {
     this.plugins.set(name, plugin);
     if (plugin.init) {
       plugin.init();
     }
   }
-  
+
   execute(event, data) {
     for (const [name, plugin] of this.plugins) {
       if (plugin.handle && plugin.handle[event]) {
