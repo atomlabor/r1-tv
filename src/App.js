@@ -24,7 +24,7 @@ function App() {
   // Countries with their country codes for TVGarden API
   const countries = [
     { code: 'us', name: 'usa', flag: '🇺🇸' },
-    { code: 'gb', name: 'uk', flag: '🇬🇧' },
+    { code: 'uk', name: 'uk', flag: '🇬🇧' },
     { code: 'de', name: 'de', flag: '🇩🇪' },
     { code: 'fr', name: 'fr', flag: '🇫🇷' },
     { code: 'es', name: 'es', flag: '🇪🇸' },
@@ -77,7 +77,6 @@ function App() {
       v.style.maxHeight = '100%';
     }
   };
-
   // Detect if fullscreen APIs and exit paths are available
   useEffect(() => {
     const fsAvailable = !!(
@@ -88,11 +87,9 @@ function App() {
     );
     setFullscreenSupported(fsAvailable);
   }, []);
-
   useEffect(() => {
     applyRotationStyle();
   }, [videoRotation, selectedChannel, currentView]);
-
   // Fullscreen helpers with vendor-prefixed fallbacks
   const isFullscreen = () => {
     return (
@@ -141,7 +138,6 @@ function App() {
       document.removeEventListener('mozfullscreenchange', handler);
     };
   }, []);
-
   // Process channels array into displayable format
   const processChannels = (channelData, startIndex = 0, count = 12) => {
     return channelData
@@ -236,11 +232,9 @@ function App() {
       setHasMoreChannels(false);
     }
   };
-
   // Determine if we should render fullscreen button:
   // Only if fullscreen API is supported AND we can render an on-screen Exit Fullscreen button
   const shouldRenderFullscreen = fullscreenSupported;
-
   return (
     <div className="r1-viewport">
       {/* Countries view */}
@@ -251,11 +245,7 @@ function App() {
           </header>
           <div className="r1-grid">
             {countries.map(country => (
-              <button
-                key={country.code}
-                className="r1-btn country-btn"
-                onClick={() => loadCountryChannels(country)}
-              >
+              <button key={country.code} className="r1-btn country-btn" onClick={() => loadCountryChannels(country)}>
                 <span className="flag">{country.flag}</span>
                 <span className="name">{country.name}</span>
               </button>
@@ -270,12 +260,7 @@ function App() {
             <button className="r1-back" onClick={goBack}>←</button>
             <div className="r1-title">{selectedCountry?.name}</div>
             {hasMoreChannels && (
-              <button
-                className="r1-more-tv-btn" 
-                onClick={loadMoreChannels}
-                disabled={loading}
-                title="Load 12 more TV channels for this country"
-              >
+              <button className="r1-more-tv-btn" onClick={loadMoreChannels} disabled={loading} title="Load 12 more TV channels for this country">
                 more tv
               </button>
             )}
@@ -284,10 +269,7 @@ function App() {
           {error && (
             <div className="r1-error">
               <div className="error-text">{error}</div>
-              <button
-                className="r1-btn retry-btn" 
-                onClick={() => loadCountryChannels(selectedCountry)}
-              >
+              <button className="r1-btn retry-btn" onClick={() => loadCountryChannels(selectedCountry)}>
                 retry
               </button>
             </div>
@@ -295,12 +277,7 @@ function App() {
           {!loading && !error && (
             <div className="r1-grid">
               {channels.map(channel => (
-                <button
-                  key={channel.id}
-                  className="r1-btn channel-btn"
-                  onClick={() => selectChannel(channel)}
-                  title={`${channel.originalName} • ${channel.country}`}
-                >
+                <button key={channel.id} className="r1-btn channel-btn" onClick={() => selectChannel(channel)} title={`${channel.originalName} • ${channel.country}`}>
                   <span className="name">{channel.name}</span>
                   <span className="meta">{channel.country}</span>
                   <span className="play">▶</span>
@@ -323,30 +300,16 @@ function App() {
             <div className="r1-title" title={selectedChannel.originalName}>
               {selectedChannel.name}
             </div>
-            <button
-              className="r1-rotate-btn"
-              onClick={toggleVideoRotation}
-              title="Rotate video (90°)"
-            >
+            <button className="r1-rotate-btn" onClick={toggleVideoRotation} title="Rotate video (90°)">
               ↻
             </button>
             {shouldRenderFullscreen && (
               <>
-                <button
-                  className="r1-more-tv-btn"
-                  onClick={toggleFullscreen}
-                  title="Toggle fullscreen"
-                  style={{ marginLeft: 6 }}
-                >
+                <button className="r1-more-tv-btn" onClick={toggleFullscreen} title="Toggle fullscreen" style={{ marginLeft: 6 }}>
                   fullscreen
                 </button>
                 {isFullscreen() && (
-                  <button
-                    className="r1-more-tv-btn"
-                    onClick={exitFs}
-                    title="Exit fullscreen"
-                    style={{ marginLeft: 6 }}
-                  >
+                  <button className="r1-more-tv-btn" onClick={exitFs} title="Exit fullscreen" style={{ marginLeft: 6 }}>
                     exit fullscreen
                   </button>
                 )}
@@ -354,19 +317,10 @@ function App() {
             )}
           </header>
           <div className="r1-player" ref={playerRef}>
-            <video
-              key={selectedChannel.url}
-              ref={videoRef}
-              controls
-              autoPlay
-              className="r1-video"
-              src={selectedChannel.url}
-              onError={(e) => {
+            <video key={selectedChannel.url} ref={videoRef} controls autoPlay className="r1-video" src={selectedChannel.url} onError={(e) => {
                 console.error('Stream error:', e);
                 setError('stream unavailable');
-              }}
-              onLoadStart={() => setError(null)}
-            >
+              }} onLoadStart={() => setError(null)}>
               Your browser does not support video playback
             </video>
             {error && (
