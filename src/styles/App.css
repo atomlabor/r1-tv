@@ -1,0 +1,226 @@
+/* R1 TV App Component Styles */
+
+.app {
+  /* App styles are now in index.css for global application */
+}
+
+/* Channel List Styles */
+.channel-list {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.navigation-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 30px;
+  padding: 15px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.back-button {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.back-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.channels-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.channel-item {
+  position: relative;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.channel-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+.channel-button {
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: white;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.channel-logo {
+  font-size: 2rem;
+  margin-bottom: 5px;
+}
+
+.channel-name {
+  font-weight: 600;
+}
+
+.favorite-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.7);
+  border: none;
+  border-radius: 50%;
+  width: 35px;
+  height: 35px;
+  cursor: pointer;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.favorite-button:hover {
+  background: rgba(0, 0, 0, 0.9);
+  transform: scale(1.1);
+}
+
+.favorite-button.active {
+  background: rgba(255, 107, 107, 0.8);
+}
+
+/* Video Player Styles */
+.video-player {
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.player-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding: 15px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.fullscreen-button {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1.2rem;
+  transition: background 0.3s ease;
+}
+
+.fullscreen-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.video-container {
+  background: #000000;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 20px;
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.video-placeholder {
+  text-align: center;
+  padding: 40px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.video-info {
+  font-size: 1.2rem;
+  line-height: 1.6;
+}
+
+.placeholder-text {
+  margin-top: 20px;
+  font-size: 1rem;
+  opacity: 0.8;
+}
+
+.player-controls {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  padding: 20px 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .navigation-header {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+  }
+  
+  .channels-grid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+  }
+  
+  .channel-button {
+    padding: 15px;
+    font-size: 1rem;
+  }
+  
+  .channel-logo {
+    font-size: 1.5rem;
+  }
+  
+  .video-container {
+    min-height: 250px;
+  }
+  
+  .player-header {
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .channels-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .channel-button {
+    padding: 12px;
+    font-size: 0.9rem;
+  }
+  
+  .video-container {
+    min-height: 200px;
+    border-radius: 8px;
+  }
+}
