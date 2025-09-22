@@ -143,6 +143,7 @@ function App() {
       {currentView === 'channels' && (
         <div className="r1-pane">
           <header className="r1-header">
+            <img src="/r1-tv.png" alt="r1 tv logo" style={{height: '18px', marginRight: '8px', verticalAlign: 'middle'}} />
             <div className="r1-title">r1.tv</div>
           </header>
           <div className="r1-grid">
@@ -173,7 +174,7 @@ function App() {
             </button>
             {shouldRenderFullscreen && (
               <>
-                <button className="r1-more-tv-btn" onClick={toggleFullscreen} title="Toggle fullscreen" style={{ marginLeft: 6 }}>
+                <button className="r1-more-tv-btn" style={{marginLeft: ''}} onClick={toggleFullscreen} title="Toggle fullscreen">
                   fullscreen
                 </button>
               </>
@@ -203,10 +204,19 @@ function App() {
                 ↩
               </button>
             )}
-            <video autoPlay className="r1-video" controls key={selectedChannel.url} onError={(e) => {
+            <video
+              autoPlay
+              className="r1-video"
+              controls
+              key={selectedChannel.url}
+              onError={(e) => {
                 console.error('Stream error:', e);
                 setError('stream unavailable');
-              }} onLoadStart={() => setError(null)} ref={videoRef} src={selectedChannel.url}>
+              }}
+              onLoadStart={() => setError(null)}
+              ref={videoRef}
+              src={selectedChannel.url}
+            >
               Your browser does not support video playback
             </video>
             {error && (
@@ -223,4 +233,5 @@ function App() {
     </div>
   );
 }
+
 export default App;
