@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import './styles/App.css';
 
 /**
- * r1 tv - rabbit r1 style tv player
- * 240x254px content, lowercase ui, tvgarden live streams
+ * r1 tv - rabbit r1 optimized tv player
+ * 240x254px grid, no scroll, lowercase ui, tvgarden api, direct player
  */
 function App() {
   const [currentView, setCurrentView] = useState('countries');
@@ -13,20 +13,20 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // countries with flags for tv streaming
+  // optimized countries grid for 240x254px
   const countries = [
-    { code: 'us', name: 'united states', flag: '🇺🇸' },
-    { code: 'gb', name: 'united kingdom', flag: '🇬🇧' },
-    { code: 'de', name: 'germany', flag: '🇩🇪' },
-    { code: 'fr', name: 'france', flag: '🇫🇷' },
-    { code: 'es', name: 'spain', flag: '🇪🇸' },
-    { code: 'it', name: 'italy', flag: '🇮🇹' },
-    { code: 'ca', name: 'canada', flag: '🇨🇦' },
-    { code: 'au', name: 'australia', flag: '🇦🇺' },
-    { code: 'jp', name: 'japan', flag: '🇯🇵' },
-    { code: 'kr', name: 'south korea', flag: '🇰🇷' },
-    { code: 'br', name: 'brazil', flag: '🇧🇷' },
-    { code: 'mx', name: 'mexico', flag: '🇲🇽' }
+    { code: 'us', name: 'usa', flag: '🇺🇸' },
+    { code: 'gb', name: 'uk', flag: '🇬🇧' },
+    { code: 'de', name: 'de', flag: '🇩🇪' },
+    { code: 'fr', name: 'fr', flag: '🇫🇷' },
+    { code: 'es', name: 'es', flag: '🇪🇸' },
+    { code: 'it', name: 'it', flag: '🇮🇹' },
+    { code: 'ca', name: 'ca', flag: '🇨🇦' },
+    { code: 'au', name: 'au', flag: '🇦🇺' },
+    { code: 'jp', name: 'jp', flag: '🇯🇵' },
+    { code: 'kr', name: 'kr', flag: '🇰🇷' },
+    { code: 'br', name: 'br', flag: '🇧🇷' },
+    { code: 'mx', name: 'mx', flag: '🇲🇽' }
   ];
 
   // load channels from tvgarden raw api
@@ -34,37 +34,50 @@ function App() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`https://tvgarden.vercel.app/api/channels/${countryCode}`);
+      const response = await fetch(`https://raw.githubusercontent.com/iptv-org/iptv/master/streams/${countryCode}.m3u`);
       if (!response.ok) {
-        // fallback to iptv-org api
+        // fallback to alternative api
         const fallbackResponse = await fetch(`https://iptv-org.github.io/api/countries/${countryCode}.json`);
-        if (!fallbackResponse.ok) throw new Error('no channels found');
+        if (!fallbackResponse.ok) throw new Error('no channels');
         const fallbackData = await fallbackResponse.json();
         const validChannels = fallbackData
-          .filter(ch => ch.url && (ch.url.includes('.m3u8') || ch.url.includes('http')))
+          .filter(ch => ch.url && ch.url.includes('.m3u8'))
           .map((ch, idx) => ({
             id: `${countryCode}_${idx}`,
-            name: (ch.name || 'unknown channel').toLowerCase(),
+            name: (ch.name || 'channel').toLowerCase().substring(0, 15),
             url: ch.url,
             logo: ch.logo || '',
-            category: (ch.category || 'general').toLowerCase()
+            category: (ch.category || 'tv').toLowerCase()
           }))
-          .slice(0, 24); // limit for grid display
+          .slice(0, 12); // perfect grid fit
         setChannels(validChannels);
         return;
       }
-      const data = await response.json();
-      const validChannels = data.channels
-        .filter(ch => ch.url && (ch.url.includes('.m3u8') || ch.url.includes('http')))
-        .map((ch, idx) => ({
-          id: `${countryCode}_${idx}`,
-          name: (ch.name || 'unknown channel').toLowerCase(),
-          url: ch.url,
-          logo: ch.logo || '',
-          category: (ch.category || 'general').toLowerCase()
-        }))
-        .slice(0, 24); // limit for grid display
-      setChannels(validChannels);
+      
+      // parse m3u content
+      const m3uContent = await response.text();
+      const lines = m3uContent.split('\n');
+      const channels = [];
+      
+      for (let i = 0; i < lines.length && channels.length < 12; i++) {
+        if (lines[i].startsWith('#EXTINF:')) {
+          const nameMatch = lines[i].match(/,(.*)$/);
+          const name = nameMatch ? nameMatch[1].toLowerCase().substring(0, 15) : 'channel';
+          const url = lines[i + 1];
+          
+          if (url && url.includes('http')) {
+            channels.push({
+              id: `${countryCode}_${channels.length}`,
+              name,
+              url,
+              logo: '',
+              category: 'tv'
+            });
+          }
+        }
+      }
+      
+      setChannels(channels);
     } catch (err) {
       setError('loading failed');
       setChannels([]);
@@ -73,7 +86,7 @@ function App() {
     }
   };
 
-  // auto-load channels when country selected
+  // auto-load channels
   useEffect(() => {
     if (selectedCountry && currentView === 'channels') {
       loadChannels(selectedCountry.code);
@@ -102,97 +115,78 @@ function App() {
   };
 
   return (
-    <div className="viewport">
-      <div className="status-offset"></div>
-      
-      {/* country selection view */}
+    <div className="r1-viewport">
+      {/* countries view */}
       {currentView === 'countries' && (
-        <div className="pane">
-          <header className="topbar">
-            <div className="brand">r1 tv</div>
-            <div className="subtitle">select country</div>
+        <div className="r1-pane">
+          <header className="r1-header">
+            <div className="r1-title">r1 tv</div>
           </header>
-          <main className="content">
-            <div className="country-grid">
-              {countries.map(country => (
+          <div className="r1-grid">
+            {countries.map(country => (
+              <button
+                key={country.code}
+                className="r1-btn country-btn"
+                onClick={() => selectCountry(country)}
+              >
+                <span className="flag">{country.flag}</span>
+                <span className="name">{country.name}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* channels view */}
+      {currentView === 'channels' && (
+        <div className="r1-pane">
+          <header className="r1-header">
+            <button className="r1-back" onClick={goBack}>←</button>
+            <div className="r1-title">{selectedCountry?.name}</div>
+          </header>
+          {loading && <div className="r1-loading">loading...</div>}
+          {error && (
+            <div className="r1-error">
+              <div>{error}</div>
+              <button className="r1-btn" onClick={() => loadChannels(selectedCountry.code)}>retry</button>
+            </div>
+          )}
+          {!loading && !error && (
+            <div className="r1-grid">
+              {channels.map(channel => (
                 <button
-                  key={country.code}
-                  className="country-button"
-                  onClick={() => selectCountry(country)}
+                  key={channel.id}
+                  className="r1-btn channel-btn"
+                  onClick={() => selectChannel(channel)}
                 >
-                  <div className="country-flag">{country.flag}</div>
-                  <div className="country-name">{country.name}</div>
+                  <span className="name">{channel.name}</span>
+                  <span className="play">▶</span>
                 </button>
               ))}
             </div>
-          </main>
+          )}
         </div>
       )}
 
-      {/* channel list view */}
-      {currentView === 'channels' && (
-        <div className="pane">
-          <header className="topbar">
-            <button className="btn-back" onClick={goBack}>←</button>
-            <div className="brand">{selectedCountry?.name}</div>
-          </header>
-          <main className="content">
-            {loading && <div className="loading">loading channels...</div>}
-            {error && (
-              <div className="error">
-                <div>{error}</div>
-                <button className="retry-btn" onClick={() => loadChannels(selectedCountry.code)}>retry</button>
-              </div>
-            )}
-            {!loading && !error && (
-              <div className="channel-grid">
-                {channels.map(channel => (
-                  <button
-                    key={channel.id}
-                    className="channel-button"
-                    onClick={() => selectChannel(channel)}
-                  >
-                    <div className="channel-name">{channel.name}</div>
-                    <div className="channel-category">{channel.category}</div>
-                    <div className="play-icon">▶</div>
-                  </button>
-                ))}
-                {channels.length === 0 && (
-                  <div className="no-channels">no channels available</div>
-                )}
-              </div>
-            )}
-          </main>
-        </div>
-      )}
-
-      {/* video player view */}
+      {/* player view */}
       {currentView === 'player' && selectedChannel && (
-        <div className="pane">
-          <header className="topbar">
-            <button className="btn-back" onClick={goBack}>←</button>
-            <div className="brand truncate" title={selectedChannel.name}>
-              {selectedChannel.name}
-            </div>
+        <div className="r1-pane">
+          <header className="r1-header">
+            <button className="r1-back" onClick={goBack}>←</button>
+            <div className="r1-title">{selectedChannel.name}</div>
           </header>
-          <main className="content player-content">
-            <div className="player-wrapper">
-              <video
-                controls
-                autoPlay
-                muted
-                className="video-player"
-                src={selectedChannel.url}
-                onError={() => setError('stream unavailable')}
-              >
-                your browser does not support video playback.
-              </video>
-              <div className="player-info">
-                <div className="channel-title">{selectedChannel.name}</div>
-                <div className="channel-meta">{selectedChannel.category} • {selectedCountry?.name}</div>
-              </div>
-            </div>
-          </main>
+          <div className="r1-player">
+            <video
+              controls
+              autoPlay
+              muted
+              className="r1-video"
+              src={selectedChannel.url}
+              onError={() => setError('stream unavailable')}
+            >
+              browser not supported
+            </video>
+          </div>
         </div>
       )}
     </div>
