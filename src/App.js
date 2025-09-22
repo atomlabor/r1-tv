@@ -1,20 +1,22 @@
 import React, { useState } from 'react';
-import CountrySelector from './components/CountrySelector';
 import './styles/App.css';
 
 /**
- * R1-TV - Hauptkomponente der Rabbit R1 TV App
- * Integriert alle Hauptfunktionen: Länderauswahl, Senderliste, Player, Favoriten
+ * R1-TV - Simple working React App for demonstration
  */
 function App() {
-  // App-weite State-Verwaltung
   const [selectedCountry, setSelectedCountry] = useState(null);
-  const [selectedChannel, setSelectedChannel] = useState(null);
   const [favorites, setFavorites] = useState([]);
-  const [currentView, setCurrentView] = useState('country-selection'); // 'country-selection', 'channels', 'player'
-  const [isFullscreen, setIsFullscreen] = useState(false);
 
-  // Mock-Daten für Sender (wird später durch tv.garden API ersetzt)
+  // Mock countries data
+  const countries = [
+    { code: 'DE', name: 'Deutschland', flag: '🇩🇪' },
+    { code: 'US', name: 'United States', flag: '🇺🇸' },
+    { code: 'GB', name: 'United Kingdom', flag: '🇬🇧' },
+    { code: 'FR', name: 'France', flag: '🇫🇷' }
+  ];
+
+  // Mock channels data
   const mockChannels = {
     'DE': [
       { id: 'ard', name: 'ARD', logo: '🎥', stream: 'https://example.com/ard' },
@@ -24,28 +26,17 @@ function App() {
     'US': [
       { id: 'cnn', name: 'CNN', logo: '📰', stream: 'https://example.com/cnn' },
       { id: 'fox', name: 'Fox News', logo: '🦊', stream: 'https://example.com/fox' }
+    ],
+    'GB': [
+      { id: 'bbc', name: 'BBC One', logo: '📻', stream: 'https://example.com/bbc' }
+    ],
+    'FR': [
+      { id: 'tf1', name: 'TF1', logo: '📺', stream: 'https://example.com/tf1' }
     ]
   };
 
-  // Event Handler
   const handleCountrySelect = (country) => {
     setSelectedCountry(country);
-    setCurrentView('channels');
-  };
-
-  const handleChannelSelect = (channel) => {
-    setSelectedChannel(channel);
-    setCurrentView('player');
-  };
-
-  const handleBackToCountries = () => {
-    setSelectedCountry(null);
-    setCurrentView('country-selection');
-  };
-
-  const handleBackToChannels = () => {
-    setSelectedChannel(null);
-    setCurrentView('channels');
   };
 
   const toggleFavorite = (channel) => {
@@ -59,110 +50,71 @@ function App() {
     });
   };
 
-  const toggleFullscreen = () => {
-    setIsFullscreen(!isFullscreen);
-    // TODO: Rabbit SDK Integration für Hardware-Rotation
-  };
+  const channels = selectedCountry ? (mockChannels[selectedCountry.code] || []) : [];
 
-  // Rendering der verschiedenen Views
-  const renderCurrentView = () => {
-    switch (currentView) {
-      case 'country-selection':
-        return (
-          <CountrySelector
-            onCountrySelect={handleCountrySelect}
-            selectedCountry={selectedCountry}
-          />
-        );
+  return (
+    <div className="app">
+      <header className="app-header">
+        <h1>🐰📺 R1-TV</h1>
+        <p>TV-App für Rabbit R1 mit Länderauswahl, Senderliste und Favoriten</p>
+        {favorites.length > 0 && (
+          <div className="favorites-count">
+            {favorites.length} Favorit{favorites.length > 1 ? 'en' : ''}
+          </div>
+        )}
+      </header>
       
-      case 'channels':
-        const channels = mockChannels[selectedCountry?.code] || [];
-        return (
+      <main className="app-main">
+        {!selectedCountry ? (
+          <div className="country-selector">
+            <h2>Land auswählen:</h2>
+            <div className="countries-grid">
+              {countries.map(country => (
+                <button
+                  key={country.code}
+                  className="country-button"
+                  onClick={() => handleCountrySelect(country)}
+                >
+                  <span className="country-flag">{country.flag}</span>
+                  <span className="country-name">{country.name}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : (
           <div className="channel-list">
             <div className="navigation-header">
-              <button onClick={handleBackToCountries} className="back-button">
+              <button 
+                className="back-button" 
+                onClick={() => setSelectedCountry(null)}
+              >
                 ← Zurück zu Ländern
               </button>
-              <h2>TV-Sender - {selectedCountry?.name}</h2>
+              <h2>TV-Sender - {selectedCountry.name}</h2>
             </div>
             <div className="channels-grid">
               {channels.map(channel => (
-                <div key={channel.id} className="channel-item">
-                  <button
-                    onClick={() => handleChannelSelect(channel)}
-                    className="channel-button"
-                  >
+                <div className="channel-item" key={channel.id}>
+                  <div className="channel-info">
                     <span className="channel-logo">{channel.logo}</span>
                     <span className="channel-name">{channel.name}</span>
-                  </button>
+                  </div>
                   <button
-                    onClick={() => toggleFavorite(channel)}
                     className={`favorite-button ${
                       favorites.some(fav => fav.id === channel.id) ? 'active' : ''
                     }`}
+                    onClick={() => toggleFavorite(channel)}
                   >
                     {favorites.some(fav => fav.id === channel.id) ? '❤️' : '🤍'}
                   </button>
                 </div>
               ))}
             </div>
+            {channels.length === 0 && (
+              <p className="no-channels">Keine Sender für dieses Land verfügbar.</p>
+            )}
           </div>
-        );
-      
-      case 'player':
-        return (
-          <div className={`video-player ${isFullscreen ? 'fullscreen' : ''}`}>
-            <div className="player-header">
-              <button onClick={handleBackToChannels} className="back-button">
-                ← Zurück zu Sendern
-              </button>
-              <h3>{selectedChannel?.name}</h3>
-              <button onClick={toggleFullscreen} className="fullscreen-button">
-                {isFullscreen ? '📏' : '🔲'}
-              </button>
-            </div>
-            <div className="video-container">
-              <div className="video-placeholder">
-                <div className="video-info">
-                  <h2>{selectedChannel?.name}</h2>
-                  <p>Stream: {selectedChannel?.stream}</p>
-                  <p className="placeholder-text">
-                    📺 Video-Player Platzhalter
-                    <br />
-                    (Integration mit tv.garden API und Rabbit SDK)
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div className="player-controls">
-              <button onClick={() => toggleFavorite(selectedChannel)}>
-                {favorites.some(fav => fav.id === selectedChannel?.id) ? '❤️' : '🤍'} Favorit
-              </button>
-            </div>
-          </div>
-        );
-      
-      default:
-        return <div>Lade...</div>;
-    }
-  };
-
-  return (
-    <div className="app">
-      <header className="app-header">
-        <h1>🐰📺 R1-TV</h1>
-        <div className="app-info">
-          <span>Rabbit R1 TV-App</span>
-          {favorites.length > 0 && (
-            <span className="favorites-count">
-              {favorites.length} Favorit{favorites.length > 1 ? 'en' : ''}
-            </span>
-          )}
-        </div>
-      </header>
-      
-      <main className="app-main">
-        {renderCurrentView()}
+        )}
       </main>
       
       <footer className="app-footer">
