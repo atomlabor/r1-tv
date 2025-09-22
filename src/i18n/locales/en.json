@@ -1,0 +1,101 @@
+{
+  "countrySelector": {
+    "title": "Select Country",
+    "searchPlaceholder": "Search countries...",
+    "noResults": "No countries found",
+    "loading": "Loading countries...",
+    "error": "Error loading countries"
+  },
+  "channelList": {
+    "title": "TV Channels",
+    "loading": "Loading channels...",
+    "error": "Error loading channels",
+    "noChannels": "No channels available",
+    "searchPlaceholder": "Search channels...",
+    "filterByCategory": "Filter by category",
+    "allCategories": "All Categories",
+    "refresh": "Refresh"
+  },
+  "player": {
+    "loading": "Loading stream...",
+    "error": "Playback error",
+    "play": "Play",
+    "pause": "Pause",
+    "mute": "Mute",
+    "unmute": "Unmute",
+    "fullscreen": "Fullscreen",
+    "exitFullscreen": "Exit Fullscreen",
+    "volume": "Volume",
+    "streamUnavailable": "Stream unavailable",
+    "connectionError": "Connection error"
+  },
+  "favorites": {
+    "title": "Favorites",
+    "addToFavorites": "Add to Favorites",
+    "removeFromFavorites": "Remove from Favorites",
+    "noFavorites": "No favorite channels yet",
+    "addFirstFavorite": "Add your first favorite channel"
+  },
+  "status": {
+    "online": "Online",
+    "offline": "Offline",
+    "connecting": "Connecting...",
+    "buffering": "Buffering...",
+    "ready": "Ready",
+    "error": "Error"
+  },
+  "buttons": {
+    "ok": "OK",
+    "cancel": "Cancel",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "refresh": "Refresh",
+    "retry": "Retry",
+    "settings": "Settings"
+  },
+  "errors": {
+    "networkError": "Network connection error",
+    "streamError": "Stream playback error",
+    "loadingError": "Loading error",
+    "unknownError": "An unknown error occurred",
+    "channelNotFound": "Channel not found",
+    "countryNotSupported": "Country not supported",
+    "browserNotSupported": "Browser not supported",
+    "tryAgain": "Please try again later"
+  },
+  "labels": {
+    "channel": "Channel",
+    "country": "Country",
+    "category": "Category",
+    "language": "Language",
+    "quality": "Quality",
+    "name": "Name",
+    "description": "Description",
+    "website": "Website",
+    "logo": "Logo",
+    "stream": "Stream",
+    "lastUpdated": "Last Updated",
+    "viewers": "Viewers",
+    "duration": "Duration"
+  },
+  "app": {
+    "title": "R1 TV",
+    "subtitle": "Live TV Streaming",
+    "version": "Version",
+    "about": "About",
+    "help": "Help",
+    "feedback": "Feedback"
+  },
+  "web": {
+    "browserTitle": "R1 TV - Live TV in Browser",
+    "unsupportedBrowser": "Your browser is not supported",
+    "enableJavaScript": "Please enable JavaScript",
+    "fullscreenNotSupported": "Fullscreen not supported in this browser",
+    "webAccessEnabled": "Web access enabled"
+  }
+}
