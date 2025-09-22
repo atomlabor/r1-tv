@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import './styles/App.css';
-
 /**
  * r1 tv - rabbit r1 optimized tv player  
  * Country direct channel list, no categories, TVGarden JSON, Rabbit UI
  * Direct load from https://raw.githubusercontent.com/TVGarden/tv-garden-channel-list/main/channels/raw/countries/{country}.json
+ * Extended with 'mehr tv' button for additional general channel list
  */
 function App() {
   const [currentView, setCurrentView] = useState('countries');
@@ -13,7 +13,7 @@ function App() {
   const [selectedChannel, setSelectedChannel] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-
+  
   // Countries with their country codes for TVGarden API
   const countries = [
     { code: 'us', name: 'usa', flag: '🇺🇸' },
@@ -106,6 +106,58 @@ function App() {
     }
   };
 
+  // Load extended general channel list from TVGarden
+  const loadMoreChannels = async () => {
+    setLoading(true);
+    setError(null);
+    setSelectedCountry({ name: 'weitere tv sender', code: 'general' });
+    
+    try {
+      const url = 'https://raw.githubusercontent.com/TVGarden/iptv-channel-list/main/channel-lists/general.json';
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        throw new Error('General channels not available');
+      }
+      
+      const channelData = await response.json();
+      
+      // Process channels - take max 24 for extended view
+      const processedChannels = channelData
+        .filter(ch => {
+          // Ensure we have playable streams
+          return ch.stream_url || (ch.iptv_urls && ch.iptv_urls.length > 0);
+        })
+        .slice(0, 24) // Extended grid (24 channels max)
+        .map((ch, idx) => ({
+          id: `general_${idx}`,
+          name: formatChannelName(ch),
+          originalName: ch.name || ch.title || 'Unknown Channel',
+          country: ch.country || 'international',
+          category: ch.category || 'general',
+          language: ch.language || '',
+          logo: ch.logo || ch.icon || '',
+          url: ch.stream_url || ch.iptv_urls[0], // Use stream_url or first iptv_url
+          allUrls: ch.iptv_urls || [ch.stream_url]
+        }));
+      
+      if (processedChannels.length === 0) {
+        setError('no additional channels available');
+        setChannels([]);
+      } else {
+        setChannels(processedChannels);
+        setCurrentView('more-channels');
+      }
+      
+    } catch (err) {
+      console.error('Failed to load general channels:', err);
+      setError('loading failed - general channels not available');
+      setChannels([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const selectChannel = (channel) => {
     setSelectedChannel(channel);
     setCurrentView('player');
@@ -113,9 +165,9 @@ function App() {
 
   const goBack = () => {
     if (currentView === 'player') {
-      setCurrentView('channels');
+      setCurrentView(channels.length > 0 ? (selectedCountry?.code === 'general' ? 'more-channels' : 'channels') : 'countries');
       setSelectedChannel(null);
-    } else if (currentView === 'channels') {
+    } else if (currentView === 'channels' || currentView === 'more-channels') {
       setCurrentView('countries');
       setSelectedCountry(null);
       setChannels([]);
@@ -129,6 +181,13 @@ function App() {
         <div className="r1-pane">
           <header className="r1-header">
             <div className="r1-title">r1 tv</div>
+            <button 
+              className="r1-more-tv-btn" 
+              onClick={loadMoreChannels}
+              title="Weitere TV Sender"
+            >
+              mehr tv
+            </button>
           </header>
           <div className="r1-grid">
             {countries.map(country => (
@@ -169,6 +228,47 @@ function App() {
           
           {!loading && !error && (
             <div className="r1-grid">
+              {channels.map(channel => (
+                <button
+                  key={channel.id}
+                  className="r1-btn channel-btn"
+                  onClick={() => selectChannel(channel)}
+                  title={`${channel.originalName} • ${channel.country}`}
+                >
+                  <span className="name">{channel.name}</span>
+                  <span className="meta">{channel.country}</span>
+                  <span className="play">▶</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* More Channels view - Extended list */}
+      {currentView === 'more-channels' && (
+        <div className="r1-pane">
+          <header className="r1-header">
+            <button className="r1-back" onClick={goBack}>←</button>
+            <div className="r1-title">weitere tv sender</div>
+          </header>
+          
+          {loading && <div className="r1-loading">loading channels...</div>}
+          
+          {error && (
+            <div className="r1-error">
+              <div className="error-text">{error}</div>
+              <button 
+                className="r1-btn retry-btn" 
+                onClick={loadMoreChannels}
+              >
+                retry
+              </button>
+            </div>
+          )}
+          
+          {!loading && !error && (
+            <div className="r1-grid-extended">
               {channels.map(channel => (
                 <button
                   key={channel.id}
