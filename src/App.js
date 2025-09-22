@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import './styles/App.css';
-
 /**
  * R1-TV - Minimalist Weather-App-inspired TV UI for Rabbit R1
  * Content area: 240x254px, Top offset: 28px, Viewport: 240x282px
@@ -15,20 +14,16 @@ function App() {
   const [error, setError] = useState(null);
   const [selectedChannel, setSelectedChannel] = useState(null);
   const [rotation, setRotation] = useState(0); // 0 or 90
-
   // TVGarden category endpoints (iptv-org)
   const tabs = [
     { id: 'animation', label: 'Animation', apiUrl: 'https://iptv-org.github.io/api/categories/animation.json' },
     { id: 'news', label: 'News', apiUrl: 'https://iptv-org.github.io/api/categories/news.json' },
     { id: 'sports', label: 'Sports', apiUrl: 'https://iptv-org.github.io/api/categories/sports.json' },
   ];
-
   useEffect(() => {
     const tab = tabs.find(t => t.id === activeTab);
     if (tab) loadChannels(tab);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
-
   const loadChannels = async (tab) => {
     setLoading(true);
     setError(null);
@@ -36,7 +31,6 @@ function App() {
       const res = await fetch(tab.apiUrl);
       if (!res.ok) throw new Error('Failed to load channels');
       const data = await res.json();
-
       // Only include playable m3u8 streams. Normalize minimal card format.
       const list = data
         .filter(ch => (ch.url && ch.url.includes('.m3u8')) || (Array.isArray(ch.urls) && ch.urls.some(u => u.includes('.m3u8'))))
@@ -54,7 +48,6 @@ function App() {
         })
         .filter(ch => !!ch.stream)
         .slice(0, 24);
-
       setChannels(list);
     } catch (e) {
       setError(e.message);
@@ -63,22 +56,18 @@ function App() {
       setLoading(false);
     }
   };
-
   const openPlayer = (ch) => {
     setSelectedChannel(ch);
     setCurrentView('player');
   };
-
   const closePlayer = () => {
     setCurrentView('channels');
     setSelectedChannel(null);
     setRotation(0);
   };
-
   const toggleRotation = () => {
     setRotation(prev => (prev === 0 ? 90 : 0));
   };
-
   const requestFullscreen = () => {
     const iframe = document.getElementById('r1-player');
     if (iframe) {
@@ -89,11 +78,9 @@ function App() {
       iframe.contentWindow && iframe.contentWindow.postMessage('fullscreen', '*');
     }
   };
-
   return (
     <div className="viewport">
-      <div className="status-offset" />
-
+      <div className="status-offset"></div>
       {currentView === 'channels' && (
         <div className="pane">
           <header className="topbar">
@@ -112,7 +99,6 @@ function App() {
               ))}
             </nav>
           </header>
-
           <main className="content">
             {loading && <div className="state text-dim">Loading…</div>}
             {error && (
@@ -124,11 +110,11 @@ function App() {
             {!loading && !error && (
               <div className="grid">
                 {channels.map(ch => (
-                  <button key={ch.id} className="card" onClick={() => openPlayer(ch)}>
+                  <button className="card" key={ch.id} onClick={() => openPlayer(ch)}>
                     <div className="card-title">{ch.name}</div>
                     <div className="card-meta">
-                      <span>{ch.country}</span>
-                      <span>{ch.lang}</span>
+                      {ch.country}
+                      {ch.lang}
                     </div>
                   </button>
                 ))}
@@ -140,7 +126,6 @@ function App() {
           </main>
         </div>
       )}
-
       {currentView === 'player' && selectedChannel && (
         <div className="pane">
           <header className="topbar">
@@ -151,18 +136,16 @@ function App() {
               <button className="btn-ghost" onClick={requestFullscreen}>Fullscreen</button>
             </div>
           </header>
-
           <main className="content player-wrap">
             {/* Inline minimal player page (keeps 240x254 content area) */}
             <iframe
               id="r1-player"
               className={`player ${rotation === 90 ? 'rotated' : ''}`}
-              src={`data:text/html;charset=utf-8,${encodeURIComponent(`
-<!DOCTYPE html>
+              src={`data:text/html;charset=utf-8,${encodeURIComponent(`<!DOCTYPE html>
 <html>
   <head>
-    <meta charset=\"utf-8\" />
-    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />
+    <meta charset="utf-8"/>
+    <meta content="width=device-width,initial-scale=1" name="viewport"/>
     <style>
       html,body{margin:0;background:#000;height:100%;}
       video{width:100%;height:100%;object-fit:contain;background:#000;}
@@ -170,9 +153,9 @@ function App() {
     </style>
   </head>
   <body>
-    <div class=\"wrap\">
-      <video controls autoplay playsinline>
-        <source src=\"${selectedChannel.stream}\" type=\"application/x-mpegURL\" />
+    <div class="wrap">
+      <video autoplay controls playsinline>
+        <source src="${selectedChannel.stream}" type="application/x-mpegURL"/>
       </video>
     </div>
     <script>
@@ -181,7 +164,7 @@ function App() {
           document.documentElement.requestFullscreen();
         }
       });
-    <\/script>
+    </script>
   </body>
 </html>
               `)}`}
@@ -197,5 +180,4 @@ function App() {
     </div>
   );
 }
-
 export default App;
