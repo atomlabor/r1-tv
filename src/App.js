@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import './styles/App.css';
 /**
  * r1 tv - rabbit r1 optimized tv player  
@@ -13,11 +13,15 @@ function App() {
   const [selectedChannel, setSelectedChannel] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [videoRotation, setVideoRotation] = useState(0); // Add rotation state
-  const [currentPage, setCurrentPage] = useState(0); // Track current page for paging
-  const [allCountryChannels, setAllCountryChannels] = useState([]); // Store all channels from country JSON
-  const [hasMoreChannels, setHasMoreChannels] = useState(false); // Track if more channels available
-  
+  const [videoRotation, setVideoRotation] = useState(0); // rotation state, persists across modes
+  const [currentPage, setCurrentPage] = useState(0); // paging
+  const [allCountryChannels, setAllCountryChannels] = useState([]); // cache
+  const [hasMoreChannels, setHasMoreChannels] = useState(false);
+
+  // refs for video and player wrapper to control fullscreen and styles
+  const videoRef = useRef(null);
+  const playerRef = useRef(null);
+
   // Countries with their country codes for TVGarden API
   const countries = [
     { code: 'us', name: 'usa', flag: '🇺🇸' },
@@ -33,42 +37,113 @@ function App() {
     { code: 'br', name: 'br', flag: '🇧🇷' },
     { code: 'mx', name: 'mx', flag: '🇲🇽' }
   ];
-  
+
   // Format channel name for optimal display - lowercase and short
   const formatChannelName = (channel) => {
     if (!channel || !channel.name) return 'unknown';
-    
     let name = channel.name;
-    // Remove common prefixes and clean up
     name = name.replace(/^(\d+\s*-\s*|\d+\s*\|\s*|\d+\s+)/i, '');
     name = name.replace(/\s*(HD|FHD|UHD|4K)\s*$/i, '');
     name = name.replace(/\s*(TV|Television)\s*$/i, '');
     name = name.replace(/[\[\(].*?[\]\)]/g, '');
     name = name.replace(/\s+/g, ' ').trim();
-    
-    // Convert to lowercase
     name = name.toLowerCase();
-    
-    // Keep it short for R1 display
-    if (name.length > 10) {
-      name = name.substring(0, 10) + '…';
-    }
-    
+    if (name.length > 10) name = name.substring(0, 10) + '…';
     return name || 'unknown';
   };
-  
-  // Toggle video rotation between 0° and 90°
+
+  // Toggle video rotation between 0° and 90° — keep applied in all modes
   const toggleVideoRotation = () => {
-    setVideoRotation(prev => prev === 0 ? 90 : 0);
+    setVideoRotation(prev => (prev === 0 ? 90 : 0));
   };
-  
+
+  // Apply rotation style consistently (including after fullscreen changes)
+  const applyRotationStyle = () => {
+    const v = videoRef.current;
+    if (!v) return;
+    const deg = videoRotation;
+    const rotate = `rotate(${deg}deg)`;
+    v.style.transform = rotate;
+    v.style.webkitTransform = rotate;
+    v.style.msTransform = rotate;
+    v.style.transformOrigin = 'center center';
+    v.style.webkitTransformOrigin = 'center center';
+    v.style.transition = 'transform 0.3s ease';
+    v.style.webkitTransition = '-webkit-transform 0.3s ease';
+    // Ensure objectFit remains in fullscreen as well
+    v.style.objectFit = 'contain';
+    // Make video occupy container in fullscreen
+    v.style.width = '100%';
+    v.style.height = '100%';
+    // When rotated 90deg, help with sizing in some browsers
+    if (deg === 90) {
+      v.style.maxWidth = '100%';
+      v.style.maxHeight = '100%';
+    }
+  };
+
+  useEffect(() => {
+    applyRotationStyle();
+  }, [videoRotation, selectedChannel, currentView]);
+
+  // Fullscreen helpers with vendor-prefixed fallbacks
+  const isFullscreen = () => {
+    return (
+      document.fullscreenElement ||
+      document.webkitFullscreenElement ||
+      document.msFullscreenElement ||
+      document.mozFullScreenElement ||
+      null
+    );
+  };
+
+  const requestFs = (el) => {
+    if (!el) return;
+    if (el.requestFullscreen) return el.requestFullscreen();
+    if (el.webkitRequestFullscreen) return el.webkitRequestFullscreen(); // Safari
+    if (el.msRequestFullscreen) return el.msRequestFullscreen(); // IE/Edge legacy
+    if (el.mozRequestFullScreen) return el.mozRequestFullScreen(); // old Firefox
+  };
+
+  const exitFs = () => {
+    if (document.exitFullscreen) return document.exitFullscreen();
+    if (document.webkitExitFullscreen) return document.webkitExitFullscreen();
+    if (document.msExitFullscreen) return document.msExitFullscreen();
+    if (document.mozCancelFullScreen) return document.mozCancelFullScreen();
+  };
+
+  const toggleFullscreen = () => {
+    const container = playerRef.current || videoRef.current;
+    if (!container) return;
+    if (isFullscreen()) {
+      exitFs();
+    } else {
+      requestFs(container);
+    }
+  };
+
+  // Listen to fullscreenchange and re-apply styles to ensure rotation persists
+  useEffect(() => {
+    const handler = () => {
+      // On any fullscreen state change, re-apply rotation to the video
+      applyRotationStyle();
+    };
+    document.addEventListener('fullscreenchange', handler);
+    document.addEventListener('webkitfullscreenchange', handler);
+    document.addEventListener('msfullscreenchange', handler);
+    document.addEventListener('mozfullscreenchange', handler);
+    return () => {
+      document.removeEventListener('fullscreenchange', handler);
+      document.removeEventListener('webkitfullscreenchange', handler);
+      document.removeEventListener('msfullscreenchange', handler);
+      document.removeEventListener('mozfullscreenchange', handler);
+    };
+  }, []);
+
   // Process channels array into displayable format
   const processChannels = (channelData, startIndex = 0, count = 12) => {
     return channelData
-      .filter(ch => {
-        // Ensure we have playable streams
-        return ch.iptv_urls && ch.iptv_urls.length > 0;
-      })
+      .filter(ch => ch.iptv_urls && ch.iptv_urls.length > 0)
       .slice(startIndex, startIndex + count)
       .map((ch, idx) => ({
         id: `${selectedCountry?.code || 'unknown'}_${startIndex + idx}`,
@@ -78,11 +153,11 @@ function App() {
         category: ch.category || 'general',
         language: ch.language || '',
         logo: ch.logo || '',
-        url: ch.iptv_urls[0], // Use first available stream
+        url: ch.iptv_urls[0],
         allUrls: ch.iptv_urls
       }));
   };
-  
+
   // Load channels directly from TVGarden country JSON
   const loadCountryChannels = async (country) => {
     setLoading(true);
@@ -91,28 +166,15 @@ function App() {
     setCurrentPage(0);
     setChannels([]);
     setAllCountryChannels([]);
-    
+
     try {
-      // Direct load from TVGarden country JSON
       const url = `https://raw.githubusercontent.com/TVGarden/tv-garden-channel-list/main/channels/raw/countries/${country.code}.json`;
       const response = await fetch(url);
-      
-      if (!response.ok) {
-        throw new Error('Country channels not available');
-      }
-      
+      if (!response.ok) throw new Error('Country channels not available');
       const channelData = await response.json();
-      
-      // Store all channels for paging
-      const validChannels = channelData.filter(ch => {
-        return ch.iptv_urls && ch.iptv_urls.length > 0;
-      });
-      
+      const validChannels = channelData.filter(ch => ch.iptv_urls && ch.iptv_urls.length > 0);
       setAllCountryChannels(validChannels);
-      
-      // Process first page (12 channels)
       const firstPageChannels = processChannels(validChannels, 0, 12);
-      
       if (firstPageChannels.length === 0) {
         setError('no channels available for this country');
         setChannels([]);
@@ -120,10 +182,8 @@ function App() {
       } else {
         setChannels(firstPageChannels);
         setCurrentView('channels');
-        // Check if more channels are available
         setHasMoreChannels(validChannels.length > 12);
       }
-      
     } catch (err) {
       console.error('Failed to load country channels:', err);
       setError('loading failed - country not available');
@@ -133,33 +193,24 @@ function App() {
       setLoading(false);
     }
   };
-  
-  // Load next 12 channels from the same country JSON - PAGE VIEW (replace, not add)
+
+  // Load next 12 channels (page view)
   const loadMoreChannels = async () => {
     if (!selectedCountry || !hasMoreChannels || loading) return;
-    
     setLoading(true);
     setError(null);
-    
     try {
       const nextPage = currentPage + 1;
       const startIndex = nextPage * 12;
-      
-      // Process next 12 channels from already loaded data - REPLACE current channels
       const nextPageChannels = processChannels(allCountryChannels, startIndex, 12);
-      
       if (nextPageChannels.length === 0) {
         setError('no more channels available');
         setHasMoreChannels(false);
       } else {
-        // REPLACE channels instead of adding (page view)
         setChannels(nextPageChannels);
         setCurrentPage(nextPage);
-        
-        // Check if even more channels are available
         setHasMoreChannels(allCountryChannels.length > (startIndex + nextPageChannels.length));
       }
-      
     } catch (err) {
       console.error('Failed to load more channels:', err);
       setError('loading failed - unable to load more channels');
@@ -167,18 +218,20 @@ function App() {
       setLoading(false);
     }
   };
-  
+
   const selectChannel = (channel) => {
     setSelectedChannel(channel);
     setCurrentView('player');
-    setVideoRotation(0); // Reset rotation when selecting new channel
+    // keep rotation as last user choice across sessions? reset to 0 for clarity
+    setVideoRotation(videoRotation); // preserve current rotation state
+    setTimeout(applyRotationStyle, 0); // ensure style applied after render
   };
-  
+
   const goBack = () => {
     if (currentView === 'player') {
       setCurrentView('channels');
       setSelectedChannel(null);
-      setVideoRotation(0); // Reset rotation when leaving player
+      // keep rotation state; user may want it preserved next time
     } else if (currentView === 'channels') {
       setCurrentView('countries');
       setSelectedCountry(null);
@@ -188,7 +241,7 @@ function App() {
       setHasMoreChannels(false);
     }
   };
-  
+
   return (
     <div className="r1-viewport">
       {/* Countries view */}
@@ -211,7 +264,7 @@ function App() {
           </div>
         </div>
       )}
-      
+
       {/* Channels view */}
       {currentView === 'channels' && (
         <div className="r1-pane">
@@ -229,9 +282,9 @@ function App() {
               </button>
             )}
           </header>
-          
+
           {loading && <div className="r1-loading">loading channels...</div>}
-          
+
           {error && (
             <div className="r1-error">
               <div className="error-text">{error}</div>
@@ -243,7 +296,7 @@ function App() {
               </button>
             </div>
           )}
-          
+
           {!loading && !error && (
             <div className="r1-grid">
               {channels.map(channel => (
@@ -260,8 +313,7 @@ function App() {
               ))}
             </div>
           )}
-          
-          {/* Page indicator */}
+
           {channels.length > 0 && (
             <div className="r1-page-info">
               Seite {currentPage + 1} • {channels.length} Kanäle{hasMoreChannels ? ' (mehr verfügbar)' : ''}
@@ -269,7 +321,7 @@ function App() {
           )}
         </div>
       )}
-      
+
       {/* Player view */}
       {currentView === 'player' && selectedChannel && (
         <div className="r1-pane">
@@ -285,24 +337,29 @@ function App() {
             >
               ↻
             </button>
+            <button
+              className="r1-more-tv-btn"
+              onClick={toggleFullscreen}
+              title="Fullscreen wechseln"
+              style={{ marginLeft: 6 }}
+            >
+              fullscreen
+            </button>
           </header>
-          <div className="r1-player">
+          <div className="r1-player" ref={playerRef}>
             <video
               key={selectedChannel.url}
+              ref={videoRef}
               controls
               autoPlay
               className="r1-video"
-              style={{
-                transform: `rotate(${videoRotation}deg)`,
-                transformOrigin: 'center center',
-                transition: 'transform 0.3s ease'
-              }}
               src={selectedChannel.url}
               onError={(e) => {
                 console.error('Stream error:', e);
                 setError('stream unavailable');
               }}
               onLoadStart={() => setError(null)}
+              // Do not set style prop here; we manage via applyRotationStyle to keep across modes
             >
               Your browser does not support video playback
             </video>
