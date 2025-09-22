@@ -18,6 +18,7 @@ function App() {
   const [allCountryChannels, setAllCountryChannels] = useState([]); // cache
   const [hasMoreChannels, setHasMoreChannels] = useState(false);
   const [fullscreenSupported, setFullscreenSupported] = useState(false);
+  const [isFs, setIsFs] = useState(false); // track fullscreen state for conditional UI
   // refs for video and player wrapper to control fullscreen and styles
   const videoRef = useRef(null);
   const playerRef = useRef(null);
@@ -125,6 +126,7 @@ function App() {
   // Listen to fullscreenchange and re-apply styles to ensure rotation persists
   useEffect(() => {
     const handler = () => {
+      setIsFs(!!isFullscreen());
       applyRotationStyle();
     };
     document.addEventListener('fullscreenchange', handler);
@@ -232,9 +234,21 @@ function App() {
       setHasMoreChannels(false);
     }
   };
-  // Determine if we should render fullscreen button:
-  // Only if fullscreen API is supported AND we can render an on-screen Exit Fullscreen button
+  // Determine if we should render fullscreen button
   const shouldRenderFullscreen = fullscreenSupported;
+
+  // Inline styles for the small exit button (shown only in fullscreen)
+  const exitBtnStyle = {
+    position: 'fixed', // fixed to viewport so it remains visible
+    top: 10,
+    right: 10,
+    zIndex: 9999,
+    fontSize: 12,
+    padding: '6px 8px',
+    borderRadius: 6,
+    opacity: 0.8
+  };
+
   return (
     <div className="r1-viewport">
       {/* Countries view */}
@@ -245,7 +259,7 @@ function App() {
           </header>
           <div className="r1-grid">
             {countries.map(country => (
-              <button key={country.code} className="r1-btn country-btn" onClick={() => loadCountryChannels(country)}>
+              <button className="r1-btn country-btn" key={country.code} onClick={() => loadCountryChannels(country)}>
                 <span className="flag">{country.flag}</span>
                 <span className="name">{country.name}</span>
               </button>
@@ -260,7 +274,7 @@ function App() {
             <button className="r1-back" onClick={goBack}>←</button>
             <div className="r1-title">{selectedCountry?.name}</div>
             {hasMoreChannels && (
-              <button className="r1-more-tv-btn" onClick={loadMoreChannels} disabled={loading} title="Load 12 more TV channels for this country">
+              <button className="r1-more-tv-btn" disabled={loading} onClick={loadMoreChannels} title="Load 12 more TV channels for this country">
                 more tv
               </button>
             )}
@@ -277,7 +291,7 @@ function App() {
           {!loading && !error && (
             <div className="r1-grid">
               {channels.map(channel => (
-                <button key={channel.id} className="r1-btn channel-btn" onClick={() => selectChannel(channel)} title={`${channel.originalName} • ${channel.country}`}>
+                <button className="r1-btn channel-btn" key={channel.id} onClick={() => selectChannel(channel)} title={`${channel.originalName} • ${channel.country}`}>
                   <span className="name">{channel.name}</span>
                   <span className="meta">{channel.country}</span>
                   <span className="play">▶</span>
@@ -308,19 +322,25 @@ function App() {
                 <button className="r1-more-tv-btn" onClick={toggleFullscreen} title="Toggle fullscreen" style={{ marginLeft: 6 }}>
                   fullscreen
                 </button>
-                {isFullscreen() && (
-                  <button className="r1-more-tv-btn" onClick={exitFs} title="Exit fullscreen" style={{ marginLeft: 6 }}>
-                    exit fullscreen
-                  </button>
-                )}
               </>
             )}
           </header>
           <div className="r1-player" ref={playerRef}>
-            <video key={selectedChannel.url} ref={videoRef} controls autoPlay className="r1-video" src={selectedChannel.url} onError={(e) => {
+            {/* Small exit fullscreen button shown only when in fullscreen */}
+            {isFs && (
+              <button
+                className="r1-more-tv-btn"
+                onClick={exitFs}
+                title="Exit fullscreen"
+                style={exitBtnStyle}
+              >
+                ↩
+              </button>
+            )}
+            <video autoPlay className="r1-video" controls key={selectedChannel.url} onError={(e) => {
                 console.error('Stream error:', e);
                 setError('stream unavailable');
-              }} onLoadStart={() => setError(null)}>
+              }} onLoadStart={() => setError(null)} ref={videoRef} src={selectedChannel.url}>
               Your browser does not support video playback
             </video>
             {error && (
