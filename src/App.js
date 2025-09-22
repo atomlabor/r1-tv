@@ -2,15 +2,16 @@ import React, { useState, useEffect } from 'react';
 import './styles/App.css';
 
 /**
- * R1-TV - Minimal Country/Channel Selector with TVGarden Integration
+ * R1-TV - Enhanced Country/Channel Selector with Category Tabs & TVGarden Integration
  * Content area: 240x254px, Top offset: 28px, Viewport: 240x282px
- * Clean implementation without any weather-related functionality
+ * Features: Country selection, channel categories, direct player launch
  */
 function App() {
   const [currentView, setCurrentView] = useState('countries');
   const [selectedCountry, setSelectedCountry] = useState(null);
   const [channels, setChannels] = useState([]);
   const [selectedChannel, setSelectedChannel] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState('All');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -30,6 +31,36 @@ function App() {
     { code: 'MX', name: 'Mexico' }
   ];
 
+  // Channel categories
+  const categories = ['All', 'News', 'Sports', 'Entertainment', 'Music', 'Kids', 'Documentary', 'Movies', 'General'];
+
+  // Category mapping for better classification
+  const categoryMapping = {
+    'news': 'News',
+    'sport': 'Sports',
+    'sports': 'Sports',
+    'entertainment': 'Entertainment',
+    'music': 'Music',
+    'kids': 'Kids',
+    'children': 'Kids',
+    'documentary': 'Documentary',
+    'movies': 'Movies',
+    'movie': 'Movies',
+    'general': 'General'
+  };
+
+  const categorizeChannel = (category) => {
+    if (!category) return 'General';
+    const lowerCategory = category.toLowerCase();
+    
+    for (const [key, value] of Object.entries(categoryMapping)) {
+      if (lowerCategory.includes(key)) {
+        return value;
+      }
+    }
+    return 'General';
+  };
+
   const loadChannels = async (countryCode) => {
     setLoading(true);
     setError(null);
@@ -38,19 +69,21 @@ function App() {
       if (!response.ok) throw new Error('Failed to load channels');
       const data = await response.json();
       
-      // Filter for working streams
+      // Filter for working streams with better categorization
       const validChannels = data
-        .filter(ch => ch.url && ch.url.includes('.m3u8'))
+        .filter(ch => ch.url && (ch.url.includes('.m3u8') || ch.url.includes('http')))
         .map((ch, idx) => ({
           id: `${countryCode}_${idx}`,
           name: ch.name || 'Unknown Channel',
           url: ch.url,
-          category: ch.category || 'General',
-          logo: ch.logo || ''
+          category: categorizeChannel(ch.category),
+          logo: ch.logo || '',
+          originalCategory: ch.category || 'General'
         }))
-        .slice(0, 20); // Limit to first 20 channels
+        .slice(0, 50); // Increased limit for better variety
       
       setChannels(validChannels);
+      setSelectedCategory('All');
       setCurrentView('channels');
     } catch (err) {
       setError(err.message);
@@ -78,8 +111,19 @@ function App() {
       setCurrentView('countries');
       setSelectedCountry(null);
       setChannels([]);
+      setSelectedCategory('All');
     }
   };
+
+  // Filter channels by selected category
+  const filteredChannels = selectedCategory === 'All' 
+    ? channels 
+    : channels.filter(channel => channel.category === selectedCategory);
+
+  // Get available categories from current channels
+  const availableCategories = ['All', ...new Set(channels.map(ch => ch.category))].filter(cat => 
+    cat === 'All' || channels.some(ch => ch.category === cat)
+  );
 
   return (
     <div className="viewport">
@@ -95,7 +139,7 @@ function App() {
           <main className="content">
             <div className="country-grid">
               {countries.map(country => (
-                <button 
+                <button
                   key={country.code}
                   className="country-card"
                   onClick={() => selectCountry(country)}
@@ -109,35 +153,67 @@ function App() {
         </div>
       )}
 
-      {/* Channel List View */}
+      {/* Channel List View with Categories */}
       {currentView === 'channels' && (
         <div className="pane">
           <header className="topbar">
             <button className="btn-back" onClick={goBack}>←</button>
             <div className="brand">{selectedCountry?.name}</div>
           </header>
+          
+          {/* Category Tabs */}
+          <div className="category-tabs">
+            {availableCategories.map(category => (
+              <button
+                key={category}
+                className={`category-tab ${selectedCategory === category ? 'active' : ''}`}
+                onClick={() => setSelectedCategory(category)}
+              >
+                {category}
+              </button>
+            ))}
+          </div>
+
           <main className="content">
             {loading && <div className="loading">Loading channels...</div>}
             {error && (
               <div className="error">
-                <p>{error}</p>
+                {error}
                 <button onClick={() => loadChannels(selectedCountry.code)}>Retry</button>
               </div>
             )}
             {!loading && !error && (
-              <div className="channel-list">
-                {channels.map(channel => (
-                  <button 
+              <div className="channel-grid">
+                {filteredChannels.map(channel => (
+                  <div
                     key={channel.id}
-                    className="channel-item"
+                    className="channel-card"
                     onClick={() => selectChannel(channel)}
                   >
-                    <div className="channel-name">{channel.name}</div>
-                    <div className="channel-category">{channel.category}</div>
-                  </button>
+                    <div className="channel-header">
+                      {channel.logo && (
+                        <img 
+                          src={channel.logo} 
+                          alt={channel.name}
+                          className="channel-logo"
+                          onError={(e) => { e.target.style.display = 'none'; }}
+                        />
+                      )}
+                      <div className="channel-name">{channel.name}</div>
+                    </div>
+                    <div className="channel-info">
+                      <span className="channel-category">{channel.category}</span>
+                      <button className="play-button">▶</button>
+                    </div>
+                  </div>
                 ))}
-                {channels.length === 0 && (
-                  <div className="no-channels">No channels available</div>
+                {filteredChannels.length === 0 && (
+                  <div className="no-channels">
+                    {selectedCategory === 'All' 
+                      ? 'No channels available' 
+                      : `No channels in ${selectedCategory} category`
+                    }
+                  </div>
                 )}
               </div>
             )}
@@ -153,17 +229,24 @@ function App() {
             <div className="brand truncate" title={selectedChannel.name}>
               {selectedChannel.name}
             </div>
+            <div className="channel-category-badge">{selectedChannel.category}</div>
           </header>
           <main className="content player-content">
             <div className="player-wrapper">
-              <video 
+              <video
                 controls 
                 autoPlay
                 className="video-player"
                 src={selectedChannel.url}
+                poster={selectedChannel.logo}
               >
                 Your browser does not support the video tag.
               </video>
+              <div className="player-info">
+                <h3>{selectedChannel.name}</h3>
+                <p>Category: {selectedChannel.category}</p>
+                <p>Country: {selectedCountry?.name}</p>
+              </div>
             </div>
           </main>
         </div>
