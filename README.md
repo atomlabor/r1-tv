@@ -2,6 +2,12 @@
 
 TV-App für Rabbit R1 mit Länderauswahl, Senderliste, Player und Favoriten.
 
+## Web-Zugang
+
+🌐 **Live Demo:** https://atomlabor.github.io/r1-tv
+
+Die App kann direkt über GitHub Pages im Browser getestet werden. Die Web-Version bietet alle Hauptfunktionen der nativen R1-App.
+
 ## Projektbeschreibung
 
 R1-TV ist eine moderne TV-App speziell für das Rabbit R1 Gerät entwickelt. Die App bietet:
@@ -66,15 +72,13 @@ Dieses Projekt steht unter der MIT-Lizenz. Siehe LICENSE Datei für Details.
 Beiträge sind willkommen! Bitte:
 
 1. Forke das Repository
-2. Erstelle einen Feature-Branch (`git checkout -b feature/neue-funktion`)
-3. Committe deine Änderungen (`git commit -am 'Neue Funktion hinzugefügt'`)
-4. Pushe den Branch (`git push origin feature/neue-funktion`)
+2. Erstelle einen Feature-Branch (git checkout -b feature/neue-funktion)
+3. Committe deine Änderungen (git commit -am 'Neue Funktion hinzugefügt')
+4. Pushe den Branch (git push origin feature/neue-funktion)
 5. Erstelle einen Pull Request
 
 ## Support
 
 Bei Fragen oder Problemen öffne bitte ein Issue im GitHub Repository.
 
----
-
-**Entwickelt für Rabbit R1** 🐰📺
+Entwickelt für Rabbit R1 🐰📺
