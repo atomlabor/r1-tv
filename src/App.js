@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import './styles/App.css';
 
 /**
- * R1-TV - Modern TV streaming app with categories, country selection and favorites
- * Now matching r1-tv.netlify.app functionality
+ * R1-TV - Modern TV streaming app optimized for Rabbit R1 display
+ * Screen: 240x254px content area, 28px status bar offset
+ * Total viewport: 240x282px
  */
 function App() {
   const [currentView, setCurrentView] = useState('categories'); // categories, countries, channels, player
@@ -124,7 +125,7 @@ function App() {
   const channels = getChannelsForCategoryAndCountry();
 
   return (
-    <div className="app">
+    <div className="app r1-optimized">
       <header className="app-header">
         <div className="header-content">
           <div className="logo">
@@ -227,7 +228,7 @@ function App() {
               <div className="video-placeholder">
                 <div className="channel-display">
                   <span className="playing-logo">{selectedChannel.logo}</span>
-                  <h3>{selectedChannel.name}</h3>
+                  {selectedChannel.name}
                   <p className="stream-info">Live Stream</p>
                 </div>
               </div>
@@ -257,7 +258,7 @@ function App() {
 
       <footer className="app-footer">
         <div className="footer-content">
-          <span>Entwickelt für Rabbit R1 | R1-create.js & tv.garden API</span>
+          Entwickelt für Rabbit R1 | R1-create.js & tv.garden API
         </div>
       </footer>
     </div>
