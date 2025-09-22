@@ -4,7 +4,7 @@ import './styles/App.css';
  * r1 tv - rabbit r1 optimized tv player  
  * Country direct channel list, no categories, TVGarden JSON, Rabbit UI
  * Direct load from https://raw.githubusercontent.com/TVGarden/tv-garden-channel-list/main/channels/raw/countries/{country}.json
- * Extended with 'mehr tv' button for additional general channel list - only on channel selection page
+ * Extended with paging functionality - 'mehr tv' button loads next 12 channels from country JSON
  */
 function App() {
   const [currentView, setCurrentView] = useState('countries');
@@ -14,6 +14,9 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [videoRotation, setVideoRotation] = useState(0); // Add rotation state
+  const [currentPage, setCurrentPage] = useState(0); // Track current page for paging
+  const [allCountryChannels, setAllCountryChannels] = useState([]); // Store all channels from country JSON
+  const [hasMoreChannels, setHasMoreChannels] = useState(false); // Track if more channels available
   
   // Countries with their country codes for TVGarden API
   const countries = [
@@ -59,11 +62,35 @@ function App() {
     setVideoRotation(prev => prev === 0 ? 90 : 0);
   };
   
+  // Process channels array into displayable format
+  const processChannels = (channelData, startIndex = 0, count = 12) => {
+    return channelData
+      .filter(ch => {
+        // Ensure we have playable streams
+        return ch.iptv_urls && ch.iptv_urls.length > 0;
+      })
+      .slice(startIndex, startIndex + count)
+      .map((ch, idx) => ({
+        id: `${selectedCountry?.code || 'unknown'}_${startIndex + idx}`,
+        name: formatChannelName(ch),
+        originalName: ch.name || 'Unknown Channel',
+        country: ch.country || selectedCountry?.code || 'unknown',
+        category: ch.category || 'general',
+        language: ch.language || '',
+        logo: ch.logo || '',
+        url: ch.iptv_urls[0], // Use first available stream
+        allUrls: ch.iptv_urls
+      }));
+  };
+  
   // Load channels directly from TVGarden country JSON
   const loadCountryChannels = async (country) => {
     setLoading(true);
     setError(null);
     setSelectedCountry(country);
+    setCurrentPage(0);
+    setChannels([]);
+    setAllCountryChannels([]);
     
     try {
       // Direct load from TVGarden country JSON
@@ -76,102 +103,66 @@ function App() {
       
       const channelData = await response.json();
       
-      // Process channels - take max 12 for optimal grid
-      const processedChannels = channelData
-        .filter(ch => {
-          // Ensure we have playable streams
-          return ch.iptv_urls && ch.iptv_urls.length > 0;
-        })
-        .slice(0, 12) // Perfect grid for R1 (12 channels max)
-        .map((ch, idx) => ({
-          id: `${country.code}_${idx}`,
-          name: formatChannelName(ch),
-          originalName: ch.name || 'Unknown Channel',
-          country: ch.country || country.code,
-          category: ch.category || 'general',
-          language: ch.language || '',
-          logo: ch.logo || '',
-          url: ch.iptv_urls[0], // Use first available stream
-          allUrls: ch.iptv_urls
-        }));
+      // Store all channels for paging
+      const validChannels = channelData.filter(ch => {
+        return ch.iptv_urls && ch.iptv_urls.length > 0;
+      });
       
-      if (processedChannels.length === 0) {
+      setAllCountryChannels(validChannels);
+      
+      // Process first page (12 channels)
+      const firstPageChannels = processChannels(validChannels, 0, 12);
+      
+      if (firstPageChannels.length === 0) {
         setError('no channels available for this country');
         setChannels([]);
+        setHasMoreChannels(false);
       } else {
-        setChannels(processedChannels);
+        setChannels(firstPageChannels);
         setCurrentView('channels');
+        // Check if more channels are available
+        setHasMoreChannels(validChannels.length > 12);
       }
       
     } catch (err) {
       console.error('Failed to load country channels:', err);
       setError('loading failed - country not available');
       setChannels([]);
+      setHasMoreChannels(false);
     } finally {
       setLoading(false);
     }
   };
   
-  // Load additional channels from general.json for the selected country
+  // Load next 12 channels from the same country JSON
   const loadMoreChannels = async () => {
-    if (!selectedCountry) return;
+    if (!selectedCountry || !hasMoreChannels || loading) return;
     
     setLoading(true);
     setError(null);
     
     try {
-      const url = 'https://raw.githubusercontent.com/TVGarden/iptv-channel-list/main/channel-lists/general.json';
-      const response = await fetch(url);
+      const nextPage = currentPage + 1;
+      const startIndex = nextPage * 12;
       
-      if (!response.ok) {
-        throw new Error('General channels not available');
-      }
+      // Process next 12 channels from already loaded data
+      const nextPageChannels = processChannels(allCountryChannels, startIndex, 12);
       
-      const channelData = await response.json();
-      
-      // Filter channels that match the selected country and process them
-      const countryCode = selectedCountry.code.toUpperCase();
-      const countryName = selectedCountry.name.toLowerCase();
-      
-      const additionalChannels = channelData
-        .filter(ch => {
-          // Ensure we have playable streams
-          if (!ch.stream_url && (!ch.iptv_urls || ch.iptv_urls.length === 0)) return false;
-          
-          // Filter by country - check country code or name
-          if (ch.country) {
-            const chCountry = ch.country.toLowerCase();
-            const chCode = ch.country.toUpperCase();
-            return chCode === countryCode || chCountry.includes(countryName) || countryName.includes(chCountry);
-          }
-          
-          // If no country info, check title/name for country references
-          const title = (ch.name || ch.title || '').toLowerCase();
-          return title.includes(countryName) || title.includes(selectedCountry.code);
-        })
-        .slice(0, 12) // Max 12 additional channels
-        .map((ch, idx) => ({
-          id: `${selectedCountry.code}_more_${idx}`,
-          name: formatChannelName(ch),
-          originalName: ch.name || ch.title || 'Unknown Channel',
-          country: ch.country || selectedCountry.code,
-          category: ch.category || 'general',
-          language: ch.language || '',
-          logo: ch.logo || ch.icon || '',
-          url: ch.stream_url || ch.iptv_urls[0], // Use stream_url or first iptv_url
-          allUrls: ch.iptv_urls || [ch.stream_url]
-        }));
-      
-      if (additionalChannels.length === 0) {
-        setError('no additional channels found for this country');
+      if (nextPageChannels.length === 0) {
+        setError('no more channels available');
+        setHasMoreChannels(false);
       } else {
-        // Add additional channels to existing ones
-        setChannels(prevChannels => [...prevChannels, ...additionalChannels]);
+        // Add next page channels to existing ones
+        setChannels(prevChannels => [...prevChannels, ...nextPageChannels]);
+        setCurrentPage(nextPage);
+        
+        // Check if even more channels are available
+        setHasMoreChannels(allCountryChannels.length > (startIndex + nextPageChannels.length));
       }
       
     } catch (err) {
-      console.error('Failed to load additional channels:', err);
-      setError('loading failed - additional channels not available');
+      console.error('Failed to load more channels:', err);
+      setError('loading failed - unable to load more channels');
     } finally {
       setLoading(false);
     }
@@ -192,6 +183,9 @@ function App() {
       setCurrentView('countries');
       setSelectedCountry(null);
       setChannels([]);
+      setAllCountryChannels([]);
+      setCurrentPage(0);
+      setHasMoreChannels(false);
     }
   };
   
@@ -224,14 +218,16 @@ function App() {
           <header className="r1-header">
             <button className="r1-back" onClick={goBack}>←</button>
             <div className="r1-title">{selectedCountry?.name}</div>
-            <button
-              className="r1-more-tv-btn" 
-              onClick={loadMoreChannels}
-              disabled={loading}
-              title="Weitere TV Sender für dieses Land"
-            >
-              mehr tv
-            </button>
+            {hasMoreChannels && (
+              <button
+                className="r1-more-tv-btn" 
+                onClick={loadMoreChannels}
+                disabled={loading}
+                title="Weitere 12 TV Sender für dieses Land laden"
+              >
+                mehr tv
+              </button>
+            )}
           </header>
           
           {loading && <div className="r1-loading">loading channels...</div>}
@@ -262,6 +258,13 @@ function App() {
                   <span className="play">▶</span>
                 </button>
               ))}
+            </div>
+          )}
+          
+          {/* Page indicator */}
+          {channels.length > 0 && (
+            <div className="r1-page-info">
+              {channels.length} Kanäle{hasMoreChannels ? ' (mehr verfügbar)' : ''}
             </div>
           )}
         </div>
