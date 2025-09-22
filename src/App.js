@@ -111,7 +111,7 @@ function App() {
 
   return (
     <div className="viewport">
-      <div className="status-bar" />
+      <div className="status-bar"></div>
       <div className="r1-app">
         <header className="r1-header">
           <div className="r1-header-content">
@@ -129,7 +129,7 @@ function App() {
             <div className="r1-section-title">choose country</div>
             <div className="r1-country-grid">
               {countries.map((country) => (
-                <button
+                <button 
                   key={country.code}
                   className="r1-country-btn"
                   onClick={() => handleCountrySelect(country)}
@@ -164,7 +164,7 @@ function App() {
               <>
                 <div className="r1-channel-grid">
                   {visibleChannels.map((channel, index) => (
-                    <button
+                    <button 
                       key={`${channel.id || index}-${channel.name}`}
                       className="r1-channel-btn"
                       onClick={() => setSelectedChannel(channel)}
@@ -219,7 +219,7 @@ function App() {
                 </button>
               )}
               
-              <video
+              <video 
                 ref={videoRef}
                 className="r1-video"
                 src={selectedChannel.url}
