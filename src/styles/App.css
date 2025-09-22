@@ -1,5 +1,4 @@
-/* R1-TV Minimal Country/Channel Selector Styles */
-
+/* R1-TV Enhanced Country/Channel Selector Styles with Category Tabs */
 /* Base Layout */
 .viewport {
   width: 240px;
@@ -68,6 +67,53 @@
   white-space: nowrap;
 }
 
+.channel-category-badge {
+  background: rgba(255, 204, 0, 0.2);
+  color: #ffcc00;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: bold;
+  margin-left: 8px;
+}
+
+/* Category Tabs */
+.category-tabs {
+  display: flex;
+  overflow-x: auto;
+  background: rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 0 8px;
+  min-height: 35px;
+  align-items: center;
+}
+
+.category-tab {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 10px;
+  font-weight: 600;
+  padding: 6px 10px;
+  margin: 0 2px;
+  border-radius: 15px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  min-width: fit-content;
+}
+
+.category-tab:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.category-tab.active {
+  background: rgba(255, 204, 0, 0.3);
+  color: #ffcc00;
+  font-weight: bold;
+}
+
 /* Content Area */
 .content {
   flex: 1;
@@ -123,7 +169,102 @@
   width: 100%;
 }
 
-/* Channel List */
+/* Channel Grid (replaces channel list) */
+.channel-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  height: 100%;
+  align-content: start;
+}
+
+.channel-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 10px;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 70px;
+  position: relative;
+}
+
+.channel-card:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+.channel-header {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.channel-logo {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  margin-right: 6px;
+  border-radius: 2px;
+}
+
+.channel-name {
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  flex: 1;
+}
+
+.channel-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+}
+
+.channel-category {
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2px 6px;
+  border-radius: 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 60px;
+}
+
+.play-button {
+  background: rgba(255, 204, 0, 0.3);
+  border: 1px solid #ffcc00;
+  color: #ffcc00;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.play-button:hover {
+  background: rgba(255, 204, 0, 0.5);
+  transform: scale(1.1);
+}
+
+/* Legacy channel list styles (for backwards compatibility) */
 .channel-list {
   display: flex;
   flex-direction: column;
@@ -148,25 +289,6 @@
 .channel-item:hover {
   background: rgba(255, 255, 255, 0.1);
   border-color: rgba(255, 255, 255, 0.3);
-}
-
-.channel-name {
-  font-size: 12px;
-  font-weight: 600;
-  margin-bottom: 2px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  width: 100%;
-}
-
-.channel-category {
-  font-size: 10px;
-  color: rgba(255, 255, 255, 0.6);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  width: 100%;
 }
 
 /* Loading and Error States */
@@ -205,6 +327,7 @@
   color: rgba(255, 255, 255, 0.5);
   font-size: 11px;
   padding: 20px;
+  grid-column: 1 / -1;
 }
 
 /* Player Styles */
@@ -221,24 +344,41 @@
   height: 100%;
   background: #000;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
 }
 
 .video-player {
   width: 100%;
-  height: 100%;
+  flex: 1;
   background: #000;
   object-fit: contain;
+}
+
+.player-info {
+  background: rgba(0, 0, 0, 0.8);
+  padding: 8px 12px;
+  font-size: 10px;
+  line-height: 1.3;
+}
+
+.player-info h3 {
+  margin: 0 0 4px 0;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.player-info p {
+  margin: 2px 0;
+  color: rgba(255, 255, 255, 0.8);
 }
 
 /* Responsive adjustments for web */
 @media (min-width: 480px) {
   .viewport {
     width: 100%;
-    max-width: 800px;
+    max-width: 900px;
     height: auto;
-    min-height: 600px;
+    min-height: 700px;
     margin: 0 auto;
     border-radius: 12px;
     overflow: hidden;
@@ -250,58 +390,96 @@
   
   .pane {
     height: auto;
-    min-height: 600px;
+    min-height: 700px;
   }
   
   .topbar {
-    height: 60px;
-    padding: 0 20px;
+    height: 70px;
+    padding: 0 25px;
   }
   
   .brand {
-    font-size: 18px;
+    font-size: 20px;
   }
   
   .subtitle {
-    font-size: 14px;
+    font-size: 16px;
+  }
+  
+  .category-tabs {
+    padding: 0 15px;
+    min-height: 45px;
+  }
+  
+  .category-tab {
+    font-size: 12px;
+    padding: 8px 15px;
+    margin: 0 4px;
   }
   
   .content {
-    padding: 20px;
+    padding: 25px;
   }
   
   .country-grid {
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 15px;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 20px;
   }
   
   .country-card {
-    padding: 20px 15px;
-    min-height: 100px;
+    padding: 25px 20px;
+    min-height: 120px;
   }
   
   .country-name {
-    font-size: 14px;
+    font-size: 16px;
     white-space: normal;
   }
   
   .country-flag {
-    font-size: 16px;
+    font-size: 18px;
   }
   
-  .channel-item {
-    padding: 15px 20px;
+  .channel-grid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+  }
+  
+  .channel-card {
+    padding: 15px;
+    min-height: 100px;
   }
   
   .channel-name {
-    font-size: 16px;
-  }
-  
-  .channel-category {
     font-size: 14px;
   }
   
+  .channel-category {
+    font-size: 11px;
+    max-width: 80px;
+  }
+  
+  .play-button {
+    width: 30px;
+    height: 30px;
+    font-size: 12px;
+  }
+  
+  .channel-logo {
+    width: 30px;
+    height: 30px;
+  }
+  
   .player-wrapper {
-    min-height: 400px;
+    min-height: 500px;
+  }
+  
+  .player-info {
+    padding: 15px 25px;
+    font-size: 14px;
+  }
+  
+  .player-info h3 {
+    font-size: 18px;
   }
 }
