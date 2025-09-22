@@ -34,12 +34,10 @@ function App() {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-
       const cleanChannels = data.filter(c => c && c.name && c.url).map(c => ({
         ...c,
         name: c.name.toLowerCase(),
       }));
-
       setChannels(cleanChannels);
       setCurrentPage(0);
     } catch (err) {
@@ -93,7 +91,6 @@ function App() {
 
   return (
     <div className="viewport">
-      <div className="status-bar" />
       <div className="r1-app">
         <header className="r1-header">
           <div className="r1-header-content">
@@ -128,11 +125,9 @@ function App() {
               <button className="r1-back-btn" onClick={goBack}>←</button>
               {selectedCountry.name} channels
             </div>
-
             {loading && channels.length === 0 && (
               <div className="r1-loading">loading channels...</div>
             )}
-
             {error && (
               <div className="r1-error">
                 {error}
@@ -141,7 +136,6 @@ function App() {
                 </button>
               </div>
             )}
-
             {visibleChannels.length > 0 && (
               <>
                 <div className="r1-channel-grid">
@@ -156,7 +150,6 @@ function App() {
                     </button>
                   ))}
                 </div>
-
                 {hasMoreChannels && (
                   <div className="r1-load-more">
                     <button
@@ -182,11 +175,9 @@ function App() {
                 <button className="r1-control-btn rotate" onClick={toggleRotate} title="rotate">↻</button>
                 <button className="r1-control-btn fullscreen" onClick={toggleFullscreen} title="fullscreen">⛶</button>
               </div>
-
               {isFullscreen && (
                 <button className="r1-exit-fullscreen" onClick={exitFullscreen} title="exit fullscreen">exit</button>
               )}
-
               <video
                 ref={videoRef}
                 className="r1-video"
@@ -199,7 +190,6 @@ function App() {
               >
                 your browser does not support video playback
               </video>
-
               {error && (
                 <div className="r1-player-error">
                   {error}
