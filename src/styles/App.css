@@ -140,24 +140,28 @@ body {
 /* Countries section */
 .r1-countries {
   flex: 1;
-  padding: 8px;
+  padding: 6px;
   display: flex;
   flex-direction: column;
+  height: calc(254px - 24px); /* Full content height minus header */
 }
 
 .r1-section-title {
   font-size: 10px;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.9);
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   text-transform: lowercase;
 }
 
 .r1-country-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 6px;
+  gap: 4px;
   flex: 1;
+  height: auto;
+  max-height: 200px;
+  overflow: hidden;
 }
 
 .r1-country-btn {
@@ -176,8 +180,10 @@ body {
   font-size: 9px;
   font-weight: 500;
   text-transform: lowercase;
-  padding: 8px 4px;
-  min-height: 40px;
+  padding: 6px 4px;
+  height: 48px;
+  min-height: 48px;
+  max-height: 48px;
 }
 
 .r1-country-btn:hover {
