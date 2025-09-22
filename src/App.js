@@ -34,15 +34,12 @@ function App() {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-      
-      // Filter and clean channel data
-      const cleanChannels = data.filter(channel => 
-        channel && channel.name && channel.url
-      ).map(channel => ({
-        ...channel,
-        name: channel.name.toLowerCase()
+
+      const cleanChannels = data.filter(c => c && c.name && c.url).map(c => ({
+        ...c,
+        name: c.name.toLowerCase(),
       }));
-      
+
       setChannels(cleanChannels);
       setCurrentPage(0);
     } catch (err) {
@@ -73,37 +70,22 @@ function App() {
   };
 
   const loadMoreChannels = () => {
-    const nextPage = currentPage + 1;
-    setCurrentPage(nextPage);
+    setCurrentPage(prev => prev + 1);
   };
 
-  const toggleRotate = () => {
-    setVideoRotation(prev => prev === 0 ? 90 : 0);
-  };
+  const toggleRotate = () => setVideoRotation(prev => (prev === 0 ? 90 : 0));
 
   const toggleFullscreen = () => {
-    if (document.fullscreenElement) {
-      document.exitFullscreen();
-    } else {
-      playerRef.current?.requestFullscreen();
-    }
+    if (document.fullscreenElement) document.exitFullscreen();
+    else playerRef.current?.requestFullscreen();
   };
 
-  const exitFullscreen = () => {
-    if (document.fullscreenElement) {
-      document.exitFullscreen();
-    }
-  };
+  const exitFullscreen = () => { if (document.fullscreenElement) document.exitFullscreen(); };
 
   useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
-    
+    const handleFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement);
     document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => {
-      document.removeEventListener('fullscreenchange', handleFullscreenChange);
-    };
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, []);
 
   const visibleChannels = channels.slice(0, (currentPage + 1) * channelsPerPage);
@@ -111,25 +93,25 @@ function App() {
 
   return (
     <div className="viewport">
-      <div className="status-bar"></div>
+      <div className="status-bar" />
       <div className="r1-app">
         <header className="r1-header">
           <div className="r1-header-content">
-            <img 
-              src="https://github.com/atomlabor/r1-tv/blob/main/r1-tv.png?raw=true" 
-              alt="r1 tv logo" 
+            <img
+              src="https://github.com/atomlabor/r1-tv/blob/main/r1-tv.png?raw=true"
+              alt="r1 tv logo"
               className="r1-logo"
             />
             <h1 className="r1-title">r1 tv</h1>
           </div>
         </header>
-        
+
         {!selectedCountry ? (
           <div className="r1-countries">
             <div className="r1-section-title">choose country</div>
             <div className="r1-country-grid">
-              {countries.map((country) => (
-                <button 
+              {countries.map(country => (
+                <button
                   key={country.code}
                   className="r1-country-btn"
                   onClick={() => handleCountrySelect(country)}
@@ -146,11 +128,11 @@ function App() {
               <button className="r1-back-btn" onClick={goBack}>←</button>
               {selectedCountry.name} channels
             </div>
-            
+
             {loading && channels.length === 0 && (
               <div className="r1-loading">loading channels...</div>
             )}
-            
+
             {error && (
               <div className="r1-error">
                 {error}
@@ -159,12 +141,12 @@ function App() {
                 </button>
               </div>
             )}
-            
+
             {visibleChannels.length > 0 && (
               <>
                 <div className="r1-channel-grid">
                   {visibleChannels.map((channel, index) => (
-                    <button 
+                    <button
                       key={`${channel.id || index}-${channel.name}`}
                       className="r1-channel-btn"
                       onClick={() => setSelectedChannel(channel)}
@@ -174,11 +156,11 @@ function App() {
                     </button>
                   ))}
                 </div>
-                
+
                 {hasMoreChannels && (
                   <div className="r1-load-more">
-                    <button 
-                      className="r1-more-tv-btn" 
+                    <button
+                      className="r1-more-tv-btn"
                       onClick={loadMoreChannels}
                       disabled={loading}
                     >
@@ -191,56 +173,37 @@ function App() {
           </div>
         ) : (
           <div className="r1-player-container">
-            <div 
-              className={`r1-player ${videoRotation === 90 ? 'rotated' : ''}`} 
+            <div
+              className={`r1-player ${videoRotation === 90 ? 'rotated' : ''}`}
               ref={playerRef}
             >
-              {/* Player controls */}
               <div className="r1-player-controls">
-                <button className="r1-control-btn back" onClick={goBack} title="back">
-                  ←
-                </button>
-                <button className="r1-control-btn rotate" onClick={toggleRotate} title="rotate">
-                  ↻
-                </button>
-                <button className="r1-control-btn fullscreen" onClick={toggleFullscreen} title="fullscreen">
-                  ⛶
-                </button>
+                <button className="r1-control-btn back" onClick={goBack} title="back">←</button>
+                <button className="r1-control-btn rotate" onClick={toggleRotate} title="rotate">↻</button>
+                <button className="r1-control-btn fullscreen" onClick={toggleFullscreen} title="fullscreen">⛶</button>
               </div>
-              
-              {/* Exit fullscreen button (only visible in fullscreen) */}
+
               {isFullscreen && (
-                <button 
-                  className="r1-exit-fullscreen"
-                  onClick={exitFullscreen}
-                  title="exit fullscreen"
-                >
-                  exit
-                </button>
+                <button className="r1-exit-fullscreen" onClick={exitFullscreen} title="exit fullscreen">exit</button>
               )}
-              
-              <video 
+
+              <video
                 ref={videoRef}
                 className="r1-video"
                 src={selectedChannel.url}
                 autoPlay
                 controls
                 key={selectedChannel.url}
-                onError={(e) => {
-                  console.error('stream error:', e);
-                  setError('stream not available');
-                }}
+                onError={(e) => { console.error('stream error:', e); setError('stream not available'); }}
                 onLoadStart={() => setError(null)}
               >
                 your browser does not support video playback
               </video>
-              
+
               {error && (
                 <div className="r1-player-error">
                   {error}
-                  <button className="r1-btn" onClick={goBack}>
-                    ← back to channels
-                  </button>
+                  <button className="r1-btn" onClick={goBack}>← back to channels</button>
                 </div>
               )}
             </div>
