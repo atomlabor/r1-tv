@@ -1,101 +1,314 @@
 {
-  "countrySelector": {
-    "title": "Select Country",
-    "searchPlaceholder": "Search countries...",
-    "noResults": "No countries found",
-    "loading": "Loading countries...",
-    "error": "Error loading countries"
-  },
-  "channelList": {
-    "title": "TV Channels",
-    "loading": "Loading channels...",
-    "error": "Error loading channels",
-    "noChannels": "No channels available",
-    "searchPlaceholder": "Search channels...",
-    "filterByCategory": "Filter by category",
-    "allCategories": "All Categories",
-    "refresh": "Refresh"
-  },
-  "player": {
-    "loading": "Loading stream...",
-    "error": "Playback error",
-    "play": "Play",
-    "pause": "Pause",
-    "mute": "Mute",
-    "unmute": "Unmute",
-    "fullscreen": "Fullscreen",
-    "exitFullscreen": "Exit Fullscreen",
-    "volume": "Volume",
-    "streamUnavailable": "Stream unavailable",
-    "connectionError": "Connection error"
-  },
-  "favorites": {
-    "title": "Favorites",
-    "addToFavorites": "Add to Favorites",
-    "removeFromFavorites": "Remove from Favorites",
-    "noFavorites": "No favorite channels yet",
-    "addFirstFavorite": "Add your first favorite channel"
-  },
-  "status": {
-    "online": "Online",
-    "offline": "Offline",
-    "connecting": "Connecting...",
-    "buffering": "Buffering...",
-    "ready": "Ready",
-    "error": "Error"
-  },
-  "buttons": {
-    "ok": "OK",
-    "cancel": "Cancel",
+  "app": {
+    "title": "R1-TV",
+    "subtitle": "Your Personal TV Assistant",
+    "description": "TV app for Rabbit R1 with country selection, channel list, player and favorites",
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "retry": "Retry",
     "close": "Close",
     "back": "Back",
     "next": "Next",
     "previous": "Previous",
+    "cancel": "Cancel",
     "save": "Save",
     "delete": "Delete",
     "edit": "Edit",
-    "refresh": "Refresh",
-    "retry": "Retry",
-    "settings": "Settings"
+    "add": "Add",
+    "remove": "Remove",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort",
+    "refresh": "Refresh"
   },
-  "errors": {
-    "networkError": "Network connection error",
-    "streamError": "Stream playback error",
-    "loadingError": "Loading error",
-    "unknownError": "An unknown error occurred",
-    "channelNotFound": "Channel not found",
-    "countryNotSupported": "Country not supported",
-    "browserNotSupported": "Browser not supported",
-    "tryAgain": "Please try again later"
-  },
-  "labels": {
-    "channel": "Channel",
-    "country": "Country",
-    "category": "Category",
-    "language": "Language",
-    "quality": "Quality",
-    "name": "Name",
-    "description": "Description",
-    "website": "Website",
-    "logo": "Logo",
-    "stream": "Stream",
-    "lastUpdated": "Last Updated",
-    "viewers": "Viewers",
-    "duration": "Duration"
-  },
-  "app": {
-    "title": "R1 TV",
-    "subtitle": "Live TV Streaming",
-    "version": "Version",
+  "navigation": {
+    "home": "Home",
+    "countries": "Countries",
+    "channels": "Channels",
+    "favorites": "Favorites",
+    "player": "Player",
+    "settings": "Settings",
     "about": "About",
     "help": "Help",
-    "feedback": "Feedback"
+    "language": "Language"
+  },
+  "countries": {
+    "title": "Select Country",
+    "subtitle": "Choose a country to view available TV channels",
+    "loading": "Loading countries...",
+    "error": "Failed to load countries",
+    "empty": "No countries available",
+    "select": "Select Country",
+    "selected": "Selected",
+    "available": "Available Countries",
+    "popular": "Popular Countries",
+    "all": "All Countries",
+    "searchPlaceholder": "Search countries..."
+  },
+  "channels": {
+    "title": "TV Channels",
+    "subtitle": "Available channels for",
+    "loading": "Loading channels...",
+    "error": "Failed to load channels",
+    "empty": "No channels available for this country",
+    "watch": "Watch",
+    "addToFavorites": "Add to Favorites",
+    "removeFromFavorites": "Remove from Favorites",
+    "inFavorites": "In Favorites",
+    "genre": "Genre",
+    "language": "Language",
+    "quality": "Quality",
+    "categories": {
+      "all": "All Categories",
+      "news": "News",
+      "sports": "Sports",
+      "entertainment": "Entertainment",
+      "movies": "Movies",
+      "documentaries": "Documentaries",
+      "kids": "Kids",
+      "music": "Music",
+      "lifestyle": "Lifestyle",
+      "education": "Education",
+      "local": "Local",
+      "international": "International"
+    },
+    "searchPlaceholder": "Search channels...",
+    "sortBy": {
+      "name": "Name",
+      "popularity": "Popularity",
+      "category": "Category",
+      "added": "Recently Added"
+    }
+  },
+  "favorites": {
+    "title": "Favorite Channels",
+    "subtitle": "Your saved TV channels",
+    "empty": "No favorite channels yet",
+    "emptyDescription": "Add channels to favorites from the channel list",
+    "added": "Added to favorites",
+    "removed": "Removed from favorites",
+    "clear": "Clear All Favorites",
+    "clearConfirm": "Remove all channels from favorites?",
+    "manage": "Manage Favorites",
+    "reorder": "Reorder",
+    "export": "Export Favorites",
+    "import": "Import Favorites"
+  },
+  "player": {
+    "title": "TV Player",
+    "loading": "Loading stream...",
+    "error": "Failed to load stream",
+    "offline": "Channel is currently offline",
+    "unsupported": "Stream format not supported",
+    "retry": "Retry Connection",
+    "fullscreen": "Fullscreen",
+    "exitFullscreen": "Exit Fullscreen",
+    "volume": "Volume",
+    "mute": "Mute",
+    "unmute": "Unmute",
+    "pause": "Pause",
+    "play": "Play",
+    "stop": "Stop",
+    "controls": {
+      "show": "Show Controls",
+      "hide": "Hide Controls",
+      "settings": "Player Settings",
+      "quality": "Quality",
+      "speed": "Playback Speed",
+      "subtitles": "Subtitles",
+      "audio": "Audio Track"
+    },
+    "info": {
+      "channel": "Channel",
+      "country": "Country",
+      "category": "Category",
+      "language": "Language",
+      "viewers": "Viewers",
+      "bitrate": "Bitrate",
+      "resolution": "Resolution"
+    },
+    "rotation": {
+      "portrait": "Portrait Mode",
+      "landscape": "Landscape Mode",
+      "auto": "Auto Rotate"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "App preferences and configuration",
+    "language": {
+      "title": "Language",
+      "description": "Select app language",
+      "options": {
+        "en": "English",
+        "de": "Deutsch"
+      }
+    },
+    "theme": {
+      "title": "Theme",
+      "description": "Choose app appearance",
+      "options": {
+        "light": "Light",
+        "dark": "Dark",
+        "auto": "Auto (System)"
+      }
+    },
+    "player": {
+      "title": "Player Settings",
+      "autoplay": "Autoplay",
+      "autoplayDescription": "Start playing automatically",
+      "quality": "Default Quality",
+      "qualityDescription": "Preferred video quality",
+      "volume": "Default Volume",
+      "controls": "Show Controls",
+      "controlsDescription": "Display player controls",
+      "fullscreenRotation": "Auto Rotate in Fullscreen",
+      "fullscreenRotationDescription": "Automatically rotate device in fullscreen"
+    },
+    "network": {
+      "title": "Network Settings",
+      "timeout": "Connection Timeout",
+      "retry": "Retry Attempts",
+      "cache": "Enable Caching",
+      "cacheDescription": "Cache channel data for faster loading"
+    },
+    "privacy": {
+      "title": "Privacy Settings",
+      "analytics": "Analytics",
+      "analyticsDescription": "Help improve the app by sharing usage data",
+      "crashReports": "Crash Reports",
+      "crashReportsDescription": "Automatically send crash reports"
+    },
+    "about": {
+      "title": "About R1-TV",
+      "version": "Version",
+      "build": "Build",
+      "developer": "Developer",
+      "license": "License",
+      "openSource": "Open Source",
+      "github": "GitHub Repository",
+      "support": "Support",
+      "feedback": "Send Feedback"
+    },
+    "reset": {
+      "title": "Reset Settings",
+      "description": "Reset all settings to default values",
+      "button": "Reset to Defaults",
+      "confirm": "Reset all settings?",
+      "success": "Settings reset successfully"
+    }
+  },
+  "search": {
+    "placeholder": "Search...",
+    "results": "Search Results",
+    "noResults": "No results found",
+    "searching": "Searching...",
+    "clear": "Clear Search",
+    "recent": "Recent Searches",
+    "suggestions": "Suggestions",
+    "filters": {
+      "all": "All",
+      "channels": "Channels",
+      "countries": "Countries",
+      "categories": "Categories"
+    }
+  },
+  "errors": {
+    "network": "Network connection error",
+    "timeout": "Request timed out",
+    "notFound": "Content not found",
+    "serverError": "Server error occurred",
+    "unauthorized": "Access denied",
+    "forbidden": "Action not permitted",
+    "rateLimited": "Too many requests, please try again later",
+    "offline": "No internet connection",
+    "generic": "Something went wrong",
+    "retry": "Please try again",
+    "contact": "Contact support if the problem persists"
+  },
+  "notifications": {
+    "channelAdded": "Channel added to favorites",
+    "channelRemoved": "Channel removed from favorites",
+    "settingsSaved": "Settings saved",
+    "errorOccurred": "An error occurred",
+    "loading": "Loading...",
+    "success": "Operation completed successfully",
+    "networkError": "Network error - check your connection",
+    "streamError": "Stream could not be loaded"
+  },
+  "accessibility": {
+    "playButton": "Play channel",
+    "favoriteButton": "Toggle favorite",
+    "backButton": "Go back",
+    "homeButton": "Go to home",
+    "menuButton": "Open menu",
+    "settingsButton": "Open settings",
+    "searchButton": "Search",
+    "clearButton": "Clear",
+    "closeButton": "Close",
+    "fullscreenButton": "Toggle fullscreen",
+    "volumeSlider": "Adjust volume",
+    "channelList": "List of TV channels",
+    "countryList": "List of countries",
+    "favoritesList": "List of favorite channels",
+    "playerControls": "Video player controls"
+  },
+  "rabbit": {
+    "integration": {
+      "title": "Rabbit R1 Integration",
+      "description": "Enhanced features for Rabbit R1 device",
+      "hardware": {
+        "title": "Hardware Controls",
+        "scroll": "Scroll with device wheel",
+        "rotate": "Auto-rotate display",
+        "voice": "Voice commands",
+        "gestures": "Touch gestures"
+      },
+      "triggers": {
+        "title": "Creation Triggers",
+        "voice": "Voice activation",
+        "gesture": "Gesture recognition",
+        "schedule": "Scheduled activation",
+        "context": "Context-aware triggers"
+      },
+      "features": {
+        "offline": "Offline functionality",
+        "sync": "Cloud synchronization",
+        "performance": "Optimized performance",
+        "battery": "Battery optimization"
+      }
+    },
+    "voice": {
+      "commands": {
+        "play": "Play",
+        "pause": "Pause",
+        "stop": "Stop",
+        "next": "Next channel",
+        "previous": "Previous channel",
+        "volume": "Volume",
+        "favorites": "Show favorites",
+        "search": "Search",
+        "home": "Go home",
+        "settings": "Settings"
+      },
+      "listening": "Listening...",
+      "processing": "Processing command...",
+      "notRecognized": "Command not recognized",
+      "tryAgain": "Please try again"
+    }
   },
   "web": {
     "browserTitle": "R1 TV - Live TV in Browser",
     "unsupportedBrowser": "Your browser is not supported",
     "enableJavaScript": "Please enable JavaScript",
     "fullscreenNotSupported": "Fullscreen not supported in this browser",
-    "webAccessEnabled": "Web access enabled"
+    "webAccessEnabled": "Web access enabled",
+    "deployment": {
+      "title": "Web Deployment",
+      "build": "Build Process",
+      "hosting": "Hosting Options",
+      "cors": "CORS Configuration",
+      "compatibility": "Browser Compatibility"
+    }
   }
 }
