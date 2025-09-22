@@ -73,11 +73,15 @@ function App() {
   };
 
   const toggleRotate = () => setVideoRotation(prev => (prev === 0 ? 90 : 0));
+
   const toggleFullscreen = () => {
     if (document.fullscreenElement) document.exitFullscreen();
     else playerRef.current?.requestFullscreen();
   };
-  const exitFullscreen = () => { if (document.fullscreenElement) document.exitFullscreen(); };
+
+  const exitFullscreen = () => { 
+    if (document.fullscreenElement) document.exitFullscreen(); 
+  };
 
   useEffect(() => {
     const handleFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement);
@@ -93,7 +97,7 @@ function App() {
       <div className="r1-app">
         <header className="r1-header">
           <div className="r1-header-content">
-            <img
+            <img 
               src="https://github.com/atomlabor/r1-tv/blob/main/r1-tv.png?raw=true"
               alt="r1 tv logo"
               className="r1-logo"
@@ -101,8 +105,12 @@ function App() {
             <h1 className="r1-title">r1 tv</h1>
             
             {selectedCountry && !selectedChannel && hasMoreChannels && (
-              <button className="r1-more-tv-header-btn" onClick={loadMoreChannels} disabled={loading}>
-                {loading ? '...' : '>'}
+              <button 
+                className="r1-more-tv-header-btn" 
+                disabled={loading} 
+                onClick={loadMoreChannels}
+              >
+                {loading ? '...' : 'more tv'}
               </button>
             )}
           </div>
@@ -128,7 +136,7 @@ function App() {
           <div className="r1-channels">
             <div className="r1-channels-header">
               <button className="r1-back-btn" onClick={goBack}>←</button>
-              {selectedCountry.name} channels
+              <span>{selectedCountry.name} channels</span>
             </div>
             
             {loading && channels.length === 0 && (
@@ -145,20 +153,18 @@ function App() {
             )}
             
             {visibleChannels.length > 0 && (
-              <>
-                <div className="r1-channel-grid">
-                  {visibleChannels.map((channel, index) => (
-                    <button
-                      key={`${channel.id || index}-${channel.name}`}
-                      className="r1-channel-btn"
-                      onClick={() => setSelectedChannel(channel)}
-                      title={channel.name}
-                    >
-                      <div className="r1-channel-name">{channel.name}</div>
-                    </button>
-                  ))}
-                </div>
-              </>
+              <div className="r1-channel-grid">
+                {visibleChannels.map((channel, index) => (
+                  <button
+                    key={`${channel.id || index}-${channel.name}`}
+                    className="r1-channel-btn"
+                    onClick={() => setSelectedChannel(channel)}
+                    title={channel.name}
+                  >
+                    <div className="r1-channel-name">{channel.name}</div>
+                  </button>
+                ))}
+              </div>
             )}
           </div>
         ) : (
@@ -184,7 +190,10 @@ function App() {
                 autoPlay
                 controls
                 key={selectedChannel.url}
-                onError={(e) => { console.error('stream error:', e); setError('stream not available'); }}
+                onError={(e) => { 
+                  console.error('stream error:', e); 
+                  setError('stream not available'); 
+                }}
                 onLoadStart={() => setError(null)}
               >
                 your browser does not support video playback
