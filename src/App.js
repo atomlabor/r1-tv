@@ -13,6 +13,7 @@ function App() {
   const [selectedChannel, setSelectedChannel] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [videoRotation, setVideoRotation] = useState(0); // Add rotation state
   
   // Countries with their country codes for TVGarden API
   const countries = [
@@ -51,6 +52,11 @@ function App() {
     }
     
     return name || 'unknown';
+  };
+  
+  // Toggle video rotation between 0° and 90°
+  const toggleVideoRotation = () => {
+    setVideoRotation(prev => prev === 0 ? 90 : 0);
   };
   
   // Load channels directly from TVGarden country JSON
@@ -174,12 +180,14 @@ function App() {
   const selectChannel = (channel) => {
     setSelectedChannel(channel);
     setCurrentView('player');
+    setVideoRotation(0); // Reset rotation when selecting new channel
   };
   
   const goBack = () => {
     if (currentView === 'player') {
       setCurrentView('channels');
       setSelectedChannel(null);
+      setVideoRotation(0); // Reset rotation when leaving player
     } else if (currentView === 'channels') {
       setCurrentView('countries');
       setSelectedCountry(null);
@@ -267,6 +275,13 @@ function App() {
             <div className="r1-title" title={selectedChannel.originalName}>
               {selectedChannel.name}
             </div>
+            <button
+              className="r1-rotate-btn"
+              onClick={toggleVideoRotation}
+              title="Video rotieren (90°)"
+            >
+              ↻
+            </button>
           </header>
           <div className="r1-player">
             <video
@@ -275,6 +290,11 @@ function App() {
               autoPlay
               muted
               className="r1-video"
+              style={{
+                transform: `rotate(${videoRotation}deg)`,
+                transformOrigin: 'center center',
+                transition: 'transform 0.3s ease'
+              }}
               src={selectedChannel.url}
               onError={(e) => {
                 console.error('Stream error:', e);
@@ -298,5 +318,4 @@ function App() {
     </div>
   );
 }
-
 export default App;
