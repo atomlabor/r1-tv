@@ -19,7 +19,7 @@ function App() {
   
   const countries = [
     { code: 'de', name: 'germany', emoji: '🇩🇪' },
-    { code: 'uk', name: 'uk', emoji: '🇬🇧' },
+    { code: 'gb', name: 'uk', emoji: '🇬🇧' },
     { code: 'us', name: 'usa', emoji: '🇺🇸' },
     { code: 'fr', name: 'france', emoji: '🇫🇷' },
     { code: 'it', name: 'italy', emoji: '🇮🇹' },
@@ -28,59 +28,56 @@ function App() {
     { code: 'ch', name: 'switzerland', emoji: '🇨🇭' }
   ];
   
-  // Create dummy channels for fallback when API returns empty or fails
-  const createDummyChannels = (countryName) => {
-    const dummyChannels = [];
-    for (let i = 1; i <= 12; i++) {
-      dummyChannels.push({
-        id: `dummy-${i}`,
-        name: `${countryName} channel ${i}`,
-        url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4'
-      });
-    }
-    return dummyChannels;
-  };
-  
   const loadChannels = async (countryCode) => {
     setLoading(true);
     setError(null);
     try {
+      console.log(`Loading channels for country: ${countryCode}`);
       const response = await fetch(`https://raw.githubusercontent.com/TVGarden/tv-garden-channel-list/main/channels/raw/countries/${countryCode}.json`);
+      
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
+      
       const data = await response.json();
+      console.log('Loaded channel data:', data);
       
-      // Check if data exists and has channels
+      // Check if data exists and is an array
       if (!data || !Array.isArray(data) || data.length === 0) {
-        setError('No channels found');
-        // Use dummy channels as fallback
-        const countryName = countries.find(c => c.code === countryCode)?.name || countryCode;
-        setChannels(createDummyChannels(countryName));
-        setCurrentPage(0);
-        return;
+        throw new Error('No channels found in response');
       }
       
-      const cleanChannels = data.filter(c => c && c.name && c.url).map(c => ({
-        ...c,
-        name: c.name.toLowerCase(),
-      }));
+      // Process and filter channels
+      const processedChannels = data
+        .filter(channel => {
+          // Filter out invalid channels
+          return channel && 
+                 channel.name && 
+                 channel.name.trim() && 
+                 channel.url && 
+                 channel.url.trim() &&
+                 channel.url.startsWith('http');
+        })
+        .map((channel, index) => ({
+          id: channel.id || `channel-${index}`,
+          name: channel.name.trim(),
+          url: channel.url.trim(),
+          logo: channel.logo || null,
+          category: channel.category || 'General'
+        }));
       
-      // If no valid channels after filtering, show error and use dummy channels
-      if (cleanChannels.length === 0) {
-        setError('No channels found');
-        const countryName = countries.find(c => c.code === countryCode)?.name || countryCode;
-        setChannels(createDummyChannels(countryName));
-      } else {
-        setChannels(cleanChannels);
+      console.log(`Processed ${processedChannels.length} valid channels`);
+      
+      if (processedChannels.length === 0) {
+        throw new Error('No valid channels found after filtering');
       }
+      
+      setChannels(processedChannels);
       setCurrentPage(0);
     } catch (err) {
       console.error('Error loading channels:', err);
-      setError('No channels found');
-      // Use dummy channels as fallback
-      const countryName = countries.find(c => c.code === countryCode)?.name || countryCode;
-      setChannels(createDummyChannels(countryName));
+      setError(`Failed to load channels: ${err.message}`);
+      setChannels([]);
       setCurrentPage(0);
     } finally {
       setLoading(false);
@@ -102,6 +99,7 @@ function App() {
   };
   
   const handleCountrySelect = (country) => {
+    console.log('Country selected:', country);
     setSelectedCountry(country);
     setCurrentPage(0);
     loadChannels(country.code);
@@ -157,7 +155,7 @@ function App() {
       <div className="r1-app">
         <header className="r1-header">
           <div className="r1-header-content">
-            <img
+            <img 
               src="https://github.com/atomlabor/r1-tv/blob/main/r1-tv.png?raw=true"
               alt="r1 tv logo"
               className="r1-logo"
@@ -165,7 +163,7 @@ function App() {
             <h1 className="r1-title">r1 tv</h1>
             
             {selectedCountry && !selectedChannel && hasMoreChannels && (
-              <button
+              <button 
                 className="r1-more-tv-header-btn" 
                 disabled={loading} 
                 onClick={loadMoreChannels}
@@ -189,7 +187,7 @@ function App() {
             <div className="r1-section-title">choose country</div>
             <div className="r1-country-grid">
               {countries.map(country => (
-                <button
+                <button 
                   key={country.code}
                   className="r1-country-btn"
                   onClick={() => handleCountrySelect(country)}
@@ -207,48 +205,51 @@ function App() {
               {selectedCountry.name} channels
             </div>
             
-            {loading && channels.length === 0 && (
+            {loading && (
               <div className="r1-loading">loading channels...</div>
             )}
             
             {error && (
               <div className="r1-error">
                 {error}
+                <button className="r1-btn" onClick={() => loadChannels(selectedCountry.code)}>try again</button>
               </div>
             )}
             
-            {/* Always show channel grid - either real channels or dummy channels */}
-            {(visibleChannels.length > 0 || channels.length === 0) && (
+            {/* Channel grid - only show if we have channels */}
+            {!loading && !error && visibleChannels.length > 0 && (
               <div className="r1-channel-grid">
-                {visibleChannels.length > 0 ? (
-                  visibleChannels.map((channel, index) => (
-                    <button
-                      key={`${channel.id || index}-${channel.name}`}
-                      className="r1-channel-btn"
-                      onClick={() => setSelectedChannel(channel)}
-                      title={channel.name}
-                    >
-                      <div className="r1-channel-name">{channel.name}</div>
-                    </button>
-                  ))
-                ) : (
-                  // Show dummy grid while loading or on error
-                  Array.from({length: 12}, (_, index) => (
-                    <button
-                      key={`placeholder-${index}`}
-                      className="r1-channel-btn r1-channel-placeholder"
-                      disabled
-                    >
-                      <div className="r1-channel-name">...</div>
-                    </button>
-                  ))
-                )}
+                {visibleChannels.map((channel, index) => (
+                  <button 
+                    key={`${channel.id || index}-${channel.name}`}
+                    className="r1-channel-btn"
+                    onClick={() => setSelectedChannel(channel)}
+                    title={channel.name}
+                  >
+                    <div className="r1-channel-name">{channel.name}</div>
+                  </button>
+                ))}
+              </div>
+            )}
+            
+            {/* Show placeholder grid when loading */}
+            {loading && (
+              <div className="r1-channel-grid">
+                {Array.from({length: 12}, (_, index) => (
+                  <button 
+                    key={`placeholder-${index}`}
+                    className="r1-channel-btn r1-channel-placeholder"
+                    disabled
+                  >
+                    <div className="r1-channel-name">...</div>
+                  </button>
+                ))}
               </div>
             )}
           </div>
         ) : (
           <div className="r1-player-container">
-            <div
+            <div 
               className={`r1-player ${videoRotation === 90 ? 'rotated' : ''}`}
               ref={playerRef}
             >
@@ -256,7 +257,7 @@ function App() {
                 <button className="r1-exit-fullscreen" onClick={exitFullscreen} title="exit fullscreen">exit</button>
               )}
               
-              <video
+              <video 
                 ref={videoRef}
                 className="r1-video"
                 src={selectedChannel.url}
@@ -275,12 +276,12 @@ function App() {
               
               {/* Touch overlay for rotated video */}
               {videoRotation === 90 && (
-                <div className="r1-video-touch-overlay" onClick={handleVideoTouch} />
+                <div className="r1-video-touch-overlay" onClick={handleVideoTouch}></div>
               )}
               
               {/* Controls overlay for rotated player */}
-              {videoRotation === 90 && (
-                <div className={`r1-player-controls-overlay ${controlsVisible ? 'visible' : ''}`}>
+              {videoRotation === 90 && controlsVisible && (
+                <div className="r1-player-controls-overlay ${controlsVisible ? 'visible' : ''}">
                   <button className="r1-control-btn back" onClick={goBack} title="back">↩</button>
                   <button className="r1-control-btn rotate" onClick={toggleRotate} title="rotate">⟳</button>
                 </div>
