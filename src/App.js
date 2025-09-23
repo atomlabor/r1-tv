@@ -110,11 +110,6 @@ function App() {
   
   const toggleRotate = () => setVideoRotation(prev => (prev === 0 ? 90 : 0));
   
-  const toggleFullscreen = () => {
-    if (document.fullscreenElement) document.exitFullscreen();
-    else playerRef.current?.requestFullscreen();
-  };
-  
   const exitFullscreen = () => { 
     if (document.fullscreenElement) document.exitFullscreen(); 
   };
@@ -156,7 +151,6 @@ function App() {
             <div className="r1-player-controls">
               <button className="r1-control-btn back" onClick={goBack} title="back">↩</button>
               <button className="r1-control-btn rotate" onClick={toggleRotate} title="rotate">⟳</button>
-              <button className="r1-control-btn fullscreen" onClick={toggleFullscreen} title="fullscreen">⛶</button>
             </div>
           )}
         </header>
