@@ -272,15 +272,15 @@ body {
   justify-content: center;
   align-items: center;
 }
-/* FIXED: Rotated player and video always 240x282 */
+/* ENHANCED: Rotated player fills entire R1 display with upscaling */
 .r1-player.rotated {
   position: fixed;
   top: 0;
   left: 0;
   transform: rotate(90deg);
   transform-origin: center;
-  width: 240px;
-  height: 282px;
+  width: 100vw;
+  height: 100vh;
   z-index: 999;
   /* Overlay the entire viewport including header */
   margin: 0;
@@ -301,6 +301,7 @@ body {
 .r1-player.rotated .r1-player-controls-overlay.visible {
   display: flex;
 }
+/* ENHANCED: Video in rotation mode fills entire display with upscaling */
 .r1-video {
   width: 240px;
   height: 282px;
@@ -309,6 +310,13 @@ body {
   /* Ensure video is always centered */
   display: block;
   margin: 0 auto;
+}
+/* Video in rotated player uses full viewport dimensions with cover scaling */
+.r1-player.rotated .r1-video {
+  width: 100vw;
+  height: 100vh;
+  object-fit: cover;
+  /* Maximum upscaling, no letterbox, fills entire device display */
 }
 /* Touch overlay for rotated video to show controls */
 .r1-video-touch-overlay {
