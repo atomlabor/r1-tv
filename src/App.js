@@ -47,16 +47,19 @@ function App() {
         throw new Error('No channels found in response');
       }
       
-      // Process and filter channels
+      // Process and filter channels - relaxed filter for TVGarden API
       const processedChannels = data
         .filter(channel => {
-          // Filter out invalid channels
+          // Only require name and url - logo and category are optional
           return channel && 
+                 typeof channel === 'object' &&
                  channel.name && 
+                 typeof channel.name === 'string' &&
                  channel.name.trim() && 
                  channel.url && 
+                 typeof channel.url === 'string' &&
                  channel.url.trim() &&
-                 channel.url.startsWith('http');
+                 (channel.url.startsWith('http') || channel.url.startsWith('//'));
         })
         .map((channel, index) => ({
           id: channel.id || `channel-${index}`,
@@ -66,7 +69,7 @@ function App() {
           category: channel.category || 'General'
         }));
       
-      console.log(`Processed ${processedChannels.length} valid channels`);
+      console.log(`Processed ${processedChannels.length} valid channels from ${data.length} total`);
       
       if (processedChannels.length === 0) {
         throw new Error('No valid channels found after filtering');
@@ -155,7 +158,7 @@ function App() {
       <div className="r1-app">
         <header className="r1-header">
           <div className="r1-header-content">
-            <img 
+            <img
               src="https://github.com/atomlabor/r1-tv/blob/main/r1-tv.png?raw=true"
               alt="r1 tv logo"
               className="r1-logo"
@@ -257,7 +260,7 @@ function App() {
                 <button className="r1-exit-fullscreen" onClick={exitFullscreen} title="exit fullscreen">exit</button>
               )}
               
-              <video 
+              <video
                 ref={videoRef}
                 className="r1-video"
                 src={selectedChannel.url}
@@ -281,7 +284,7 @@ function App() {
               
               {/* Controls overlay for rotated player */}
               {videoRotation === 90 && controlsVisible && (
-                <div className={`r1-player-controls-overlay ${controlsVisible ? 'visible' : ''}`}>
+                <div className="r1-player-controls-overlay">
                   <button className="r1-control-btn back" onClick={goBack} title="back">↩</button>
                   <button className="r1-control-btn rotate" onClick={toggleRotate} title="rotate">⟳</button>
                 </div>
