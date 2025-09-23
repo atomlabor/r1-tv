@@ -1,14 +1,10 @@
-/* Basis-UI-Reset */
+/* Rabbit R1 UI - True R1 style, no black bars, header starts at zero */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  -ms-overflow-style: none;
-  scrollbar-width: none;
 }
-::-webkit-scrollbar {
-  display: none;
-}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 11px;
@@ -19,7 +15,7 @@ body {
   text-transform: lowercase;
 }
 
-/* Gerät-Viewport */
+/* Total device viewport 240x282 - full usage */
 .viewport {
   position: fixed;
   top: 0;
@@ -30,27 +26,31 @@ body {
   overflow: hidden;
 }
 
-/* App-Hauptcontainer */
+/* App container starts at top: 0, full height 282px */
 .r1-app {
   position: absolute;
-  top: 0; left: 0;
-  width: 240px; height: 282px;
+  top: 0;
+  left: 0;
+  width: 240px;
+  height: 282px;
   background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
   color: #fff;
   overflow: hidden;
 }
 
-/* Schwarzblende bei Rotation */
+/* Black background when player is rotated */
 .r1-player.rotated ~ .r1-app {
   background: #000;
 }
+
+/* Black linear-gradient background, black color, and absolute positioning when rotated */
 .r1-player.rotated .r1-app {
-  background: #000;
-  color: #fff;
+  background: linear-gradient(135deg, #000000, #000000);
+  color: #000000;
   position: absolute;
 }
 
-/* Header */
+/* Header starts at top with no margin/padding-top - ALWAYS VISIBLE, PERSISTENT ON ROTATION */
 .r1-header {
   display: flex;
   align-items: center;
@@ -60,13 +60,22 @@ body {
   background: rgba(0,0,0,0.15);
   border-bottom: 1px solid rgba(255,255,255,0.1);
   position: fixed;
-  top: 0; left: 0;
+  top: 0;
+  left: 0;
   width: 240px;
   z-index: 2000;
 }
+
+/* When rotated, header remains fixed at top with higher z-index */
 .r1-app.rotated .r1-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 240px;
+  z-index: 2000;
   background: rgba(0,0,0,0.8);
 }
+
 .r1-header-content {
   display: flex;
   align-items: center;
@@ -74,6 +83,7 @@ body {
   flex: 1;
   justify-content: center;
 }
+
 .r1-title {
   font-size: 11px;
   font-weight: 600;
@@ -81,13 +91,15 @@ body {
   margin: 0;
   text-shadow: 0 1px 2px rgba(0,0,0,.2);
 }
+
 .r1-logo {
   height: 16px;
   width: auto;
   display: inline-block;
 }
-.r1-more-tv-header-btn,
-.r1-control-btn {
+
+/* More TV Header Button - same design as rotation/fullscreen buttons */
+.r1-more-tv-header-btn {
   position: absolute;
   right: 6px;
   top: 50%;
@@ -104,54 +116,176 @@ body {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  padding: 0;
   transition: all 0.2s ease;
-  z-index: 100;
+  padding: 0;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
   text-transform: lowercase;
+  z-index: 100;
 }
-.r1-control-btn {
-  font-size: 12px;
-  right: 44px;
+
+.r1-more-tv-header-btn:hover {
+  background: rgba(255,255,255,0.25);
+  border-color: rgba(255,255,255,0.4);
 }
-.r1-more-tv-header-btn:disabled,
-.r1-control-btn:disabled {
+
+.r1-more-tv-header-btn:active {
+  transform: translateY(-50%) scale(0.95);
+  background: rgba(255,255,255,0.3);
+}
+
+.r1-more-tv-header-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
-/* Länder- & Channel-Auswahl */
-.r1-countries, .r1-channels {
+/* Player Controls ALWAYS visible in header - persistent on rotation */
+.r1-player-controls {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  gap: 4px;
+  z-index: 2001;
+}
+
+/* Ensure controls are always visible, even when rotated */
+.r1-player-controls.visible,
+.r1-header .r1-player-controls {
+  display: flex;
+}
+
+.r1-control-btn {
+  width: 32px;
+  height: 16px;
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 6px;
+  color: #fff;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.r1-control-btn:hover {
+  background: rgba(255,255,255,0.25);
+  border-color: rgba(255,255,255,0.4);
+}
+
+.r1-control-btn:active {
+  transform: scale(0.95);
+  background: rgba(255,255,255,0.3);
+}
+
+.r1-control-btn.back {
+  font-size: 12px;
+}
+
+.r1-control-btn.rotate {
+  font-size: 12px;
+}
+
+.r1-control-btn.fullscreen {
+  font-size: 10px;
+}
+
+/* Countries area uses full remaining space after header */
+.r1-countries {
   position: relative;
   height: calc(282px - 24px);
-  margin-top: 24px;
   padding: 6px;
+  margin-top: 24px;
   display: flex;
   flex-direction: column;
 }
-.r1-section-title, .r1-channels-header {
+
+.r1-section-title {
   font-size: 10px;
   font-weight: 600;
   color: rgba(255,255,255,0.9);
   margin-bottom: 6px;
 }
-.r1-country-grid, .r1-channel-grid {
-  display: grid;
-  gap: 4px;
-}
+
+/* Grid has more space now - 258px - 16px title = ~242px available */
 .r1-country-grid {
+  display: grid;
   grid-template-columns: repeat(2, 1fr);
+  gap: 4px;
   height: 230px;
   overflow-y: auto;
 }
+
+.r1-country-btn {
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 6px;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 48px;
+  padding: 6px 4px;
+  font-size: 9px;
+}
+
+.country-emoji {
+  font-size: 16px;
+  margin-bottom: 2px;
+}
+
+.country-name {
+  font-size: 8px;
+}
+
+/* Channels use full height */
+.r1-channels {
+  position: relative;
+  height: 282px;
+  padding: 4px;
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+}
+
+.r1-channels-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.9);
+  padding: 2px 2px 6px;
+}
+
+.r1-back-btn {
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 4px;
+  color: #fff;
+  height: 18px;
+  padding: 2px 6px;
+  font-size: 12px;
+}
+
+/* Channel grid - 1 column, 4 rows for paging in groups of 4 */
 .r1-channel-grid {
+  display: grid;
   grid-template-columns: 1fr;
   grid-template-rows: repeat(4, 1fr);
+  gap: 4px;
   height: 220px;
   overflow: hidden;
 }
-.r1-country-btn, .r1-channel-btn {
+
+.r1-channel-btn {
   background: rgba(255,255,255,0.12);
   border: 1px solid rgba(255,255,255,0.15);
   border-radius: 6px;
@@ -160,13 +294,12 @@ body {
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  font-size: 9px;
-  padding: 6px 4px;
+  height: 50px;
+  padding: 4px;
+  font-size: 8px;
 }
-.r1-country-btn { height: 48px; }
-.r1-channel-btn { height: 50px; font-size: 8px; }
-.country-emoji { font-size: 16px; margin-bottom: 2px; }
-.country-name, .r1-channel-name {
+
+.r1-channel-name {
   font-size: 8px;
   text-align: center;
   line-height: 1.1;
@@ -177,7 +310,23 @@ body {
   -webkit-box-orient: vertical;
 }
 
-/* Player-Bereich und zentrierte Ausrichtung */
+.r1-load-more {
+  display: flex;
+  justify-content: center;
+  padding: 6px 0;
+}
+
+.r1-more-tv-btn {
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 4px;
+  color: #fff;
+  height: 22px;
+  font-size: 8px;
+  padding: 0 12px;
+}
+
+/* Player uses full height - ENHANCED CENTER ALIGNMENT FOR ALL STATES */
 .r1-player-container {
   position: relative;
   height: 282px;
@@ -187,57 +336,104 @@ body {
   justify-content: center;
   align-items: center;
   margin: 0 auto;
+  box-sizing: border-box;
 }
+
+/* Ensure centering during loading states */
+.r1-player-container.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Ensure centering during error states */
+.r1-player-container.error {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+/* Ensure centering during fullscreen states */
+.r1-player-container.fullscreen {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .r1-player {
+  flex: 1;
   width: 240px;
   height: 260px;
   background: #000;
   position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
   overflow: hidden;
-}
-/* Rotierte Darstellung */
-.r1-player.rotated {
-  position: fixed;
-  top: 0; left: 0;
-  width: 240px;
-  height: 282px;
-  background: #000;
-  z-index: 999;
   display: flex;
   justify-content: center;
   align-items: center;
-  transform: rotate(90deg);
-  transform-origin: center;
 }
 
-/* 16:9-Letterbox für Video – maximal mögliche Größe */
-.r1-player.rotated .r1-video {
-  width: 282px;
-  height: 158.625px; /* 282 / 16 * 9 */
-  max-width: 282px;
-  max-height: 240px;
+/* REVERTED: Rotated player fixed to exact 240x282 dimensions */
+.r1-player.rotated {
+  position: fixed;
+  top: 0;
+  left: 0;
+  transform: rotate(90deg);
+  transform-origin: center;
+  width: 240px;
+  height: 282px;
+  z-index: 999;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Remove overlay controls - controls now always in header */
+.r1-player.rotated .r1-player-controls-overlay {
+  display: none;
+}
+
+/* REVERTED: Video dimensions fixed to exact 240x282 with object-fit: contain */
+.r1-video {
+  width: 240px;
+  height: 282px;
   object-fit: contain;
   background: #000;
   display: block;
   margin: 0 auto;
-  border-radius: 8px;
 }
 
-/* Touch Overlay für Bedienung */
+/* Video in rotated player uses exact R1 dimensions with contain scaling */
+.r1-player.rotated .r1-video {
+  width: 240px;
+  height: 282px;
+  object-fit: contain;
+}
+
+/* Touch overlay for rotated video - simplified, no longer shows controls */
 .r1-video-touch-overlay {
   position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   z-index: 1000;
   background: transparent;
   cursor: pointer;
 }
 
-/* Fehler- & Ladescreens */
-.r1-error-message,
+/* Error messages and loading states - ensure they're centered */
+.r1-error-message {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  color: #fff;
+  font-size: 10px;
+  padding: 20px;
+}
+
 .r1-loading-message {
   display: flex;
   justify-content: center;
@@ -247,3 +443,32 @@ body {
   font-size: 10px;
   padding: 20px;
 }
+
+/* Responsive adjustments - maintain centering */
+@media (max-width: 240px) {
+  .r1-player-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+}
+
+@media (orientation: landscape) {
+  .r1-player-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+}
+
+/* Hide scrollbars */
+::-webkit-scrollbar {
+  display: none;
+}
+
+* {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+
