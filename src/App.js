@@ -164,7 +164,7 @@ function App() {
       <div className="r1-app">
         <header className="r1-header">
           <div className="r1-header-content">
-            <img src="https://github.com/atomlabor/r1-tv/blob/main/r1-tv.png?raw=true" alt="r1 tv logo" class="r1-logo">
+            <img alt="r1 tv logo" className="r1-logo" />
             <h1 className="r1-title">r1 tv</h1>
           </div>
           {selectedCountry && !selectedChannel && hasMoreChannels && (
@@ -207,9 +207,8 @@ function App() {
             {!loading && !error && visibleChannels.length > 0 && (
               <div className="r1-channel-grid">
                 {visibleChannels.map((channel, index) => (
-                  <button className="r1-channel-btn" key={`${channel.id}-${index}`} onClick={() => setSelectedChannel(channel)} title={`${channel.name} | ${channel.url}`}>
+                  <button className="r1-channel-btn" key={`${channel.id}-${index}`} onClick={() => setSelectedChannel(channel)} title={channel.name}>
                     <div className="r1-channel-name">{channel.name}</div>
-                    <div className="r1-channel-url">{channel.url}</div>
                   </button>
                 ))}
               </div>
@@ -219,7 +218,6 @@ function App() {
                 {Array.from({ length: 4 }, (_, index) => (
                   <button className="r1-channel-btn r1-channel-placeholder" disabled key={`placeholder-${index}`}>
                     <div className="r1-channel-name">...</div>
-                    <div className="r1-channel-url">...</div>
                   </button>
                 ))}
               </div>
