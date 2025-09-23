@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import './styles/App.css';
+
 function App() {
   const [selectedChannel, setSelectedChannel] = useState(null);
   const [channels, setChannels] = useState([]);
@@ -9,11 +10,10 @@ function App() {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [controlsVisible, setControlsVisible] = useState(false);
   const channelsPerPage = 4; // Changed from 12 to 4 for 1x4 grid paging
   const videoRef = useRef(null);
   const playerRef = useRef(null);
-  const controlsTimeoutRef = useRef(null);
+
   const countries = [
     { code: 'de', name: 'germany', emoji: '🇩🇪' },
     { code: 'gb', name: 'uk', emoji: '🇬🇧' },
@@ -24,6 +24,7 @@ function App() {
     { code: 'at', name: 'austria', emoji: '🇦🇹' },
     { code: 'ch', name: 'switzerland', emoji: '🇨🇭' }
   ];
+
   // Accept stream protocols used across sources
   const isValidStreamUrl = (url) => {
     if (!url || typeof url !== 'string') return false;
@@ -37,6 +38,7 @@ function App() {
       u.startsWith('//')
     );
   };
+
   // Extract first valid stream URL from diverse structures
   const getStreamUrl = (channel) => {
     if (!channel || typeof channel !== 'object') return null;
@@ -56,6 +58,7 @@ function App() {
     }
     return null;
   };
+
   // Extract a display name robustly
   const getChannelName = (channel, index) => {
     if (!channel || typeof channel !== 'object') return `channel-${index + 1}`;
@@ -63,6 +66,7 @@ function App() {
     if (typeof name === 'string' && name.trim()) return name.trim();
     return `channel-${index + 1}`;
   };
+
   const loadChannels = async (countryCode) => {
     setLoading(true);
     setError(null);
@@ -118,11 +122,11 @@ function App() {
       setLoading(false);
     }
   };
+
   const goBack = () => {
     if (selectedChannel) {
       setSelectedChannel(null);
       setVideoRotation(0);
-      setControlsVisible(false);
       setError(null);
     } else if (selectedCountry) {
       setSelectedCountry(null);
@@ -131,60 +135,70 @@ function App() {
       setError(null);
     }
   };
+
   const handleCountrySelect = (country) => {
     setSelectedCountry(country);
     setCurrentPage(0);
     loadChannels(country.code);
   };
+
   const loadMoreChannels = () => setCurrentPage((p) => p + 1);
-  const toggleRotate = () => { setVideoRotation((p) => (p === 0 ? 90 : 0)); setControlsVisible(false); };
+  const toggleRotate = () => { setVideoRotation((p) => (p === 0 ? 90 : 0)); };
   const exitFullscreen = () => { if (document.fullscreenElement) document.exitFullscreen(); };
-  const handleVideoTouch = () => {
-    if (videoRotation === 90) {
-      setControlsVisible(true);
-      if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
-      controlsTimeoutRef.current = setTimeout(() => setControlsVisible(false), 3000);
-    }
-  };
+
   useEffect(() => {
     const onFs = () => setIsFullscreen(!!document.fullscreenElement);
     document.addEventListener('fullscreenchange', onFs);
     return () => {
       document.removeEventListener('fullscreenchange', onFs);
-      if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
     };
   }, []);
+
   // Show channels in groups of 4 for paging
   const startIndex = currentPage * channelsPerPage;
   const endIndex = startIndex + channelsPerPage;
   const visibleChannels = channels.slice(startIndex, endIndex);
   const hasMoreChannels = channels.length > endIndex;
+
   return (
     <div className="viewport">
       <div className="r1-app">
         <header className="r1-header">
           <div className="r1-header-content">
-            <img src="https://github.com/atomlabor/r1-tv/blob/main/r1-tv.png?raw=true" alt="r1 tv logo" className="r1-logo" />
+            <img 
+              alt="r1 tv logo" 
+              className="r1-logo"
+              src="https://raw.githubusercontent.com/atomlabor/r1-tv/main/r1-tv.png"
+            />
             <h1 className="r1-title">r1 tv</h1>
           </div>
           {selectedCountry && !selectedChannel && hasMoreChannels && (
-            <button className="r1-more-tv-header-btn" disabled={loading} onClick={loadMoreChannels}>
+            <button 
+              className="r1-more-tv-header-btn" 
+              disabled={loading} 
+              onClick={loadMoreChannels}
+            >
               {loading ? '...' : 'more tv'}
             </button>
           )}
-          {selectedChannel && videoRotation !== 90 && (
+          {selectedChannel && (
             <div className="r1-player-controls visible">
               <button className="r1-control-btn back" onClick={goBack} title="back">↩</button>
               <button className="r1-control-btn rotate" onClick={toggleRotate} title="rotate">⟳</button>
             </div>
           )}
         </header>
+
         {!selectedCountry ? (
           <div className="r1-countries">
             <div className="r1-section-title">choose country</div>
             <div className="r1-country-grid">
               {countries.map((country) => (
-                <button className="r1-country-btn" key={country.code} onClick={() => handleCountrySelect(country)}>
+                <button 
+                  className="r1-country-btn" 
+                  key={country.code} 
+                  onClick={() => handleCountrySelect(country)}
+                >
                   <div className="country-emoji">{country.emoji}</div>
                   <div className="country-name">{country.name}</div>
                 </button>
@@ -207,7 +221,12 @@ function App() {
             {!loading && !error && visibleChannels.length > 0 && (
               <div className="r1-channel-grid">
                 {visibleChannels.map((channel, index) => (
-                  <button className="r1-channel-btn" key={`${channel.id}-${index}`} onClick={() => setSelectedChannel(channel)} title={channel.name}>
+                  <button 
+                    className="r1-channel-btn" 
+                    key={`${channel.id}-${index}`} 
+                    onClick={() => setSelectedChannel(channel)} 
+                    title={channel.name}
+                  >
                     <div className="r1-channel-name">{channel.name}</div>
                   </button>
                 ))}
@@ -225,7 +244,10 @@ function App() {
           </div>
         ) : (
           <div className="r1-player-container">
-            <div className={`r1-player ${videoRotation === 90 ? 'rotated' : ''}`} ref={playerRef}>
+            <div 
+              className={`r1-player ${videoRotation === 90 ? 'rotated' : ''}`} 
+              ref={playerRef}
+            >
               {isFullscreen && (
                 <button className="r1-exit-fullscreen" onClick={exitFullscreen} title="exit fullscreen">exit</button>
               )}
@@ -236,7 +258,6 @@ function App() {
                 autoPlay
                 controls={videoRotation !== 90}
                 key={selectedChannel.url}
-                onClick={handleVideoTouch}
                 onError={(e) => {
                   console.error('stream error:', e);
                 }}
@@ -244,15 +265,6 @@ function App() {
               >
                 your browser does not support video playback
               </video>
-              {videoRotation === 90 && (
-                <div className="r1-video-touch-overlay" onClick={handleVideoTouch}></div>
-              )}
-              {videoRotation === 90 && controlsVisible && (
-                <div className="r1-player-controls-overlay">
-                  <button className="r1-control-btn back" onClick={goBack} title="back">↩</button>
-                  <button className="r1-control-btn rotate" onClick={toggleRotate} title="rotate">⟳</button>
-                </div>
-              )}
             </div>
           </div>
         )}
@@ -260,4 +272,5 @@ function App() {
     </div>
   );
 }
+
 export default App;
