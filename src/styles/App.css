@@ -42,17 +42,20 @@ body {
 .r1-header {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   height: 24px;
   padding: 4px 6px;
   background: rgba(0,0,0,0.15);
   border-bottom: 1px solid rgba(255,255,255,0.1);
+  position: relative;
 }
 
 .r1-header-content {
   display: flex;
   align-items: center;
   gap: 6px;
+  flex: 1;
+  justify-content: center;
 }
 
 .r1-title {
@@ -67,6 +70,57 @@ body {
   height: 16px;
   width: auto;
   display: inline-block;
+}
+
+/* Player Controls positioned in header top right */
+.r1-player-controls {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  transform: translateY(-50%);
+  display: flex;
+  gap: 4px;
+  z-index: 10;
+}
+
+.r1-control-btn {
+  width: 32px;
+  height: 32px;
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 6px;
+  color: #fff;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.r1-control-btn:hover {
+  background: rgba(255,255,255,0.25);
+  border-color: rgba(255,255,255,0.4);
+}
+
+.r1-control-btn:active {
+  transform: scale(0.95);
+  background: rgba(255,255,255,0.3);
+}
+
+.r1-control-btn.back {
+  font-size: 14px;
+}
+
+.r1-control-btn.rotate {
+  font-size: 16px;
+}
+
+.r1-control-btn.fullscreen {
+  font-size: 14px;
 }
 
 /* Countries area uses full remaining space after header */
