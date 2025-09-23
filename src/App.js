@@ -281,7 +281,7 @@ function App() {
               
               {/* Controls overlay for rotated player */}
               {videoRotation === 90 && controlsVisible && (
-                <div className="r1-player-controls-overlay ${controlsVisible ? 'visible' : ''}">
+                <div className={`r1-player-controls-overlay ${controlsVisible ? 'visible' : ''}`}>
                   <button className="r1-control-btn back" onClick={goBack} title="back">↩</button>
                   <button className="r1-control-btn rotate" onClick={toggleRotate} title="rotate">⟳</button>
                 </div>
