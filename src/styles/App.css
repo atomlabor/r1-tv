@@ -34,6 +34,12 @@ body {
   color: #fff;
   overflow: hidden;
 }
+
+/* Black background when player is rotated */
+.r1-player.rotated ~ .r1-app {
+  background: #000;
+}
+
 /* Header starts at top with no margin/padding-top */
 .r1-header {
   display: flex;
