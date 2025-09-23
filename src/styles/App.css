@@ -34,12 +34,16 @@ body {
   color: #fff;
   overflow: hidden;
 }
-
 /* Black background when player is rotated */
 .r1-player.rotated ~ .r1-app {
   background: #000;
 }
-
+/* Black linear-gradient background, black color, and absolute positioning when rotated */
+.r1-player.rotated .r1-app {
+  background: linear-gradient(135deg, #000000, #000000);
+  color: #000000;
+  position: absolute;
+}
 /* Header starts at top with no margin/padding-top */
 .r1-header {
   display: flex;
