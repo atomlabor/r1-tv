@@ -74,6 +74,43 @@ body {
   width: auto;
   display: inline-block;
 }
+/* More TV Header Button - same design as rotation/fullscreen buttons */
+.r1-more-tv-header-btn {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 32px;
+  height: 16px;
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 6px;
+  color: #fff;
+  font-size: 8px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  text-transform: lowercase;
+  z-index: 100;
+}
+.r1-more-tv-header-btn:hover {
+  background: rgba(255,255,255,0.25);
+  border-color: rgba(255,255,255,0.4);
+}
+.r1-more-tv-header-btn:active {
+  transform: translateY(-50%) scale(0.95);
+  background: rgba(255,255,255,0.3);
+}
+.r1-more-tv-header-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
 /* Player Controls positioned in header top right - hidden by default when rotated */
 .r1-player-controls {
   position: absolute;
@@ -193,13 +230,14 @@ body {
   padding: 2px 6px;
   font-size: 12px;
 }
-/* Channel grid with more available space */
+/* Channel grid - 1 column, 4 rows for paging in groups of 4 */
 .r1-channel-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  grid-template-rows: repeat(3, 1fr);
-  gap: 3px;
-  height: 200px;
+  grid-template-columns: 1fr;
+  grid-template-rows: repeat(4, 1fr);
+  gap: 4px;
+  height: 220px;
+  overflow: hidden;
 }
 .r1-channel-btn {
   background: rgba(255,255,255,0.12);
@@ -210,12 +248,12 @@ body {
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  height: 52px;
-  padding: 2px;
-  font-size: 7px;
+  height: 50px;
+  padding: 4px;
+  font-size: 8px;
 }
 .r1-channel-name {
-  font-size: 7px;
+  font-size: 8px;
   text-align: center;
   line-height: 1.1;
   max-height: 30px;
