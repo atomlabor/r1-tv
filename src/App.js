@@ -35,19 +35,22 @@ function App() {
     try {
       console.log(`Loading channels for country: ${countryCode}`);
       
+      // Ensure we always use the correct country code (not the name)
+      const validCountryCode = countryCode.toLowerCase();
+      
       // Use tv.garden API proxy or direct access approach
       // First try the tv.garden API-compatible endpoint
       let response;
       try {
         // Try tv.garden API-like endpoint first
-        response = await fetch(`https://api.iptv-org.github.io/countries/${countryCode}.json`);
+        response = await fetch(`https://api.iptv-org.github.io/countries/${validCountryCode}.json`);
         if (!response.ok) {
           throw new Error(`IPTV-org API error: ${response.status}`);
         }
       } catch (iptvError) {
         console.log('IPTV-org API failed, trying tv.garden channel list fallback');
         // Fallback to original tv-garden-channel-list but with improved handling
-        response = await fetch(`https://raw.githubusercontent.com/TVGarden/tv-garden-channel-list/main/channels/raw/countries/${countryCode}.json`);
+        response = await fetch(`https://raw.githubusercontent.com/TVGarden/tv-garden-channel-list/main/channels/raw/countries/${validCountryCode}.json`);
         if (!response.ok) {
           throw new Error(`TV Garden API error: ${response.status}`);
         }
@@ -125,6 +128,7 @@ function App() {
     console.log('Country selected:', country);
     setSelectedCountry(country);
     setCurrentPage(0);
+    // Ensure we always pass the country code, not the name
     loadChannels(country.code);
   };
   
@@ -178,7 +182,7 @@ function App() {
       <div className="r1-app">
         <header className="r1-header">
           <div className="r1-header-content">
-            <img 
+            <img
               src="https://github.com/atomlabor/r1-tv/blob/main/r1-tv.png?raw=true"
               alt="r1 tv logo"
               className="r1-logo"
@@ -186,7 +190,7 @@ function App() {
             <h1 className="r1-title">r1 tv</h1>
             
             {selectedCountry && !selectedChannel && hasMoreChannels && (
-              <button 
+              <button
                 className="r1-more-tv-header-btn" 
                 disabled={loading} 
                 onClick={loadMoreChannels}
