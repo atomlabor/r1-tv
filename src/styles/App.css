@@ -4,7 +4,6 @@
   padding: 0;
   box-sizing: border-box;
 }
-
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 11px;
@@ -14,7 +13,6 @@ body {
   overflow: hidden;
   text-transform: lowercase;
 }
-
 /* Total device viewport 240x282 - full usage */
 .viewport {
   position: fixed;
@@ -25,7 +23,6 @@ body {
   background: #ff6b35;
   overflow: hidden;
 }
-
 /* App container starts at top: 0, full height 282px */
 .r1-app {
   position: absolute;
@@ -37,7 +34,6 @@ body {
   color: #fff;
   overflow: hidden;
 }
-
 /* Header starts at top with no margin/padding-top */
 .r1-header {
   display: flex;
@@ -49,7 +45,6 @@ body {
   border-bottom: 1px solid rgba(255,255,255,0.1);
   position: relative;
 }
-
 .r1-header-content {
   display: flex;
   align-items: center;
@@ -57,7 +52,6 @@ body {
   flex: 1;
   justify-content: center;
 }
-
 .r1-title {
   font-size: 11px;
   font-weight: 600;
@@ -65,24 +59,20 @@ body {
   margin: 0;
   text-shadow: 0 1px 2px rgba(0,0,0,.2);
 }
-
 .r1-logo {
   height: 16px;
   width: auto;
   display: inline-block;
 }
-
 /* Player Controls positioned in header top right */
 .r1-player-controls {
   position: absolute;
-  top: 50%;
-  right: 6px;
-  transform: translateY(-50%);
+  top: 14%;
+  right: 0;
   display: flex;
   gap: 4px;
   z-index: 10;
 }
-
 .r1-control-btn {
   width: 32px;
   height: 32px;
@@ -100,29 +90,23 @@ body {
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
 }
-
 .r1-control-btn:hover {
   background: rgba(255,255,255,0.25);
   border-color: rgba(255,255,255,0.4);
 }
-
 .r1-control-btn:active {
   transform: scale(0.95);
   background: rgba(255,255,255,0.3);
 }
-
 .r1-control-btn.back {
   font-size: 14px;
 }
-
 .r1-control-btn.rotate {
   font-size: 16px;
 }
-
 .r1-control-btn.fullscreen {
   font-size: 14px;
 }
-
 /* Countries area uses full remaining space after header */
 .r1-countries {
   position: relative;
@@ -131,14 +115,12 @@ body {
   display: flex;
   flex-direction: column;
 }
-
 .r1-section-title {
   font-size: 10px;
   font-weight: 600;
   color: rgba(255,255,255,0.9);
   margin-bottom: 6px;
 }
-
 /* Grid has more space now - 258px - 16px title = ~242px available */
 .r1-country-grid {
   display: grid;
@@ -147,7 +129,6 @@ body {
   height: 230px;
   overflow-y: auto;
 }
-
 .r1-country-btn {
   background: rgba(255,255,255,0.12);
   border: 1px solid rgba(255,255,255,0.15);
@@ -161,16 +142,13 @@ body {
   padding: 6px 4px;
   font-size: 9px;
 }
-
 .country-emoji {
   font-size: 16px;
   margin-bottom: 2px;
 }
-
 .country-name {
   font-size: 8px;
 }
-
 /* Channels use full height */
 .r1-channels {
   position: relative;
@@ -179,7 +157,6 @@ body {
   display: flex;
   flex-direction: column;
 }
-
 .r1-channels-header {
   display: flex;
   align-items: center;
@@ -189,7 +166,6 @@ body {
   color: rgba(255,255,255,0.9);
   padding: 2px 2px 6px;
 }
-
 .r1-back-btn {
   background: rgba(255,255,255,0.15);
   border: 1px solid rgba(255,255,255,0.25);
@@ -199,7 +175,6 @@ body {
   padding: 2px 6px;
   font-size: 12px;
 }
-
 /* Channel grid with more available space */
 .r1-channel-grid {
   display: grid;
@@ -208,7 +183,6 @@ body {
   gap: 3px;
   height: 200px;
 }
-
 .r1-channel-btn {
   background: rgba(255,255,255,0.12);
   border: 1px solid rgba(255,255,255,0.15);
@@ -222,7 +196,6 @@ body {
   padding: 2px;
   font-size: 7px;
 }
-
 .r1-channel-name {
   font-size: 7px;
   text-align: center;
@@ -233,13 +206,11 @@ body {
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
 }
-
 .r1-load-more {
   display: flex;
   justify-content: center;
   padding: 6px 0;
 }
-
 .r1-more-tv-btn {
   background: rgba(255,255,255,0.15);
   border: 1px solid rgba(255,255,255,0.25);
@@ -249,7 +220,6 @@ body {
   font-size: 8px;
   padding: 0 12px;
 }
-
 /* Player uses full height - ENHANCED CENTER ALIGNMENT FOR ALL STATES */
 .r1-player-container {
   position: relative;
@@ -263,14 +233,12 @@ body {
   margin: 0 auto;
   box-sizing: border-box;
 }
-
 /* Ensure centering during loading states */
 .r1-player-container.loading {
   display: flex;
   justify-content: center;
   align-items: center;
 }
-
 /* Ensure centering during error states */
 .r1-player-container.error {
   display: flex;
@@ -278,14 +246,12 @@ body {
   align-items: center;
   text-align: center;
 }
-
 /* Ensure centering during fullscreen states */
 .r1-player-container.fullscreen {
   display: flex;
   justify-content: center;
   align-items: center;
 }
-
 .r1-player {
   flex: 1;
   width: 240px;
@@ -298,7 +264,6 @@ body {
   justify-content: center;
   align-items: center;
 }
-
 .r1-player.rotated {
   transform: rotate(90deg);
   width: 282px;
@@ -310,7 +275,6 @@ body {
   justify-content: center;
   align-items: center;
 }
-
 .r1-video {
   width: 100%;
   height: 100%;
@@ -320,7 +284,6 @@ body {
   display: block;
   margin: 0 auto;
 }
-
 /* Error messages and loading states - ensure they're centered */
 .r1-error-message {
   display: flex;
@@ -331,7 +294,6 @@ body {
   font-size: 10px;
   padding: 20px;
 }
-
 .r1-loading-message {
   display: flex;
   justify-content: center;
@@ -341,7 +303,6 @@ body {
   font-size: 10px;
   padding: 20px;
 }
-
 /* Responsive adjustments - maintain centering */
 @media (max-width: 240px) {
   .r1-player-container {
@@ -350,7 +311,6 @@ body {
     align-items: center;
   }
 }
-
 @media (orientation: landscape) {
   .r1-player-container {
     display: flex;
@@ -358,12 +318,10 @@ body {
     align-items: center;
   }
 }
-
 /* Hide scrollbars */
 ::-webkit-scrollbar {
   display: none;
 }
-
 * {
   -ms-overflow-style: none;
   scrollbar-width: none;
