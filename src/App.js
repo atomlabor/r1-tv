@@ -11,12 +11,12 @@ function App() {
   const [currentPage, setCurrentPage] = useState(0);
   const [loading, setLoading] = useState(false);
   const [controlsVisible, setControlsVisible] = useState(false);
-  
+
   const channelsPerPage = 12;
   const videoRef = useRef(null);
   const playerRef = useRef(null);
   const controlsTimeoutRef = useRef(null);
-  
+
   const countries = [
     { code: 'de', name: 'germany', emoji: '🇩🇪' },
     { code: 'gb', name: 'uk', emoji: '🇬🇧' },
@@ -27,117 +27,117 @@ function App() {
     { code: 'at', name: 'austria', emoji: '🇦🇹' },
     { code: 'ch', name: 'switzerland', emoji: '🇨🇭' }
   ];
-  
-  // Helper function to check if stream URL is valid
+
+  // Accept stream protocols used across sources
   const isValidStreamUrl = (url) => {
-    if (!url || typeof url !== 'string' || !url.trim()) {
-      return false;
-    }
-    
-    const trimmedUrl = url.trim();
-    
-    // Accept all stream protocols including rtmp:, udp:, http:, https:
-    return trimmedUrl.startsWith('http://') || 
-           trimmedUrl.startsWith('https://') ||
-           trimmedUrl.startsWith('rtmp://') ||
-           trimmedUrl.startsWith('rtmps://') ||
-           trimmedUrl.startsWith('udp://') ||
-           trimmedUrl.startsWith('//');
+    if (!url || typeof url !== 'string') return false;
+    const u = url.trim();
+    return (
+      u.startsWith('http://') ||
+      u.startsWith('https://') ||
+      u.startsWith('rtmp://') ||
+      u.startsWith('rtmps://') ||
+      u.startsWith('udp://') ||
+      u.startsWith('//')
+    );
   };
-  
-  // Helper function to get stream URL from channel object (fallback logic)
+
+  // Extract first valid stream URL from diverse structures
   const getStreamUrl = (channel) => {
-    // Try all possible stream field names including M3U-specific ones
-    const possibleFields = ['url', 'stream', 'stream_url', 'src', 'link', 'href', 'uri'];
-    
-    for (const field of possibleFields) {
-      if (channel[field] && isValidStreamUrl(channel[field])) {
-        return channel[field];
-      }
+    if (!channel || typeof channel !== 'object') return null;
+
+    // TVGarden format: arrays iptv_urls / youtube_urls
+    if (Array.isArray(channel.iptv_urls) && channel.iptv_urls.length) {
+      const firstValid = channel.iptv_urls.find(isValidStreamUrl);
+      if (firstValid) return firstValid;
     }
-    
+    if (Array.isArray(channel.youtube_urls) && channel.youtube_urls.length) {
+      const firstValidYt = channel.youtube_urls.find(isValidStreamUrl);
+      if (firstValidYt) return firstValidYt;
+    }
+
+    // Generic fallbacks
+    const possibleFields = ['url', 'stream', 'stream_url', 'src', 'link', 'href', 'uri'];
+    for (const f of possibleFields) {
+      if (channel[f] && isValidStreamUrl(channel[f])) return channel[f];
+    }
+
     return null;
   };
-  
-  // Updated loadChannels function to use tv.garden API approach
+
+  // Extract a display name robustly
+  const getChannelName = (channel, index) => {
+    if (!channel || typeof channel !== 'object') return `channel-${index + 1}`;
+    const name = channel.name || channel.title || channel.tvg_name || channel.channel || channel.display_name;
+    if (typeof name === 'string' && name.trim()) return name.trim();
+    return `channel-${index + 1}`;
+  };
+
   const loadChannels = async (countryCode) => {
     setLoading(true);
     setError(null);
     try {
-      console.log(`Loading channels for country: ${countryCode}`);
-      
-      // Ensure we always use the correct country code (not the name)
-      const validCountryCode = countryCode.toLowerCase();
-      
-      // Use tv.garden API proxy or direct access approach
-      // First try the tv.garden API-compatible endpoint
+      const code = (countryCode || '').toLowerCase();
       let response;
       try {
-        // Try tv.garden API-like endpoint first
-        response = await fetch(`https://api.iptv-org.github.io/countries/${validCountryCode}.json`);
-        if (!response.ok) {
-          throw new Error(`IPTV-org API error: ${response.status}`);
-        }
-      } catch (iptvError) {
-        console.log('IPTV-org API failed, trying tv.garden channel list fallback');
-        // Fallback to original tv-garden-channel-list but with improved handling
-        response = await fetch(`https://raw.githubusercontent.com/TVGarden/tv-garden-channel-list/main/channels/raw/countries/${validCountryCode}.json`);
-        if (!response.ok) {
-          throw new Error(`TV Garden API error: ${response.status}`);
-        }
+        response = await fetch(`https://api.iptv-org.github.io/countries/${code}.json`);
+        if (!response.ok) throw new Error(`IPTV-org API error: ${response.status}`);
+      } catch (_) {
+        response = await fetch(`https://raw.githubusercontent.com/TVGarden/tv-garden-channel-list/main/channels/raw/countries/${code}.json`);
+        if (!response.ok) throw new Error(`TV Garden API error: ${response.status}`);
       }
-      
+
       const data = await response.json();
-      console.log('Loaded channel data:', data);
-      
-      // Check if data exists and is an array
-      if (!data || !Array.isArray(data) || data.length === 0) {
-        throw new Error('No channels found in response');
+      if (!Array.isArray(data)) throw new Error('Unexpected response format');
+
+      // Flatten TVGarden channels that may have multiple iptv_urls
+      const processed = data.flatMap((ch, idx) => {
+        const displayName = getChannelName(ch, idx);
+
+        // Prefer IPTV URLs, then fall back to YouTube/embed if present
+        const iptvUrls = Array.isArray(ch.iptv_urls) ? ch.iptv_urls.filter(isValidStreamUrl) : [];
+        const ytUrls = Array.isArray(ch.youtube_urls) ? ch.youtube_urls.filter(isValidStreamUrl) : [];
+
+        const genericUrl = getStreamUrl(ch);
+
+        const urls = [];
+        if (iptvUrls.length) urls.push(...iptvUrls);
+        if (!iptvUrls.length && genericUrl) urls.push(genericUrl);
+        if (!urls.length && ytUrls.length) urls.push(...ytUrls);
+
+        // If no urls, return empty list (filtered out later)
+        if (!urls.length) return [];
+
+        // Create an entry per URL so UI lists all name + URL options
+        return urls.map((u, uIdx) => ({
+          id: ch.nanoid || ch.id || ch.tvg_id || `${idx}-${uIdx}`,
+          name: displayName,
+          url: u,
+          logo: ch.logo || ch.tvg_logo || null,
+          category: ch.category || ch.group_title || 'General',
+          country: ch.country || code.toUpperCase(),
+        }));
+      });
+
+      const uniqueByKey = new Map();
+      for (const c of processed) {
+        const key = `${c.name}|${c.url}`;
+        if (!uniqueByKey.has(key)) uniqueByKey.set(key, c);
       }
-      
-      // Process and filter channels - enhanced for tv.garden API compatibility
-      const processedChannels = data
-        .filter(channel => {
-          // Enhanced filtering for tv.garden API format with fallback to all stream fields
-          if (!channel || typeof channel !== 'object' || !channel.name || typeof channel.name !== 'string' || !channel.name.trim()) {
-            return false;
-          }
-          
-          // Use the helper function to get a valid stream URL
-          const streamUrl = getStreamUrl(channel);
-          return streamUrl !== null;
-        })
-        .map((channel, index) => {
-          // Map different API formats to consistent structure with fallback URL logic
-          const streamUrl = getStreamUrl(channel);
-          return {
-            id: channel.id || channel.tvg_id || `channel-${index}`,
-            name: channel.name.trim(),
-            url: streamUrl.trim(),
-            logo: channel.logo || channel.tvg_logo || null,
-            category: channel.category || channel.group_title || 'General',
-            country: channel.country || countryCode.toUpperCase()
-          };
-        });
-      
-      console.log(`Processed ${processedChannels.length} valid channels from ${data.length} total`);
-      
-      if (processedChannels.length === 0) {
-        throw new Error('No valid channels found after filtering');
-      }
-      
-      setChannels(processedChannels);
+      const finalChannels = Array.from(uniqueByKey.values());
+      if (!finalChannels.length) throw new Error('No valid channels found');
+
+      setChannels(finalChannels);
       setCurrentPage(0);
-    } catch (err) {
-      console.error('Error loading channels:', err);
-      setError(`Failed to load channels: ${err.message}`);
+    } catch (e) {
+      setError(`Failed to load channels: ${e.message}`);
       setChannels([]);
       setCurrentPage(0);
     } finally {
       setLoading(false);
     }
   };
-  
+
   const goBack = () => {
     if (selectedChannel) {
       setSelectedChannel(null);
@@ -151,84 +151,51 @@ function App() {
       setError(null);
     }
   };
-  
+
   const handleCountrySelect = (country) => {
-    console.log('Country selected:', country);
     setSelectedCountry(country);
     setCurrentPage(0);
-    // Ensure we always pass the country code, not the name
     loadChannels(country.code);
   };
-  
-  const loadMoreChannels = () => {
-    setCurrentPage(prev => prev + 1);
-  };
-  
-  const toggleRotate = () => {
-    setVideoRotation(prev => (prev === 0 ? 90 : 0));
-    setControlsVisible(false);
-  };
-  
-  const exitFullscreen = () => { 
-    if (document.fullscreenElement) document.exitFullscreen(); 
-  };
-  
-  // Touch handler for showing controls when rotated
+
+  const loadMoreChannels = () => setCurrentPage((p) => p + 1);
+  const toggleRotate = () => { setVideoRotation((p) => (p === 0 ? 90 : 0)); setControlsVisible(false); };
+  const exitFullscreen = () => { if (document.fullscreenElement) document.exitFullscreen(); };
+
   const handleVideoTouch = () => {
     if (videoRotation === 90) {
       setControlsVisible(true);
-      
-      // Clear existing timeout
-      if (controlsTimeoutRef.current) {
-        clearTimeout(controlsTimeoutRef.current);
-      }
-      
-      // Hide controls after 3 seconds
-      controlsTimeoutRef.current = setTimeout(() => {
-        setControlsVisible(false);
-      }, 3000);
+      if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
+      controlsTimeoutRef.current = setTimeout(() => setControlsVisible(false), 3000);
     }
   };
-  
+
   useEffect(() => {
-    const handleFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement);
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    const onFs = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener('fullscreenchange', onFs);
     return () => {
-      document.removeEventListener('fullscreenchange', handleFullscreenChange);
-      // Cleanup timeout on unmount
-      if (controlsTimeoutRef.current) {
-        clearTimeout(controlsTimeoutRef.current);
-      }
+      document.removeEventListener('fullscreenchange', onFs);
+      if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
     };
   }, []);
-  
+
   const visibleChannels = channels.slice(0, (currentPage + 1) * channelsPerPage);
   const hasMoreChannels = channels.length > visibleChannels.length;
-  
+
   return (
     <div className="viewport">
       <div className="r1-app">
         <header className="r1-header">
           <div className="r1-header-content">
-            <img 
-              src="https://github.com/atomlabor/r1-tv/blob/main/r1-tv.png?raw=true"
-              alt="r1 tv logo"
-              className="r1-logo"
-            />
+            <img src="https://github.com/atomlabor/r1-tv/blob/main/r1-tv.png?raw=true" alt="r1 tv logo" className="r1-logo" />
             <h1 className="r1-title">r1 tv</h1>
-            
             {selectedCountry && !selectedChannel && hasMoreChannels && (
-              <button 
-                className="r1-more-tv-header-btn" 
-                disabled={loading} 
-                onClick={loadMoreChannels}
-              >
+              <button className="r1-more-tv-header-btn" disabled={loading} onClick={loadMoreChannels}>
                 {loading ? '...' : 'more tv'}
               </button>
             )}
           </div>
-          
-          {/* Player Controls in Header Top Right - only show when not rotated */}
+
           {selectedChannel && videoRotation !== 90 && (
             <div className="r1-player-controls visible">
               <button className="r1-control-btn back" onClick={goBack} title="back">↩</button>
@@ -236,17 +203,13 @@ function App() {
             </div>
           )}
         </header>
-        
+
         {!selectedCountry ? (
           <div className="r1-countries">
             <div className="r1-section-title">choose country</div>
             <div className="r1-country-grid">
-              {countries.map(country => (
-                <button 
-                  key={country.code}
-                  className="r1-country-btn"
-                  onClick={() => handleCountrySelect(country)}
-                >
+              {countries.map((country) => (
+                <button key={country.code} className="r1-country-btn" onClick={() => handleCountrySelect(country)}>
                   <div className="country-emoji">{country.emoji}</div>
                   <div className="country-name">{country.name}</div>
                 </button>
@@ -259,44 +222,32 @@ function App() {
               <button className="r1-back-btn" onClick={goBack}>←</button>
               {selectedCountry.name} channels
             </div>
-            
-            {loading && (
-              <div className="r1-loading">loading channels...</div>
-            )}
-            
+
+            {loading && <div className="r1-loading">loading channels...</div>}
             {error && (
               <div className="r1-error">
                 {error}
                 <button className="r1-btn" onClick={() => loadChannels(selectedCountry.code)}>try again</button>
               </div>
             )}
-            
-            {/* Channel grid - only show if we have channels */}
+
             {!loading && !error && visibleChannels.length > 0 && (
               <div className="r1-channel-grid">
                 {visibleChannels.map((channel, index) => (
-                  <button 
-                    key={`${channel.id || index}-${channel.name}`}
-                    className="r1-channel-btn"
-                    onClick={() => setSelectedChannel(channel)}
-                    title={channel.name}
-                  >
+                  <button key={`${channel.id || index}-${channel.name}-${channel.url}`} className="r1-channel-btn" onClick={() => setSelectedChannel(channel)} title={`${channel.name} | ${channel.url}`}>
                     <div className="r1-channel-name">{channel.name}</div>
+                    <div className="r1-channel-url">{channel.url}</div>
                   </button>
                 ))}
               </div>
             )}
-            
-            {/* Show placeholder grid when loading */}
+
             {loading && (
               <div className="r1-channel-grid">
-                {Array.from({length: 12}, (_, index) => (
-                  <button 
-                    key={`placeholder-${index}`}
-                    className="r1-channel-btn r1-channel-placeholder"
-                    disabled
-                  >
+                {Array.from({ length: 12 }, (_, index) => (
+                  <button key={`placeholder-${index}`} className="r1-channel-btn r1-channel-placeholder" disabled>
                     <div className="r1-channel-name">...</div>
+                    <div className="r1-channel-url">...</div>
                   </button>
                 ))}
               </div>
@@ -304,15 +255,12 @@ function App() {
           </div>
         ) : (
           <div className="r1-player-container">
-            <div 
-              className={`r1-player ${videoRotation === 90 ? 'rotated' : ''}`}
-              ref={playerRef}
-            >
+            <div className={`r1-player ${videoRotation === 90 ? 'rotated' : ''}`} ref={playerRef}>
               {isFullscreen && (
                 <button className="r1-exit-fullscreen" onClick={exitFullscreen} title="exit fullscreen">exit</button>
               )}
-              
-              <video 
+
+              <video
                 ref={videoRef}
                 className="r1-video"
                 src={selectedChannel.url}
@@ -320,28 +268,26 @@ function App() {
                 controls={videoRotation !== 90}
                 key={selectedChannel.url}
                 onClick={handleVideoTouch}
-                onError={(e) => { 
-                  console.error('stream error:', e); 
-                  setError('stream not available'); 
+                onError={(e) => {
+                  console.error('stream error:', e);
+                  setError('stream not available');
                 }}
                 onLoadStart={() => setError(null)}
               >
                 your browser does not support video playback
               </video>
-              
-              {/* Touch overlay for rotated video */}
+
               {videoRotation === 90 && (
                 <div className="r1-video-touch-overlay" onClick={handleVideoTouch}></div>
               )}
-              
-              {/* Controls overlay for rotated player */}
+
               {videoRotation === 90 && controlsVisible && (
                 <div className="r1-player-controls-overlay">
                   <button className="r1-control-btn back" onClick={goBack} title="back">↩</button>
                   <button className="r1-control-btn rotate" onClick={toggleRotate} title="rotate">⟳</button>
                 </div>
               )}
-              
+
               {error && (
                 <div className="r1-player-error">
                   {error}
