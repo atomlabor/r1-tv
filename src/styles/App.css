@@ -75,7 +75,7 @@ body {
 }
 .r1-control-btn {
   width: 32px;
-  height: 32px;
+  height: 24px;
   background: rgba(255,255,255,0.15);
   border: 1px solid rgba(255,255,255,0.25);
   border-radius: 6px;
@@ -269,7 +269,6 @@ body {
   width: 282px;
   height: 282px;
   margin-left: -21px;
-  margin-top: -26px;
   /* Maintain centering even when rotated */
   display: flex;
   justify-content: center;
