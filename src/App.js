@@ -28,15 +28,29 @@ function App() {
     { code: 'ch', name: 'switzerland', emoji: '🇨🇭' }
   ];
   
+  // Updated loadChannels function to use tv.garden API approach
   const loadChannels = async (countryCode) => {
     setLoading(true);
     setError(null);
     try {
       console.log(`Loading channels for country: ${countryCode}`);
-      const response = await fetch(`https://raw.githubusercontent.com/TVGarden/tv-garden-channel-list/main/channels/raw/countries/${countryCode}.json`);
       
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      // Use tv.garden API proxy or direct access approach
+      // First try the tv.garden API-compatible endpoint
+      let response;
+      try {
+        // Try tv.garden API-like endpoint first
+        response = await fetch(`https://api.iptv-org.github.io/countries/${countryCode}.json`);
+        if (!response.ok) {
+          throw new Error(`IPTV-org API error: ${response.status}`);
+        }
+      } catch (iptvError) {
+        console.log('IPTV-org API failed, trying tv.garden channel list fallback');
+        // Fallback to original tv-garden-channel-list but with improved handling
+        response = await fetch(`https://raw.githubusercontent.com/TVGarden/tv-garden-channel-list/main/channels/raw/countries/${countryCode}.json`);
+        if (!response.ok) {
+          throw new Error(`TV Garden API error: ${response.status}`);
+        }
       }
       
       const data = await response.json();
@@ -47,27 +61,33 @@ function App() {
         throw new Error('No channels found in response');
       }
       
-      // Process and filter channels - relaxed filter for TVGarden API
+      // Process and filter channels - enhanced for tv.garden API compatibility
       const processedChannels = data
         .filter(channel => {
-          // Only require name and url - logo and category are optional
+          // Enhanced filtering for tv.garden API format
           return channel && 
                  typeof channel === 'object' &&
                  channel.name && 
                  typeof channel.name === 'string' &&
                  channel.name.trim() && 
-                 channel.url && 
-                 typeof channel.url === 'string' &&
-                 channel.url.trim() &&
-                 (channel.url.startsWith('http') || channel.url.startsWith('//'));
+                 (channel.url || channel.stream_url || channel.stream) && 
+                 typeof (channel.url || channel.stream_url || channel.stream) === 'string' &&
+                 (channel.url || channel.stream_url || channel.stream).trim() &&
+                 ((channel.url || channel.stream_url || channel.stream).startsWith('http') || 
+                  (channel.url || channel.stream_url || channel.stream).startsWith('//'));
         })
-        .map((channel, index) => ({
-          id: channel.id || `channel-${index}`,
-          name: channel.name.trim(),
-          url: channel.url.trim(),
-          logo: channel.logo || null,
-          category: channel.category || 'General'
-        }));
+        .map((channel, index) => {
+          // Map different API formats to consistent structure
+          const streamUrl = channel.url || channel.stream_url || channel.stream;
+          return {
+            id: channel.id || channel.tvg_id || `channel-${index}`,
+            name: channel.name.trim(),
+            url: streamUrl.trim(),
+            logo: channel.logo || channel.tvg_logo || null,
+            category: channel.category || channel.group_title || 'General',
+            country: channel.country || countryCode.toUpperCase()
+          };
+        });
       
       console.log(`Processed ${processedChannels.length} valid channels from ${data.length} total`);
       
@@ -158,7 +178,7 @@ function App() {
       <div className="r1-app">
         <header className="r1-header">
           <div className="r1-header-content">
-            <img
+            <img 
               src="https://github.com/atomlabor/r1-tv/blob/main/r1-tv.png?raw=true"
               alt="r1 tv logo"
               className="r1-logo"
@@ -190,7 +210,7 @@ function App() {
             <div className="r1-section-title">choose country</div>
             <div className="r1-country-grid">
               {countries.map(country => (
-                <button 
+                <button
                   key={country.code}
                   className="r1-country-btn"
                   onClick={() => handleCountrySelect(country)}
@@ -223,7 +243,7 @@ function App() {
             {!loading && !error && visibleChannels.length > 0 && (
               <div className="r1-channel-grid">
                 {visibleChannels.map((channel, index) => (
-                  <button 
+                  <button
                     key={`${channel.id || index}-${channel.name}`}
                     className="r1-channel-btn"
                     onClick={() => setSelectedChannel(channel)}
@@ -239,7 +259,7 @@ function App() {
             {loading && (
               <div className="r1-channel-grid">
                 {Array.from({length: 12}, (_, index) => (
-                  <button 
+                  <button
                     key={`placeholder-${index}`}
                     className="r1-channel-btn r1-channel-placeholder"
                     disabled
@@ -252,7 +272,7 @@ function App() {
           </div>
         ) : (
           <div className="r1-player-container">
-            <div 
+            <div
               className={`r1-player ${videoRotation === 90 ? 'rotated' : ''}`}
               ref={playerRef}
             >
