@@ -28,6 +28,37 @@ function App() {
     { code: 'ch', name: 'switzerland', emoji: '🇨🇭' }
   ];
   
+  // Helper function to check if stream URL is valid
+  const isValidStreamUrl = (url) => {
+    if (!url || typeof url !== 'string' || !url.trim()) {
+      return false;
+    }
+    
+    const trimmedUrl = url.trim();
+    
+    // Accept all stream protocols including rtmp:, udp:, http:, https:
+    return trimmedUrl.startsWith('http://') || 
+           trimmedUrl.startsWith('https://') ||
+           trimmedUrl.startsWith('rtmp://') ||
+           trimmedUrl.startsWith('rtmps://') ||
+           trimmedUrl.startsWith('udp://') ||
+           trimmedUrl.startsWith('//');
+  };
+  
+  // Helper function to get stream URL from channel object (fallback logic)
+  const getStreamUrl = (channel) => {
+    // Try all possible stream field names including M3U-specific ones
+    const possibleFields = ['url', 'stream', 'stream_url', 'src', 'link', 'href', 'uri'];
+    
+    for (const field of possibleFields) {
+      if (channel[field] && isValidStreamUrl(channel[field])) {
+        return channel[field];
+      }
+    }
+    
+    return null;
+  };
+  
   // Updated loadChannels function to use tv.garden API approach
   const loadChannels = async (countryCode) => {
     setLoading(true);
@@ -67,21 +98,18 @@ function App() {
       // Process and filter channels - enhanced for tv.garden API compatibility
       const processedChannels = data
         .filter(channel => {
-          // Enhanced filtering for tv.garden API format
-          return channel && 
-                 typeof channel === 'object' &&
-                 channel.name && 
-                 typeof channel.name === 'string' &&
-                 channel.name.trim() && 
-                 (channel.url || channel.stream_url || channel.stream) && 
-                 typeof (channel.url || channel.stream_url || channel.stream) === 'string' &&
-                 (channel.url || channel.stream_url || channel.stream).trim() &&
-                 ((channel.url || channel.stream_url || channel.stream).startsWith('http') || 
-                  (channel.url || channel.stream_url || channel.stream).startsWith('//'));
+          // Enhanced filtering for tv.garden API format with fallback to all stream fields
+          if (!channel || typeof channel !== 'object' || !channel.name || typeof channel.name !== 'string' || !channel.name.trim()) {
+            return false;
+          }
+          
+          // Use the helper function to get a valid stream URL
+          const streamUrl = getStreamUrl(channel);
+          return streamUrl !== null;
         })
         .map((channel, index) => {
-          // Map different API formats to consistent structure
-          const streamUrl = channel.url || channel.stream_url || channel.stream;
+          // Map different API formats to consistent structure with fallback URL logic
+          const streamUrl = getStreamUrl(channel);
           return {
             id: channel.id || channel.tvg_id || `channel-${index}`,
             name: channel.name.trim(),
@@ -182,7 +210,7 @@ function App() {
       <div className="r1-app">
         <header className="r1-header">
           <div className="r1-header-content">
-            <img
+            <img 
               src="https://github.com/atomlabor/r1-tv/blob/main/r1-tv.png?raw=true"
               alt="r1 tv logo"
               className="r1-logo"
@@ -190,7 +218,7 @@ function App() {
             <h1 className="r1-title">r1 tv</h1>
             
             {selectedCountry && !selectedChannel && hasMoreChannels && (
-              <button
+              <button 
                 className="r1-more-tv-header-btn" 
                 disabled={loading} 
                 onClick={loadMoreChannels}
@@ -214,7 +242,7 @@ function App() {
             <div className="r1-section-title">choose country</div>
             <div className="r1-country-grid">
               {countries.map(country => (
-                <button
+                <button 
                   key={country.code}
                   className="r1-country-btn"
                   onClick={() => handleCountrySelect(country)}
@@ -247,7 +275,7 @@ function App() {
             {!loading && !error && visibleChannels.length > 0 && (
               <div className="r1-channel-grid">
                 {visibleChannels.map((channel, index) => (
-                  <button
+                  <button 
                     key={`${channel.id || index}-${channel.name}`}
                     className="r1-channel-btn"
                     onClick={() => setSelectedChannel(channel)}
@@ -263,7 +291,7 @@ function App() {
             {loading && (
               <div className="r1-channel-grid">
                 {Array.from({length: 12}, (_, index) => (
-                  <button
+                  <button 
                     key={`placeholder-${index}`}
                     className="r1-channel-btn r1-channel-placeholder"
                     disabled
@@ -276,7 +304,7 @@ function App() {
           </div>
         ) : (
           <div className="r1-player-container">
-            <div
+            <div 
               className={`r1-player ${videoRotation === 90 ? 'rotated' : ''}`}
               ref={playerRef}
             >
@@ -284,7 +312,7 @@ function App() {
                 <button className="r1-exit-fullscreen" onClick={exitFullscreen} title="exit fullscreen">exit</button>
               )}
               
-              <video
+              <video 
                 ref={videoRef}
                 className="r1-video"
                 src={selectedChannel.url}
