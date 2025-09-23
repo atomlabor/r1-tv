@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import './styles/App.css';
+
 function App() {
   const [selectedChannel, setSelectedChannel] = useState(null);
   const [channels, setChannels] = useState([]);
@@ -24,6 +25,7 @@ function App() {
     { code: 'at', name: 'austria', emoji: '🇦🇹' },
     { code: 'ch', name: 'switzerland', emoji: '🇨🇭' }
   ];
+  
   // Create dummy channels for fallback when API returns empty or fails
   const createDummyChannels = (countryName) => {
     const dummyChannels = [];
@@ -36,6 +38,7 @@ function App() {
     }
     return dummyChannels;
   };
+  
   const loadChannels = async (countryCode) => {
     setLoading(true);
     setError(null);
@@ -81,6 +84,7 @@ function App() {
       setLoading(false);
     }
   };
+  
   const goBack = () => {
     if (selectedChannel) {
       setSelectedChannel(null);
@@ -93,29 +97,37 @@ function App() {
       setError(null);
     }
   };
+  
   const handleCountrySelect = (country) => {
     setSelectedCountry(country);
     setCurrentPage(0);
     loadChannels(country.code);
   };
+  
   const loadMoreChannels = () => {
     setCurrentPage(prev => prev + 1);
   };
+  
   const toggleRotate = () => setVideoRotation(prev => (prev === 0 ? 90 : 0));
+  
   const toggleFullscreen = () => {
     if (document.fullscreenElement) document.exitFullscreen();
     else playerRef.current?.requestFullscreen();
   };
+  
   const exitFullscreen = () => { 
     if (document.fullscreenElement) document.exitFullscreen(); 
   };
+  
   useEffect(() => {
     const handleFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement);
     document.addEventListener('fullscreenchange', handleFullscreenChange);
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, []);
+  
   const visibleChannels = channels.slice(0, (currentPage + 1) * channelsPerPage);
   const hasMoreChannels = channels.length > visibleChannels.length;
+  
   return (
     <div className="viewport">
       <div className="r1-app">
@@ -138,7 +150,17 @@ function App() {
               </button>
             )}
           </div>
+          
+          {/* Player Controls in Header Top Right */}
+          {selectedChannel && (
+            <div className="r1-player-controls">
+              <button className="r1-control-btn back" onClick={goBack} title="back">↩</button>
+              <button className="r1-control-btn rotate" onClick={toggleRotate} title="rotate">⟳</button>
+              <button className="r1-control-btn fullscreen" onClick={toggleFullscreen} title="fullscreen">⛶</button>
+            </div>
+          )}
         </header>
+        
         {!selectedCountry ? (
           <div className="r1-countries">
             <div className="r1-section-title">choose country</div>
@@ -207,12 +229,6 @@ function App() {
               className={`r1-player ${videoRotation === 90 ? 'rotated' : ''}`}
               ref={playerRef}
             >
-              <div className="r1-player-controls">
-                <button className="r1-control-btn back" onClick={goBack} title="back">←</button>
-                <button className="r1-control-btn rotate" onClick={toggleRotate} title="rotate">↻</button>
-                <button className="r1-control-btn fullscreen" onClick={toggleFullscreen} title="fullscreen">⛶</button>
-              </div>
-              
               {isFullscreen && (
                 <button className="r1-exit-fullscreen" onClick={exitFullscreen} title="exit fullscreen">exit</button>
               )}
@@ -246,4 +262,5 @@ function App() {
     </div>
   );
 }
+
 export default App;
