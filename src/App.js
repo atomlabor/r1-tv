@@ -239,7 +239,6 @@ function App() {
                 onClick={handleVideoTouch}
                 onError={(e) => {
                   console.error('stream error:', e);
-                  setError('stream not available');
                 }}
                 onLoadStart={() => setError(null)}
               >
@@ -252,12 +251,6 @@ function App() {
                 <div className="r1-player-controls-overlay">
                   <button className="r1-control-btn back" onClick={goBack} title="back">↩</button>
                   <button className="r1-control-btn rotate" onClick={toggleRotate} title="rotate">⟳</button>
-                </div>
-              )}
-              {error && (
-                <div className="r1-player-error">
-                  {error}
-                  <button className="r1-btn" onClick={goBack}>← back to channels</button>
                 </div>
               )}
             </div>
