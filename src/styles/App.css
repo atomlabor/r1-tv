@@ -67,7 +67,6 @@ body {
 /* Player Controls positioned in header top right */
 .r1-player-controls {
   position: absolute;
-  top: 14%;
   right: 0;
   display: flex;
   gap: 4px;
