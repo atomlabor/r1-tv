@@ -187,7 +187,7 @@ function App() {
             </button>
           )}
           <div className="r1-header-content">
-            <img alt="r1 tv logo" className="r1-logo" onClick={() => setShowLogoPopup(true)} />
+            <img alt="r1 tv logo" className="r1-logo" src="https://github.com/atomlabor/r1-tv/blob/main/r1-tv.png?raw=true" onClick={() => setShowLogoPopup(true)} />
             <h1 className="r1-title">r1 tv</h1>
           </div>
           {selectedCountry && !selectedChannel && hasMoreChannels && (
@@ -213,7 +213,7 @@ function App() {
               <br/><br/>
               <a href="https://ko-fi.com/atomlabor" target="_blank" rel="noopener noreferrer">☕ Ko-fi</a>
               <button className="r1-popup-close" onClick={() => setShowLogoPopup(false)}>close</button>
-              <img className="r1-popup-qr" alt="ko-fi qr code" />
+              <img alt="ko-fi qr code" className="r1-popup-qr" src="https://github.com/atomlabor/r1-tv/blob/main/spend%20a%20coffee%20httpsko-fi.comatomlabor.png?raw=true" />
             </div>
           </div>
         )}
