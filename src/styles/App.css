@@ -68,11 +68,11 @@ body {
   position: absolute;
   left: 0;
   bottom: 0; /* Statt top: 0 */
-  width: 282px;
+  width: 220px;
   height: 24px;
   background: rgba(0,0,0,0.8);
   color: #fff;
-  border-top: 1px solid rgba(255,255,255,0.1); /* Linie oben statt unten */
+  border-top: 0px solid rgba(255,255,255,0.1); /* Linie oben statt unten */
   transform: rotate(90deg);
   transform-origin: left bottom; /* Drehe bezogen auf unten links */
   z-index: 2001;
