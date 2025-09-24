@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
 import './styles/App.css';
-
 function App() {
   const [selectedChannel, setSelectedChannel] = useState(null);
   const [channels, setChannels] = useState([]);
@@ -15,7 +14,6 @@ function App() {
   const channelsPerPage = 4; // Changed from 12 to 4 for 1x4 grid paging
   const videoRef = useRef(null);
   const playerRef = useRef(null);
-
   const countries = [
     { code: 'de', name: 'germany', emoji: '🇩🇪' },
     { code: 'gb', name: 'uk', emoji: '🇬🇧' },
@@ -26,7 +24,6 @@ function App() {
     { code: 'at', name: 'austria', emoji: '🇦🇹' },
     { code: 'ch', name: 'switzerland', emoji: '🇨🇭' }
   ];
-
   // Accept stream protocols used across sources
   const isValidStreamUrl = (url) => {
     if (!url || typeof url !== 'string') return false;
@@ -40,11 +37,9 @@ function App() {
       u.startsWith('//')
     );
   };
-
   // Extract first valid stream URL from diverse structures
   const getStreamUrl = (channel) => {
     if (!channel || typeof channel !== 'object') return null;
-
     // TVGarden format: arrays iptv_urls / youtube_urls
     if (Array.isArray(channel.iptv_urls) && channel.iptv_urls.length) {
       const firstValid = channel.iptv_urls.find(isValidStreamUrl);
@@ -54,7 +49,6 @@ function App() {
       const firstValidYt = channel.youtube_urls.find(isValidStreamUrl);
       if (firstValidYt) return firstValidYt;
     }
-
     // Generic fallbacks
     const possibleFields = ['url', 'stream', 'stream_url', 'src', 'link', 'href', 'uri'];
     for (const f of possibleFields) {
@@ -62,7 +56,6 @@ function App() {
     }
     return null;
   };
-
   // Extract a display name robustly
   const getChannelName = (channel, index) => {
     if (!channel || typeof channel !== 'object') return `channel-${index + 1}`;
@@ -70,7 +63,6 @@ function App() {
     if (typeof name === 'string' && name.trim()) return name.trim();
     return `channel-${index + 1}`;
   };
-
   const loadChannels = async (countryCode) => {
     setLoading(true);
     setError(null);
@@ -86,7 +78,6 @@ function App() {
       }
       const data = await response.json();
       if (!Array.isArray(data)) throw new Error('Unexpected response format');
-
       // Flatten TVGarden channels that may have multiple iptv_urls
       const processed = data.flatMap((ch, idx) => {
         const displayName = getChannelName(ch, idx);
@@ -98,10 +89,8 @@ function App() {
         if (iptvUrls.length) urls.push(...iptvUrls);
         if (!iptvUrls.length && genericUrl) urls.push(genericUrl);
         if (!urls.length && ytUrls.length) urls.push(...ytUrls);
-
         // If no urls, return empty list (filtered out later)
         if (!urls.length) return [];
-
         // Create an entry per URL so UI lists all name + URL options
         return urls.map((u, uIdx) => ({
           id: ch.nanoid || ch.id || ch.tvg_id || `${idx}-${uIdx}`,
@@ -112,7 +101,6 @@ function App() {
           country: ch.country || code.toUpperCase(),
         }));
       });
-
       const uniqueByKey = new Map();
       for (const c of processed) {
         const key = `${c.name}|${c.url}`;
@@ -130,7 +118,6 @@ function App() {
       setLoading(false);
     }
   };
-
   const goBack = () => {
     if (selectedChannel) {
       setSelectedChannel(null);
@@ -143,18 +130,15 @@ function App() {
       setError(null);
     }
   };
-
   const handleCountrySelect = (country) => {
     setSelectedCountry(country);
     setCurrentPage(0);
     loadChannels(country.code);
   };
-
   const loadMoreChannels = () => setCurrentPage((p) => p + 1);
   const goBackChannels = () => setCurrentPage((p) => Math.max(0, p - 1));
   const toggleRotate = () => { setVideoRotation((p) => (p === 0 ? 90 : 0)); };
   const exitFullscreen = () => { if (document.fullscreenElement) document.exitFullscreen(); };
-
   useEffect(() => {
     const onFs = () => setIsFullscreen(!!document.fullscreenElement);
     document.addEventListener('fullscreenchange', onFs);
@@ -162,18 +146,16 @@ function App() {
       document.removeEventListener('fullscreenchange', onFs);
     };
   }, []);
-
   // Show channels in groups of 4 for paging
   const startIndex = currentPage * channelsPerPage;
   const endIndex = startIndex + channelsPerPage;
   const visibleChannels = channels.slice(startIndex, endIndex);
   const hasMoreChannels = channels.length > endIndex;
   const hasPreviousChannels = currentPage > 0;
-
   return (
     <div className="viewport">
       <div className="r1-app">
-        <header className={`r1-header ${videoRotation === 90 ? 'rotated-header' : ''}`}>
+        <header className={`r1-header ${selectedChannel ? 'player' : ''}`}>
           {selectedCountry && !selectedChannel && hasPreviousChannels && (
             <button
               className="r1-back-tv-header-btn"
@@ -208,20 +190,19 @@ function App() {
             </div>
           )}
         </header>
-
         {showLogoPopup && (
           <div className="r1-popup-overlay" onClick={() => setShowLogoPopup(false)}>
             <div className="r1-popup" onClick={(e) => e.stopPropagation()}>
-              <h2>about r1 tv</h2>
-              <p>r1 tv is a free IPTV streaming portal for publicly available channels from various countries.</p>
-              <p>implemented by atomlabor.de with love for the rabbit r1 community.</p>
-              <p>support the projectt:</p>
-              <a href="https://ko-fi.com/atomlabor" target="_blank" rel="noopener noreferrer">☕ Ko-fi</a>
+              about r1 tv
+              r1 tv is a free IPTV streaming portal for publicly available channels from various countries.
+              implemented by atomlabor.de with love for the rabbit r1 community.
+              support the projectt:
+              <a href="https://ko-fi.com/atomlabor" rel="noopener noreferrer" target="_blank">☕ Ko-fi</a>
               <button onClick={() => setShowLogoPopup(false)}>close</button>
+              <img alt="ko-fi qr code" src="https://github.com/atomlabor/r1-tv/blob/main/spend%20a%20coffee%20httpsko-fi.comatomlabor.png?raw=true" />
             </div>
           </div>
         )}
-
         {!selectedCountry ? (
           <div className="r1-countries">
             <div className="r1-section-title">choose country</div>
@@ -305,5 +286,4 @@ function App() {
     </div>
   );
 }
-
 export default App;
