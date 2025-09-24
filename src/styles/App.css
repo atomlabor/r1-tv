@@ -109,7 +109,25 @@ header.r1-header.rotated-header { position: absolute; left: 0; bottom: 0; width:
   background: #fff;
 }
 
-/* Added per request */
-.r1-popup-btn-row { display: flex; gap: 7px; align-items: center; justify-content: center; margin-bottom: 5px; }
-.r1-popup-btn { background: #ff6b35; color: #fff; border: none; border-radius: 6px; font-size: 11px; font-weight: 500; padding: 4px 14px; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,.10); transition: all 0.17s cubic-bezier(.4,.92,.28,1.2); }
-.r1-popup-btn:hover { background: #ff914d; }
+.r1-popup-btn-row {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 5px;
+}
+.r1-popup-btn {
+  background: #ff6b35;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 4px 14px;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0,0,0,.10);
+  transition: all 0.17s cubic-bezier(.4,.92,.28,1.2);
+}
+.r1-popup-btn:hover {
+  background: #ff914d;
+}
