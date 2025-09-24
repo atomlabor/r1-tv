@@ -376,18 +376,20 @@ body {
 /* REVERTED: Rotated player fixed to exact 240x282 dimensions */
 .r1-player.rotated {
   position: fixed;
-  top: 0;
-  left: 0;
-  transform: rotate(90deg);
-  transform-origin: center;
-  width: 240px;
-  height: 282px;
-  z-index: 999;
-  margin: 0;
+  top: 50%;
+  left: 50%;
+  width: 282px;
+  height: 240px;
+  background: #000;
+  z-index: 9999;
+  transform: translate(-50%, -50%) rotate(90deg);
+  transform-origin: center center;
   display: flex;
   justify-content: center;
   align-items: center;
+  overflow: hidden;
 }
+
 
 /* Remove overlay controls - controls now always in header */
 .r1-player.rotated .r1-player-controls-overlay {
@@ -406,10 +408,13 @@ body {
 
 /* Video in rotated player uses exact R1 dimensions with contain scaling */
 .r1-player.rotated .r1-video {
-  width: 240px;
-  height: 282px;
+  width: 100%;
+  height: 100%;
   object-fit: contain;
+  background: #000;
+  display: block;
 }
+
 
 /* Touch overlay for rotated video - simplified, no longer shows controls */
 .r1-video-touch-overlay {
