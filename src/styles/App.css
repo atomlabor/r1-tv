@@ -347,6 +347,7 @@ body {
   width: 240px;
   height: 282px;
   overflow: hidden;
+  background: #000 !important;
 }
 
 .r1-player-container.loading {
