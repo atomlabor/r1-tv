@@ -88,12 +88,12 @@ body {
 .r1-btn:hover, .r1-back-btn:hover { background: rgba(255,255,255,0.25); border-color: rgba(255,255,255,0.4); }
 .r1-btn:active, .r1-back-btn:active { background: rgba(255,255,255,0.3); transform: scale(0.97); }
 .r1-btn:disabled, .r1-back-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
 /* Popup overlay and box */
 .r1-popup-overlay { position: fixed; inset: 0; width: 240px; height: 282px; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 5000; }
-.r1-popup { background: #ffffff; color: #111; width: 200px; max-width: 90%; border-radius: 8px; padding: 10px; box-shadow: 0 6px 20px rgba(0,0,0,0.25); text-align: center; }
+.r1-popup { background: #ffffff; color: #111; width: 200px; max-width: 90%; border-radius: 8px; padding: 10px; box-shadow: 0 6px 20px rgba(0,0,0,0.25); text-align: center; text-transform: lowercase; }
 .r1-popup h2 { font-size: 12px; margin-bottom: 6px; text-transform: lowercase; color: #000; }
-.r1-popup p { font-size: 10px; margin: 4px 0; color: #333; }
-.r1-popup a { display: inline-block; margin: 8px 0; padding: 4px 10px; background: #ff6b35; color: #fff; border-radius: 6px; font-size: 10px; text-decoration: none; }
-.r1-popup button { margin-top: 6px; background: rgba(0,0,0,0.1); border: 1px solid rgba(0,0,0,0.15); color: #000; border-radius: 6px; padding: 3px 10px; font-size: 10px; cursor: pointer; }
+.r1-popup p { font-size: 10px; margin: 4px 0; color: #333; text-transform: lowercase; }
+.r1-popup a { display: inline-block; margin: 8px 0; padding: 4px 10px; background: #ff6b35; color: #fff; border-radius: 6px; font-size: 10px; text-decoration: none; text-transform: lowercase; }
+.r1-popup button { margin-top: 6px; background: rgba(0,0,0,0.1); border: 1px solid rgba(0,0,0,0.15); color: #000; border-radius: 6px; padding: 3px 10px; font-size: 10px; cursor: pointer; text-transform: lowercase; }
 .r1-popup button:hover { background: rgba(0,0,0,0.15); }
+.r1-popup-qr-caption { text-transform: lowercase; }
