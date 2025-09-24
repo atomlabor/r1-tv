@@ -187,7 +187,7 @@ function App() {
             </button>
           )}
           <div className="r1-header-content">
-            <img alt="r1 tv logo" className="r1-logo" src="https://github.com/atomlabor/r1-tv/blob/main/r1-tv.png?raw=true" onClick={() => setShowLogoPopup(true)} />
+            <img alt="r1 tv logo" className="r1-logo" onClick={() => setShowLogoPopup(true)} />
             <h1 className="r1-title">r1 tv</h1>
           </div>
           {selectedCountry && !selectedChannel && hasMoreChannels && (
@@ -211,9 +211,9 @@ function App() {
               implemented by atomlabor.de with love for the rabbit r1 community.
               support the project:
               <br/><br/>
-              <a href="https://ko-fi.com/atomlabor" target="_blank" rel="noopener noreferrer">☕ Ko-fi</a>
+              <button className="r1-popup-kofi" onClick={() => window.open('https://ko-fi.com/atomlabor', '_blank')}>☕ Ko-fi</button>
               <button className="r1-popup-close" onClick={() => setShowLogoPopup(false)}>close</button>
-              <img alt="ko-fi qr code" className="r1-popup-qr" src="https://github.com/atomlabor/r1-tv/blob/main/spend%20a%20coffee%20httpsko-fi.comatomlabor.png?raw=true" />
+              <img alt="ko-fi qr code" className="r1-popup-qr"/>
             </div>
           </div>
         )}
@@ -268,9 +268,19 @@ function App() {
               {isFullscreen && (
                 <button className="r1-exit-fullscreen" onClick={exitFullscreen} title="exit fullscreen">exit</button>
               )}
-              <video ref={videoRef} className="r1-video" src={selectedChannel.url} autoPlay controls={videoRotation !== 90} key={selectedChannel.url} onError={(e) => {
-                console.error('stream error:', e);
-              }} onLoadStart={() => setError(null)}>
+              <video
+                autoPlay
+                className="r1-video"
+                controls={videoRotation === 90 ? false : true}
+                key={selectedChannel.url}
+                onError={(e) => {
+                  console.error('stream error:', e);
+                  setError('Failed to load stream. Please try another channel.');
+                }}
+                onLoadStart={() => setError(null)}
+                ref={videoRef}
+                src={selectedChannel.url}
+              >
                 your browser does not support video playback
               </video>
             </div>
