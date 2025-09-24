@@ -13,6 +13,7 @@ function App() {
   const channelsPerPage = 4; // Changed from 12 to 4 for 1x4 grid paging
   const videoRef = useRef(null);
   const playerRef = useRef(null);
+
   const countries = [
     { code: 'de', name: 'germany', emoji: '🇩🇪' },
     { code: 'gb', name: 'uk', emoji: '🇬🇧' },
@@ -81,7 +82,6 @@ function App() {
       }
       const data = await response.json();
       if (!Array.isArray(data)) throw new Error('Unexpected response format');
-
       // Flatten TVGarden channels that may have multiple iptv_urls
       const processed = data.flatMap((ch, idx) => {
         const displayName = getChannelName(ch, idx);
@@ -143,6 +143,7 @@ function App() {
   };
 
   const loadMoreChannels = () => setCurrentPage((p) => p + 1);
+  const goBackChannels = () => setCurrentPage((p) => Math.max(0, p - 1));
   const toggleRotate = () => { setVideoRotation((p) => (p === 0 ? 90 : 0)); };
   const exitFullscreen = () => { if (document.fullscreenElement) document.exitFullscreen(); };
 
@@ -159,12 +160,22 @@ function App() {
   const endIndex = startIndex + channelsPerPage;
   const visibleChannels = channels.slice(startIndex, endIndex);
   const hasMoreChannels = channels.length > endIndex;
+  const hasPreviousChannels = currentPage > 0;
 
   return (
     <div className="viewport">
       <div className="r1-app">
         <header className={`r1-header${videoRotation === 90 ? ' rotated-header' : ''}`}>
           <div className="r1-header-content">
+            {selectedCountry && !selectedChannel && hasPreviousChannels && (
+              <button
+                className="r1-back-tv-header-btn" 
+                disabled={loading} 
+                onClick={goBackChannels}
+              >
+                {loading ? '...' : 'back'}
+              </button>
+            )}
             <img 
               alt="r1 tv logo" 
               className="r1-logo"
@@ -173,7 +184,7 @@ function App() {
             <h1 className="r1-title">r1 tv</h1>
           </div>
           {selectedCountry && !selectedChannel && hasMoreChannels && (
-            <button 
+            <button
               className="r1-more-tv-header-btn" 
               disabled={loading} 
               onClick={loadMoreChannels}
@@ -188,13 +199,12 @@ function App() {
             </div>
           )}
         </header>
-
         {!selectedCountry ? (
           <div className="r1-countries">
             <div className="r1-section-title">choose country</div>
             <div className="r1-country-grid">
               {countries.map((country) => (
-                <button 
+                <button
                   className="r1-country-btn" 
                   key={country.code} 
                   onClick={() => handleCountrySelect(country)}
@@ -221,7 +231,7 @@ function App() {
             {!loading && !error && visibleChannels.length > 0 && (
               <div className="r1-channel-grid">
                 {visibleChannels.map((channel, index) => (
-                  <button 
+                  <button
                     className="r1-channel-btn" 
                     key={`${channel.id}-${index}`} 
                     onClick={() => setSelectedChannel(channel)} 
@@ -244,7 +254,7 @@ function App() {
           </div>
         ) : (
           <div className="r1-player-container">
-            <div 
+            <div
               className={`r1-player ${videoRotation === 90 ? 'rotated' : ''}`} 
               ref={playerRef}
             >
