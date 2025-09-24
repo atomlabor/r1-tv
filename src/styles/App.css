@@ -38,6 +38,10 @@ body {
   overflow: hidden;
 }
 
+.r1-player {
+  background: #000 !important;
+}
+
 /* Black background when player is rotated */
 .r1-player.rotated ~ .r1-app {
   background: #000;
