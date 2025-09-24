@@ -225,7 +225,7 @@ function App() {
               support the project:
               <a href="https://ko-fi.com/atomlabor" rel="noopener noreferrer" target="_blank">☕ Ko-fi</a>
               <button onClick={() => setShowLogoPopup(false)}>close</button>
-              <img alt="ko-fi qr code" className="r1-popup-qr"/>
+               <img alt="ko-fi qr code" src="https://github.com/atomlabor/r1-tv/blob/main/spend%20a%20coffee%20httpsko-fi.comatomlabor.png?raw=true" />
             </div>
           </div>
         )}
