@@ -223,6 +223,7 @@ function App() {
               r1 tv is a free IPTV streaming portal for publicly available channels from various countries.
               implemented by atomlabor.de with love for the rabbit r1 community.
               support the project:
+              
               <a href="https://ko-fi.com/atomlabor" rel="noopener noreferrer" target="_blank">☕ Ko-fi</a>
               <button onClick={() => setShowLogoPopup(false)}>close</button>
                <img alt="ko-fi qr code" src="https://github.com/atomlabor/r1-tv/blob/main/spend%20a%20coffee%20httpsko-fi.comatomlabor.png?raw=true" />
