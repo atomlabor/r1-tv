@@ -68,18 +68,33 @@ body {
   left: 0;
   width: 240px;
   z-index: 2000;
+  transition: transform 0.3s cubic-bezier(0.4,0.4,0.1,1);
+}
+
+/* Rotated header: rotate 90deg, mittig platzieren, volle Breite nach Rotation (282px) */
+.r1-header.rotated-header {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 282px;
+  height: 24px;
+  background: rgba(0,0,0,0.8);
+  color: #fff;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  transform: translate(-50%, -50%) rotate(90deg);
+  transform-origin: center center;
+  z-index: 2001;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 /* When rotated, header remains fixed at top with higher z-index */
 .r1-app.rotated .r1-header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 240px;
-  z-index: 2000;
   background: rgba(0,0,0,0.8);
 }
 
+/* Header Content unberührt */
 .r1-header-content {
   display: flex;
   align-items: center;
@@ -143,7 +158,6 @@ body {
   cursor: not-allowed;
 }
 
-/* Player Controls ALWAYS visible in header - persistent on rotation */
 .r1-player-controls {
   position: absolute;
   right: 6px;
@@ -154,7 +168,6 @@ body {
   z-index: 2001;
 }
 
-/* Ensure controls are always visible, even when rotated */
 .r1-player-controls.visible,
 .r1-header .r1-player-controls {
   display: flex;
@@ -217,7 +230,6 @@ body {
   margin-bottom: 6px;
 }
 
-/* Grid has more space now - 258px - 16px title = ~242px available */
 .r1-country-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -279,7 +291,6 @@ body {
   font-size: 12px;
 }
 
-/* Channel grid - 1 column, 4 rows for paging in groups of 4 */
 .r1-channel-grid {
   display: grid;
   grid-template-columns: 1fr;
@@ -332,20 +343,18 @@ body {
 
 /* Player uses full height - ENHANCED CENTER ALIGNMENT FOR ALL STATES */
 .r1-player-container {
-  position: relative; /* Wichtig! */
+  position: relative;
   width: 240px;
   height: 282px;
   overflow: hidden;
 }
 
-/* Ensure centering during loading states */
 .r1-player-container.loading {
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-/* Ensure centering during error states */
 .r1-player-container.error {
   display: flex;
   justify-content: center;
@@ -353,7 +362,6 @@ body {
   text-align: center;
 }
 
-/* Ensure centering during fullscreen states */
 .r1-player-container.fullscreen {
   display: flex;
   justify-content: center;
@@ -372,7 +380,7 @@ body {
   align-items: center;
 }
 
-/* REVERTED: Rotated player fixed to exact 240x282 dimensions */
+/* Rotated player, fixed to exact 240x282 dimensions */
 .r1-player.rotated {
   position: absolute;
   top: 50%;
@@ -389,13 +397,11 @@ body {
   z-index: 10;
 }
 
-
 /* Remove overlay controls - controls now always in header */
 .r1-player.rotated .r1-player-controls-overlay {
   display: none;
 }
 
-/* REVERTED: Video dimensions fixed to exact 240x282 with object-fit: contain */
 .r1-video {
   width: 240px;
   height: 282px;
@@ -405,7 +411,6 @@ body {
   margin: 0 auto;
 }
 
-/* Video in rotated player uses exact R1 dimensions with contain scaling */
 .r1-player.rotated .r1-video {
   width: 100%;
   height: 100%;
@@ -414,8 +419,6 @@ body {
   display: block;
 }
 
-
-/* Touch overlay for rotated video - simplified, no longer shows controls */
 .r1-video-touch-overlay {
   position: absolute;
   top: 0;
@@ -427,7 +430,6 @@ body {
   cursor: pointer;
 }
 
-/* Error messages and loading states - ensure they're centered */
 .r1-error-message {
   display: flex;
   justify-content: center;
@@ -474,5 +476,3 @@ body {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
-
-
