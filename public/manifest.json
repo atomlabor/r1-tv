@@ -1,0 +1,16 @@
+{
+  "short_name": "R1 TV",
+  "name": "R1 TV - Live TV Streaming",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ff6b35",
+  "theme_color": "#f7931e",
+  "description": "Free IPTV streaming portal for public channels.",
+  "icons": [
+    {
+      "src": "r1-tv.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}
