@@ -212,11 +212,12 @@ function App() {
         {showLogoPopup && (
           <div className="r1-popup-overlay" onClick={() => setShowLogoPopup(false)}>
             <div className="r1-popup" onClick={(e) => e.stopPropagation()}>
-              <h2>About r1 tv</h2>
-              <p>r1 tv ist ein freies IPTV-Streaming-Portal für öffentlich verfügbare Kanäle aus verschiedenen Ländern.</p>
-              <p>Unterstütze das Projekt:</p>
+              <h2>about r1 tv</h2>
+              <p>r1 tv is a free IPTV streaming portal for publicly available channels from various countries.</p>
+              <p>implemented by atomlabor.de with love for the rabbit r1 community.</p>
+              <p>support the projectt:</p>
               <a href="https://ko-fi.com/atomlabor" target="_blank" rel="noopener noreferrer">☕ Ko-fi</a>
-              <button onClick={() => setShowLogoPopup(false)}>Schließen</button>
+              <button onClick={() => setShowLogoPopup(false)}>close</button>
             </div>
           </div>
         )}
