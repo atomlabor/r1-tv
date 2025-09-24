@@ -461,3 +461,38 @@ body {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+
+.r1-btn, .r1-back-btn {
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 4px;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 500;
+  height: 22px;
+  padding: 2px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+  outline: none;
+  text-transform: lowercase;
+}
+
+.r1-btn:hover, .r1-back-btn:hover {
+  background: rgba(255,255,255,0.25);
+  border-color: rgba(255,255,255,0.4);
+}
+
+.r1-btn:active, .r1-back-btn:active {
+  background: rgba(255,255,255,0.3);
+  transform: scale(0.97);
+}
+
+.r1-btn:disabled, .r1-back-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
