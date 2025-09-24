@@ -78,7 +78,7 @@ function App() {
         if (!response.ok) throw new Error(`IPTV-org API error: ${response.status}`);
       } catch (_) {
         response = await fetch(`https://raw.githubusercontent.com/TVGarden/tv-garden-channel-list/main/channels/raw/countries/${code}.json`);
-        if (!response.ok) throw new Error(`TV Garden API error: ${response.status}`);
+        if (!response.ok) throw new Error(` Users in the United Kingdom are restricted from tuning in to stations outside of the UK for an indefinite period due to copyright and neighboring rights related matters that require clarification. | TV Garden API error: ${response.status}`);
       }
       const data = await response.json();
       if (!Array.isArray(data)) throw new Error('Unexpected response format');
