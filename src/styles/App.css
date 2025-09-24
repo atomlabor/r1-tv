@@ -98,10 +98,10 @@ body {
 .r1-popup button:hover { background: rgba(0,0,0,0.15); }
 .r1-popup-qr-caption { text-transform: lowercase; }
 .r1-popup-qr {
-  width: min(60px, 35vw);
-  height: min(60px, 35vw);
-  max-width: 35vw;
-  max-height: 35vw;
+  width: 36px;
+  height: 36px;
+  max-width: 36px;
+  max-height: 36px;
   aspect-ratio: 1/1;
   object-fit: contain;
   border-radius: 9px;
@@ -113,9 +113,9 @@ body {
 }
 @media (max-width: 340px) {
   .r1-popup-qr {
-    width: min(38px, 29vw);
-    height: min(38px, 29vw);
-    max-width: 29vw;
-    max-height: 29vw;
+    width: 36px;
+    height: 36px;
+    max-width: 36px;
+    max-height: 36px;
   }
 }
