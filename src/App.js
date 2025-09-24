@@ -13,7 +13,6 @@ function App() {
   const channelsPerPage = 4; // Changed from 12 to 4 for 1x4 grid paging
   const videoRef = useRef(null);
   const playerRef = useRef(null);
-
   const countries = [
     { code: 'de', name: 'germany', emoji: '🇩🇪' },
     { code: 'gb', name: 'uk', emoji: '🇬🇧' },
@@ -82,6 +81,7 @@ function App() {
       }
       const data = await response.json();
       if (!Array.isArray(data)) throw new Error('Unexpected response format');
+
       // Flatten TVGarden channels that may have multiple iptv_urls
       const processed = data.flatMap((ch, idx) => {
         const displayName = getChannelName(ch, idx);
@@ -163,7 +163,7 @@ function App() {
   return (
     <div className="viewport">
       <div className="r1-app">
-        <header className="r1-header">
+        <header className={`r1-header${videoRotation === 90 ? ' rotated-header' : ''}`}>
           <div className="r1-header-content">
             <img 
               alt="r1 tv logo" 
