@@ -328,15 +328,10 @@ body {
 
 /* Player uses full height - ENHANCED CENTER ALIGNMENT FOR ALL STATES */
 .r1-player-container {
-  position: relative;
-  height: 282px;
+  position: relative; /* Wichtig! */
   width: 240px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  margin: 0 auto;
-  box-sizing: border-box;
+  height: 282px;
+  overflow: hidden;
 }
 
 /* Ensure centering during loading states */
@@ -375,19 +370,19 @@ body {
 
 /* REVERTED: Rotated player fixed to exact 240x282 dimensions */
 .r1-player.rotated {
-  position: fixed;
+  position: absolute;
   top: 50%;
   left: 50%;
   width: 282px;
   height: 240px;
   background: #000;
-  z-index: 9999;
   transform: translate(-50%, -50%) rotate(90deg);
   transform-origin: center center;
   display: flex;
   justify-content: center;
   align-items: center;
   overflow: hidden;
+  z-index: 10;
 }
 
 
