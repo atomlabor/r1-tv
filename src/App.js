@@ -214,7 +214,7 @@ function App() {
               <br/>
               <button className="r1-back-btn" onClick={() => window.open('https://ko-fi.com/atomlabor', '_blank')}>☕ Ko-fi</button>
               <button className="r1-back-btn" onClick={() => setShowLogoPopup(false)}>×</button>
-              <img alt="ko-fi qr code" className="r1-popup-qr" src="https://github.com/atomlabor/r1-tv/blob/main/r1-tv-qr.png?raw=true" width="80" height="80" />
+              <img alt="ko-fi qr code" className="r1-popup-qr" src="https://github.com/atomlabor/r1-tv/blob/main/spend%20a%20coffee%20httpsko-fi.comatomlabor.png?raw=true" width="80" height="80" />
             </div>
           </div>
         )}
