@@ -74,20 +74,21 @@ body {
 /* Rotated header: rotate 90deg, mittig platzieren, volle Breite nach Rotation (282px) */
 .r1-header.rotated-header {
   position: absolute;
-  top: 50%;
-  left: 50%;
+  top: 0;
+  left: 0;
   width: 282px;
   height: 24px;
   background: rgba(0,0,0,0.8);
   color: #fff;
   border-bottom: 1px solid rgba(255,255,255,0.1);
-  transform: translate(-50%, -50%) rotate(90deg);
-  transform-origin: center center;
+  transform: rotate(90deg);
+  transform-origin: left top;
   z-index: 2001;
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
+
 
 /* When rotated, header remains fixed at top with higher z-index */
 .r1-app.rotated .r1-header {
