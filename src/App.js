@@ -82,6 +82,7 @@ function App() {
       }
       const data = await response.json();
       if (!Array.isArray(data)) throw new Error('Unexpected response format');
+
       // Flatten TVGarden channels that may have multiple iptv_urls
       const processed = data.flatMap((ch, idx) => {
         const displayName = getChannelName(ch, idx);
@@ -105,6 +106,7 @@ function App() {
           country: ch.country || code.toUpperCase(),
         }));
       });
+
       const uniqueByKey = new Map();
       for (const c of processed) {
         const key = `${c.name}|${c.url}`;
@@ -166,16 +168,16 @@ function App() {
     <div className="viewport">
       <div className="r1-app">
         <header className={`r1-header${videoRotation === 90 ? ' rotated-header' : ''}`}>
+          {selectedCountry && !selectedChannel && hasPreviousChannels && (
+            <button 
+              className="r1-back-tv-header-btn" 
+              disabled={loading} 
+              onClick={goBackChannels}
+            >
+              {loading ? '...' : 'back'}
+            </button>
+          )}
           <div className="r1-header-content">
-            {selectedCountry && !selectedChannel && hasPreviousChannels && (
-              <button
-                className="r1-back-tv-header-btn" 
-                disabled={loading} 
-                onClick={goBackChannels}
-              >
-                {loading ? '...' : 'back'}
-              </button>
-            )}
             <img 
               alt="r1 tv logo" 
               className="r1-logo"
@@ -184,7 +186,7 @@ function App() {
             <h1 className="r1-title">r1 tv</h1>
           </div>
           {selectedCountry && !selectedChannel && hasMoreChannels && (
-            <button
+            <button 
               className="r1-more-tv-header-btn" 
               disabled={loading} 
               onClick={loadMoreChannels}
@@ -204,7 +206,7 @@ function App() {
             <div className="r1-section-title">choose country</div>
             <div className="r1-country-grid">
               {countries.map((country) => (
-                <button
+                <button 
                   className="r1-country-btn" 
                   key={country.code} 
                   onClick={() => handleCountrySelect(country)}
@@ -231,7 +233,7 @@ function App() {
             {!loading && !error && visibleChannels.length > 0 && (
               <div className="r1-channel-grid">
                 {visibleChannels.map((channel, index) => (
-                  <button
+                  <button 
                     className="r1-channel-btn" 
                     key={`${channel.id}-${index}`} 
                     onClick={() => setSelectedChannel(channel)} 
@@ -254,14 +256,14 @@ function App() {
           </div>
         ) : (
           <div className="r1-player-container">
-            <div
+            <div 
               className={`r1-player ${videoRotation === 90 ? 'rotated' : ''}`} 
               ref={playerRef}
             >
               {isFullscreen && (
                 <button className="r1-exit-fullscreen" onClick={exitFullscreen} title="exit fullscreen">exit</button>
               )}
-              <video
+              <video 
                 ref={videoRef}
                 className="r1-video"
                 src={selectedChannel.url}
