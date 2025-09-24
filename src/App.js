@@ -155,7 +155,7 @@ function App() {
   return (
     <div className="viewport">
       <div className="r1-app">
-        <header className={`r1-header ${selectedChannel ? 'player' : ''}`}>
+        <header className={`r1-header ${selectedChannel ? 'playing' : ''}`}>
           {selectedCountry && !selectedChannel && hasPreviousChannels && (
             <button
               className="r1-back-tv-header-btn"
@@ -193,13 +193,13 @@ function App() {
         {showLogoPopup && (
           <div className="r1-popup-overlay" onClick={() => setShowLogoPopup(false)}>
             <div className="r1-popup" onClick={(e) => e.stopPropagation()}>
-              about r1 tv
-              r1 tv is a free IPTV streaming portal for publicly available channels from various countries.
-              implemented by atomlabor.de with love for the rabbit r1 community.
-              support the projectt:
-              <a href="https://ko-fi.com/atomlabor" rel="noopener noreferrer" target="_blank">☕ Ko-fi</a>
+              <h2>about r1 tv</h2>
+              <p>r1 tv is a free IPTV streaming portal for publicly available channels from various countries.</p>
+              <p>implemented by atomlabor.de with love for the rabbit r1 community.</p>
+              <p>support the project:</p>
+              <a href="https://ko-fi.com/atomlabor" target="_blank" rel="noopener noreferrer">☕ Ko-fi</a>
               <button onClick={() => setShowLogoPopup(false)}>close</button>
-              <img alt="ko-fi qr code" src="https://github.com/atomlabor/r1-tv/blob/main/spend%20a%20coffee%20httpsko-fi.comatomlabor.png?raw=true" />
+              <img src="https://github.com/atomlabor/r1-tv/blob/main/spend%20a%20coffee%20httpsko-fi.comatomlabor.png?raw=true" alt="ko-fi qr code" className="r1-popup-qr" />
             </div>
           </div>
         )}
