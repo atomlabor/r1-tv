@@ -98,10 +98,10 @@ body {
 .r1-popup button:hover { background: rgba(0,0,0,0.15); }
 .r1-popup-qr-caption { text-transform: lowercase; }
 .r1-popup-qr {
-  width: 36px;
-  height: 36px;
-  max-width: 36px;
-  max-height: 36px;
+  width: 50px;
+  height: 50px;
+  max-width: 50px;
+  max-height: 50px;
   aspect-ratio: 1/1;
   object-fit: contain;
   border-radius: 9px;
