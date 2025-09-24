@@ -60,6 +60,7 @@ function App() {
     for (const f of possibleFields) {
       if (channel[f] && isValidStreamUrl(channel[f])) return channel[f];
     }
+
     return null;
   };
 
@@ -180,7 +181,7 @@ function App() {
   return (
     <div className="viewport">
       <div className="r1-app">
-        <header className={`r1-header ${videoRotation === 90 ? 'rotated-header' : ''}`}>
+        <header className="r1-header">
           {selectedCountry && !selectedChannel && hasPreviousChannels && (
             <button
               className="r1-back-tv-header-btn"
@@ -226,7 +227,7 @@ function App() {
               
               <a href="https://ko-fi.com/atomlabor" rel="noopener noreferrer" target="_blank">☕ Ko-fi</a>
               <button onClick={() => setShowLogoPopup(false)}>close</button>
-               <img alt="ko-fi qr code" src="https://github.com/atomlabor/r1-tv/blob/main/spend%20a%20coffee%20httpsko-fi.comatomlabor.png?raw=true" />
+               <img className="r1-popup-qr" alt="ko-fi qr code"/>
             </div>
           </div>
         )}
