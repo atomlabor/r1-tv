@@ -10,6 +10,8 @@ function App() {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [showLogoPopup, setShowLogoPopup] = useState(false);
+  
   const channelsPerPage = 4; // Changed from 12 to 4 for 1x4 grid paging
   const videoRef = useRef(null);
   const playerRef = useRef(null);
@@ -42,6 +44,7 @@ function App() {
   // Extract first valid stream URL from diverse structures
   const getStreamUrl = (channel) => {
     if (!channel || typeof channel !== 'object') return null;
+
     // TVGarden format: arrays iptv_urls / youtube_urls
     if (Array.isArray(channel.iptv_urls) && channel.iptv_urls.length) {
       const firstValid = channel.iptv_urls.find(isValidStreamUrl);
@@ -51,6 +54,7 @@ function App() {
       const firstValidYt = channel.youtube_urls.find(isValidStreamUrl);
       if (firstValidYt) return firstValidYt;
     }
+
     // Generic fallbacks
     const possibleFields = ['url', 'stream', 'stream_url', 'src', 'link', 'href', 'uri'];
     for (const f of possibleFields) {
@@ -94,8 +98,10 @@ function App() {
         if (iptvUrls.length) urls.push(...iptvUrls);
         if (!iptvUrls.length && genericUrl) urls.push(genericUrl);
         if (!urls.length && ytUrls.length) urls.push(...ytUrls);
+
         // If no urls, return empty list (filtered out later)
         if (!urls.length) return [];
+
         // Create an entry per URL so UI lists all name + URL options
         return urls.map((u, uIdx) => ({
           id: ch.nanoid || ch.id || ch.tvg_id || `${idx}-${uIdx}`,
@@ -167,7 +173,7 @@ function App() {
   return (
     <div className="viewport">
       <div className="r1-app">
-        <header className={`r1-header${videoRotation === 90 ? ' rotated-header' : ''}`}>
+        <header className={`r1-header ${videoRotation === 90 ? 'rotated-header' : ''}`}>
           {selectedCountry && !selectedChannel && hasPreviousChannels && (
             <button
               className="r1-back-tv-header-btn"
@@ -182,6 +188,7 @@ function App() {
               alt="r1 tv logo"
               className="r1-logo"
               src="https://raw.githubusercontent.com/atomlabor/r1-tv/main/r1-tv.png"
+              onClick={() => setShowLogoPopup(true)}
             />
             <h1 className="r1-title">r1 tv</h1>
           </div>
@@ -201,6 +208,18 @@ function App() {
             </div>
           )}
         </header>
+
+        {showLogoPopup && (
+          <div className="r1-popup-overlay" onClick={() => setShowLogoPopup(false)}>
+            <div className="r1-popup" onClick={(e) => e.stopPropagation()}>
+              <h2>About r1 tv</h2>
+              <p>r1 tv ist ein freies IPTV-Streaming-Portal für öffentlich verfügbare Kanäle aus verschiedenen Ländern.</p>
+              <p>Unterstütze das Projekt:</p>
+              <a href="https://ko-fi.com/atomlabor" target="_blank" rel="noopener noreferrer">☕ Ko-fi</a>
+              <button onClick={() => setShowLogoPopup(false)}>Schließen</button>
+            </div>
+          </div>
+        )}
 
         {!selectedCountry ? (
           <div className="r1-countries">
