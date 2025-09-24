@@ -91,7 +91,7 @@ header.r1-header.rotated-header { position: absolute; left: 0; bottom: 0; width:
 .r1-btn:disabled, .r1-back-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 /* Popup overlay and box */
 .r1-popup-overlay { position: fixed; inset: 0; width: 240px; height: 282px; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 5000; }
-.r1-popup { background: #ffffff; color: #111; width: 200px; max-width: 90%; border-radius: 8px; padding: 10px; box-shadow: 0 6px 20px rgba(0,0,0,0.25); text-align: center; text-transform: lowercase; }
+.r1-popup { background: #f7931e; color: #111; width: 200px; max-width: 90%; border-radius: 8px; padding: 10px; box-shadow: 0 6px 20px rgba(0,0,0,0.25); text-align: center; text-transform: lowercase; }
 .r1-popup h2 { font-size: 12px; margin-bottom: 6px; text-transform: lowercase; color: #000; }
 .r1-popup p { font-size: 10px; margin: 4px 0; color: #333; text-transform: lowercase; }
 .r1-popup-qr {
