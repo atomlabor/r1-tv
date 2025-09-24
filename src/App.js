@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import './styles/App.css';
+
 function App() {
   const [selectedChannel, setSelectedChannel] = useState(null);
   const [channels, setChannels] = useState([]);
@@ -25,6 +26,7 @@ function App() {
     { code: 'at', name: 'austria', emoji: '🇦🇹' },
     { code: 'ch', name: 'switzerland', emoji: '🇨🇭' }
   ];
+
   // Accept stream protocols used across sources
   const isValidStreamUrl = (url) => {
     if (!url || typeof url !== 'string') return false;
@@ -38,6 +40,7 @@ function App() {
       u.startsWith('//')
     );
   };
+
   // Extract first valid stream URL from diverse structures
   const getStreamUrl = (channel) => {
     if (!channel || typeof channel !== 'object') return null;
@@ -51,6 +54,7 @@ function App() {
       const firstValidYt = channel.youtube_urls.find(isValidStreamUrl);
       if (firstValidYt) return firstValidYt;
     }
+
     // Generic fallbacks
     const possibleFields = ['url', 'stream', 'stream_url', 'src', 'link', 'href', 'uri'];
     for (const f of possibleFields) {
@@ -58,6 +62,7 @@ function App() {
     }
     return null;
   };
+
   // Extract a display name robustly
   const getChannelName = (channel, index) => {
     if (!channel || typeof channel !== 'object') return `channel-${index + 1}`;
@@ -65,6 +70,7 @@ function App() {
     if (typeof name === 'string' && name.trim()) return name.trim();
     return `channel-${index + 1}`;
   };
+
   const loadChannels = async (countryCode) => {
     setLoading(true);
     setError(null);
@@ -131,6 +137,7 @@ function App() {
       setLoading(false);
     }
   };
+
   const goBack = () => {
     if (selectedChannel) {
       setSelectedChannel(null);
@@ -143,15 +150,18 @@ function App() {
       setError(null);
     }
   };
+
   const handleCountrySelect = (country) => {
     setSelectedCountry(country);
     setCurrentPage(0);
     loadChannels(country.code);
   };
+
   const loadMoreChannels = () => setCurrentPage((p) => p + 1);
   const goBackChannels = () => setCurrentPage((p) => Math.max(0, p - 1));
   const toggleRotate = () => { setVideoRotation((p) => (p === 0 ? 90 : 0)); };
   const exitFullscreen = () => { if (document.fullscreenElement) document.exitFullscreen(); };
+
   useEffect(() => {
     const onFs = () => setIsFullscreen(!!document.fullscreenElement);
     document.addEventListener('fullscreenchange', onFs);
@@ -159,23 +169,25 @@ function App() {
       document.removeEventListener('fullscreenchange', onFs);
     };
   }, []);
+
   // Show channels in groups of 4 for paging
   const startIndex = currentPage * channelsPerPage;
   const endIndex = startIndex + channelsPerPage;
   const visibleChannels = channels.slice(startIndex, endIndex);
   const hasMoreChannels = channels.length > endIndex;
   const hasPreviousChannels = currentPage > 0;
+
   return (
     <div className="viewport">
       <div className="r1-app">
-        <header className="r1-header">
+        <header className={`r1-header${videoRotation === 90 ? ' rotated-header' : ''}`}>
           {selectedCountry && !selectedChannel && hasPreviousChannels && (
             <button className="r1-back-tv-header-btn" disabled={loading} onClick={goBackChannels}>
               {loading ? '...' : 'back'}
             </button>
           )}
           <div className="r1-header-content">
-            <img alt="r1 tv logo" className="r1-logo" src="https://raw.githubusercontent.com/atomlabor/r1-tv/main/r1-tv.png" onClick={() => setShowLogoPopup(true)} />
+            <img alt="r1 tv logo" className="r1-logo" onClick={() => setShowLogoPopup(true)} />
             <h1 className="r1-title">r1 tv</h1>
           </div>
           {selectedCountry && !selectedChannel && hasMoreChannels && (
@@ -190,6 +202,7 @@ function App() {
             </div>
           )}
         </header>
+
         {showLogoPopup && (
           <div className="r1-popup-overlay" onClick={() => setShowLogoPopup(false)}>
             <div className="r1-popup" onClick={(e) => e.stopPropagation()}>
@@ -197,13 +210,14 @@ function App() {
               r1 tv is a free IPTV streaming portal for publicly available channels from various countries.
               implemented by atomlabor.de with love for the rabbit r1 community.
               support the project:
-              <br />
-              <a href="https://ko-fi.com/atomlabor" rel="noopener noreferrer" target="_blank">☕ Ko-fi</a>
+              <br/><br/>
+              <a href="https://ko-fi.com/atomlabor" target="_blank" rel="noopener noreferrer">☕ Ko-fi</a>
               <button className="r1-popup-close" onClick={() => setShowLogoPopup(false)}>close</button>
-              <img alt="ko-fi qr code" className="r1-popup-qr" src="https://raw.githubusercontent.com/atomlabor/r1-tv/main/ko-fi-qr.png" />
+              <img className="r1-popup-qr" alt="ko-fi qr code" />
             </div>
           </div>
         )}
+
         {!selectedCountry ? (
           <div className="r1-countries">
             <div className="r1-section-title">choose country</div>
@@ -266,4 +280,5 @@ function App() {
     </div>
   );
 }
+
 export default App;
