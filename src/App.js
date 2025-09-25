@@ -206,10 +206,9 @@ function App() {
         {showLogoPopup && (
           <div className="r1-popup-overlay" onClick={() => setShowLogoPopup(false)}>
             <div className="r1-popup" onClick={(e) => e.stopPropagation()}>
-              about r1 tv
               r1 tv is a free IPTV streaming portal for publicly available channels from various countries.
               implemented by atomlabor.de with love for the rabbit r1 community.
-              support the project:
+              support the project with a coffee | scan qr with your smartphone:
               <br/>
               <br/>
               <button className="r1-back-btn" onClick={() => window.open('https://ko-fi.com/atomlabor', '_blank')}>☕ Ko-fi</button>
